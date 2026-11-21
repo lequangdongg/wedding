@@ -148,7 +148,7 @@ if (!reduced) {
   if (cd) gsap.from($$('[data-cd]', cd), { yPercent: 60, autoAlpha: 0, stagger: 0.08, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: cd, start: 'top 75%', once: true } });
 }
 
-/* ================= Cào để mở (như thẻ cào — "drag to reveal" của trang mẫu) ================= */
+/* ================= Giữ & lau để hé lộ (như thẻ cào — "drag to reveal" của trang mẫu) ================= */
 (function scratchReveal() {
   const stage = $('[data-scratch-stage]');
   const canvas = $<HTMLCanvasElement>('[data-scratch-canvas]');
@@ -220,14 +220,15 @@ if (!reduced) {
   let down = false;
   canvas.addEventListener('pointerdown', (e) => { down = true; last = null; canvas.setPointerCapture(e.pointerId); const p = pos(e); scratch(p.x, p.y); });
   canvas.addEventListener('pointermove', (e) => {
-    if (!down && !fine) return; // chuột: rê là cào; cảm ứng: phải chạm & vuốt
+    if (!down) return; // phải giữ chuột (hoặc chạm) mới lau
     const p = pos(e); scratch(p.x, p.y);
   });
   const up = () => { down = false; last = null; };
   canvas.addEventListener('pointerup', up);
   canvas.addEventListener('pointercancel', up);
   canvas.addEventListener('pointerleave', () => { if (!down) last = null; });
-  pill.addEventListener('click', revealAll); // bàn phím / người không muốn cào
+  pill.textContent = fine ? 'Giữ chuột & lau để hé lộ' : 'Chạm & lau để hé lộ';
+  pill.addEventListener('click', revealAll); // bàn phím / người không muốn lau
 
   paint();
   let rw = window.innerWidth;

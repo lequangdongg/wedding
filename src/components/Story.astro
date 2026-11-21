@@ -38,7 +38,7 @@ const total = String(moments.length).padStart(2, '0');
     --w: min(76vw, 500px);
     position: absolute; left: 56%; top: 52%; margin: 0; width: var(--w);
     transform: translate(-50%, -50%);
-    background: #161616; padding: calc(var(--w) * .035) calc(var(--w) * .035) calc(var(--w) * .2);
+    background: #161616; padding: calc(var(--w) * .035) calc(var(--w) * .035) calc(var(--w) * .09);
     border-radius: 8px; border: 1px solid rgb(255 255 255 / .06);
     box-shadow: 0 40px 80px -30px rgb(0 0 0 / .85), 0 12px 24px -12px rgb(0 0 0 / .6);
   }
@@ -48,7 +48,7 @@ const total = String(moments.length).padStart(2, '0');
   }
   @media (min-width: 1024px) {
     .tour__meta { top: 112px; }
-    .pol { --w: clamp(360px, min(38vw, 74vh), 760px); top: 50%; left: 52%; padding-bottom: calc(var(--w) * .17); }
+    .pol { --w: clamp(360px, min(38vw, 74vh), 760px); top: 50%; left: 52%; padding-bottom: calc(var(--w) * .075); }
     .pol :global(.pol__ph) { aspect-ratio: 1.24 / 1; }
   }
 </style>
