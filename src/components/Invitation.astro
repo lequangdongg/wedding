@@ -1,0 +1,41 @@
+---
+import { families, sides } from '../data/wedding';
+---
+<section class="inv" id="loi-moi">
+  <div class="wrap inv__in">
+    <p class="eyebrow" data-fade>01 / 05 — Trân trọng kính mời</p>
+    <h2 class="h2" data-split>Đến chung vui <em class="it accent">cùng</em> gia đình chúng tôi</h2>
+    <div class="inv__fams">
+      {(['nam', 'nu'] as const).map((k, i) => (
+        <div class={`fam fam--${k}`} data-fade>
+          <p class="eyebrow">{families[k].side}</p>
+          <p class="fam__names">Ông {families[k].father}<br />Bà {families[k].mother}</p>
+          <p class="fam__addr muted">{families[k].addr}</p>
+        </div>
+      ))}
+    </div>
+    <p class="inv__news" data-fade>
+      Trân trọng báo tin <strong class="only-nam">{sides.nam.ceremony}</strong><strong class="only-nu">{sides.nu.ceremony}</strong><br />của hai con chúng tôi
+    </p>
+    <p class="inv__honor" data-fade>Sự hiện diện của Quý Khách là niềm vinh hạnh cho gia đình chúng tôi!</p>
+  </div>
+</section>
+
+<style>
+  .inv { padding: var(--section-y) 0 calc(var(--section-y) * .6); text-align: center; }
+  .inv__in { max-width: 920px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
+  .inv .h2 { font-size: clamp(2.5rem, 1.8rem + 3vw, 5rem); }
+  .inv__fams { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 8px; }
+  :global(html[data-side='nu']) .fam--nu { order: -1; }
+  .fam { border-top: 1px solid var(--c-ink); padding-top: 14px; display: flex; flex-direction: column; gap: 6px; }
+  .fam__names { font-size: 13px; font-weight: 500; line-height: 1.55; }
+  .fam__addr { font-size: 12px; line-height: 1.5; }
+  .inv__news { font-size: 12px; letter-spacing: .2em; text-transform: uppercase; line-height: 1.8; }
+  .inv__news strong { font-weight: 600; }
+  .inv__honor { font-family: var(--f-display); font-style: italic; font-size: clamp(1.125rem, 1rem + .6vw, 1.5rem); line-height: 1.5; color: var(--c-graphite); max-width: 30ch; }
+  @media (min-width: 768px) {
+    .inv__fams { gap: 48px; }
+    .fam__names { font-size: 16px; }
+    .fam__addr { font-size: 14px; }
+  }
+</style>

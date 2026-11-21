@@ -1,0 +1,32 @@
+---
+import { sides } from '../data/wedding';
+const units = [
+  { k: 'd', l: 'Ngày' },
+  { k: 'h', l: 'Giờ' },
+  { k: 'm', l: 'Phút' },
+  { k: 's', l: 'Giây' },
+];
+---
+<section class="cd" aria-label="Đếm ngược" data-countdown data-nam={sides.nam.countdown.iso} data-nu={sides.nu.countdown.iso}>
+  <div class="wrap cd__in">
+    <p class="script cd__script" data-fade>Save the date</p>
+    <div class="cd__grid">
+      {units.map((u) => (
+        <div><b class="num" data-cd={u.k}>00</b><span>{u.l}</span></div>
+      ))}
+    </div>
+    <p class="cd__label">đến <span class="only-nam">{sides.nam.countdown.label}</span><span class="only-nu">{sides.nu.countdown.label}</span></p>
+  </div>
+</section>
+
+<style>
+  .cd { background: var(--c-oxblood); color: var(--c-porcelain); padding: calc(var(--section-y) * .8) 0; }
+  .cd__in { display: flex; flex-direction: column; align-items: center; gap: 24px; text-align: center; }
+  .cd__script { font-size: clamp(3rem, 2.4rem + 3vw, 6rem); color: var(--c-champagne); }
+  .cd__grid { width: 100%; max-width: 900px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .cd__grid > div { display: flex; flex-direction: column; gap: 6px; }
+  .cd__grid > div + div { border-left: 1px solid rgb(234 217 185 / .3); }
+  .cd__grid b { font-family: var(--f-display); font-weight: 400; font-size: clamp(2.75rem, 2rem + 4vw, 7rem); line-height: 1; }
+  .cd__grid span { font-size: 10px; letter-spacing: .2em; text-transform: uppercase; color: var(--c-champagne); }
+  .cd__label { font-size: 13px; color: var(--c-champagne); }
+</style>

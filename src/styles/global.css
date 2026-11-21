@@ -1,0 +1,111 @@
+/* Fonts: chỉ nạp subset latin + vietnamese, font-display: swap (fontsource mặc định) */
+@import '@fontsource/be-vietnam-pro/latin-300.css';
+@import '@fontsource/be-vietnam-pro/vietnamese-300.css';
+@import '@fontsource/be-vietnam-pro/latin-400.css';
+@import '@fontsource/be-vietnam-pro/vietnamese-400.css';
+@import '@fontsource/be-vietnam-pro/latin-500.css';
+@import '@fontsource/be-vietnam-pro/vietnamese-500.css';
+@import '@fontsource/be-vietnam-pro/latin-600.css';
+@import '@fontsource/be-vietnam-pro/vietnamese-600.css';
+@import '@fontsource/playfair-display/latin-400.css';
+@import '@fontsource/playfair-display/vietnamese-400.css';
+@import '@fontsource/playfair-display/latin-400-italic.css';
+@import '@fontsource/playfair-display/vietnamese-400-italic.css';
+@import '@fontsource/playfair-display/latin-500.css';
+@import '@fontsource/playfair-display/vietnamese-500.css';
+@import '@fontsource/patrick-hand/latin-400.css';
+@import '@fontsource/patrick-hand/vietnamese-400.css';
+/* Great Vibes không có dấu tiếng Việt -> CHỈ dùng cho chữ tiếng Anh */
+@import '@fontsource/great-vibes/latin-400.css';
+
+:root {
+  --c-porcelain: #F7F6F2; --c-mist: #DFE7E5; --c-mist-deep: #B9C8C7;
+  --c-ink: #17181A; --c-graphite: #55585A;
+  --c-bordeaux: #7A1420; --c-oxblood: #3B0A10; --c-pine: #1E3226;
+  --c-champagne: #EAD9B9; --c-blush: #E3A397; --c-rose: #B5524A;
+
+  --f-display: 'Playfair Display', 'Times New Roman', serif;
+  --f-text: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-script: 'Great Vibes', cursive;
+  --f-hand: 'Patrick Hand', 'Comic Sans MS', cursive;
+
+  --t-display: clamp(3.75rem, 1.6rem + 9.4vw, 10.5rem);
+  --t-h1: clamp(2.75rem, 1.9rem + 4.2vw, 6rem);
+  --t-h2: clamp(2.5rem, 1.9rem + 2.6vw, 4.5rem);
+  --t-h3: clamp(1.375rem, 1.2rem + .8vw, 2rem);
+  --t-body: clamp(1rem, .95rem + .2vw, 1.125rem);
+
+  --gutter: clamp(20px, 4.5vw, 64px);
+  --section-y: clamp(88px, 5rem + 5vw, 168px);
+  --maxw: 1440px;
+
+  --ease-silk: cubic-bezier(.16, 1, .3, 1);
+  --ease-curtain: cubic-bezier(.76, 0, .24, 1);
+  --ease-soft: cubic-bezier(.33, 1, .68, 1);
+  --d-micro: 200ms; --d-ui: 450ms; --d-reveal: 900ms; --d-scene: 1400ms;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; scroll-behavior: auto; }
+body {
+  margin: 0; background: var(--c-porcelain); color: var(--c-ink);
+  font-family: var(--f-text); font-size: var(--t-body); font-weight: 300; line-height: 1.65;
+  -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
+  overflow-x: clip;
+}
+body.is-locked { overflow: hidden; }
+img, video, svg { display: block; max-width: 100%; }
+img { height: auto; }
+a { color: inherit; }
+button { font: inherit; color: inherit; cursor: pointer; }
+h1, h2, h3, p, figure, blockquote { margin: 0; }
+:focus-visible { outline: 2px solid var(--c-bordeaux); outline-offset: 3px; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.wrap { width: 100%; max-width: var(--maxw); margin-inline: auto; padding-inline: var(--gutter); }
+
+/* type */
+.eyebrow { font-size: 11px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: var(--c-bordeaux); }
+@media (min-width: 1024px) { .eyebrow { font-size: 12px; } }
+.h2 { font-family: var(--f-display); font-weight: 400; font-size: var(--t-h2); line-height: 1; letter-spacing: -.01em; }
+.it { font-style: italic; }
+.accent { color: var(--c-bordeaux); }
+.script { font-family: var(--f-script); font-weight: 400; line-height: 1; }
+.num { font-variant-numeric: tabular-nums; }
+.muted { color: var(--c-graphite); }
+
+/* buttons */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  min-height: 48px; padding: 0 24px; border-radius: 999px; border: 1px solid transparent;
+  font-size: 14px; font-weight: 500; letter-spacing: .02em; text-decoration: none; white-space: nowrap;
+  transition: background-color var(--d-micro) var(--ease-soft), color var(--d-micro) var(--ease-soft), border-color var(--d-micro) var(--ease-soft), transform var(--d-micro) var(--ease-soft);
+}
+.btn:active { transform: scale(.97); }
+.btn--ink { background: var(--c-ink); color: var(--c-porcelain); }
+.btn--ink:hover { background: var(--c-bordeaux); }
+.btn--line { border-color: currentColor; background: transparent; }
+.btn--line:hover { background: var(--c-ink); color: var(--c-porcelain); border-color: var(--c-ink); }
+.btn--wine { background: var(--c-bordeaux); color: var(--c-porcelain); }
+.btn--wine:hover { background: var(--c-oxblood); }
+.btn svg { width: 16px; height: 16px; flex: none; }
+
+/* ---------- motion ----------
+   Mọi chuyển động chạy bằng GSAP (src/scripts/app.ts). CSS không ẩn sẵn gì -> không JS vẫn đọc được.
+   SplitText bọc dòng trong .split-mask để chữ trượt lên từ mặt nạ. */
+.split-mask { overflow: clip; padding-bottom: .08em; margin-bottom: -.08em; }
+.hand { font-family: var(--f-hand); font-weight: 400; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; }
+}
+
+/* Nội dung theo bên mời (nhà trai / nhà gái). Mặc định nhà trai khi chưa có JS. */
+html:not([data-side='nu']) .only-nu { display: none !important; }
+html[data-side='nu'] .only-nam { display: none !important; }
+
+/* Lenis (chỉ bật trên desktop) */
+html.lenis, html.lenis body { height: auto; }
+.lenis.lenis-smooth { scroll-behavior: auto !important; }
+.lenis.lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
+.lenis.lenis-stopped { overflow: hidden; }

@@ -1,0 +1,99 @@
+---
+import Photo from './Photo.astro';
+import Icon from './Icon.astro';
+import { nav, photos, site } from '../data/wedding';
+---
+<header class="nav" id="nav">
+  <a href="#top" class="nav__mono" data-goto title="Về đầu trang">Đ<span class="it">&amp;</span>C</a>
+  <nav class="nav__links" aria-label="Mục lục">
+    {nav.map((n) => <a href={`#${n.id}`} data-goto>{n.label}</a>)}
+  </nav>
+  <div class="nav__actions">
+    <a href="#su-kien" class="nav__cta" data-goto>Lịch trình</a>
+    <button type="button" class="nav__menu" id="menu-open" aria-expanded="false" aria-controls="menu">Menu</button>
+  </div>
+</header>
+
+<div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Mục lục" hidden>
+  <div class="menu__top">
+    <span class="menu__mono">Đ<span class="it">&amp;</span>C</span>
+    <button type="button" class="menu__close" id="menu-close"><Icon name="close" size={14} /> Đóng</button>
+  </div>
+  <ol class="menu__list">
+    {nav.map((n, i) => (
+      <li>
+        <a href={`#${n.id}`} data-goto data-menu-link>
+          <span class="num">{String(i + 1).padStart(2, '0')}</span>
+          <span class="menu__label">{n.label}</span>
+        </a>
+      </li>
+    ))}
+  </ol>
+  <div class="menu__foot" data-menu-foot>
+    <Photo src={photos.dance} alt="" widths={[200, 400]} sizes="120px" pos="50% 35%" quality={60} class="menu__img" />
+    <div>
+      <p class="script menu__script">Forever with you</p>
+      <p class="menu__date">{site.dateShort} · {site.city}</p>
+    </div>
+  </div>
+</div>
+
+<div class="curtain" id="curtain" aria-hidden="true"><span id="curtain-label"></span></div>
+
+<style>
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 50; height: 64px;
+    padding: env(safe-area-inset-top) var(--gutter) 0;
+    display: flex; align-items: center; justify-content: space-between; gap: 16px;
+    color: var(--c-porcelain);
+    transition: transform var(--d-ui) var(--ease-silk), background-color var(--d-ui) var(--ease-soft), color var(--d-ui) var(--ease-soft);
+  }
+  .nav.is-hidden { transform: translateY(-100%); }
+  .nav.is-solid { background: rgb(247 246 242 / .86); color: var(--c-ink); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-bottom: 1px solid rgb(185 200 199 / .6); }
+  .nav.is-dark { background: rgb(13 13 14 / .72); color: var(--c-porcelain); border-bottom-color: rgb(255 255 255 / .08); }
+  .nav__mono, .menu__mono { font-family: var(--f-display); font-size: 22px; text-decoration: none; letter-spacing: .04em; }
+  .nav__mono .it, .menu__mono .it { color: var(--c-blush); }
+  .nav.is-solid:not(.is-dark) .nav__mono .it { color: var(--c-bordeaux); }
+  .nav__links { display: none; }
+  .nav__actions { display: flex; align-items: center; gap: 8px; }
+  .nav__cta { display: none; }
+  .nav__menu { height: 44px; padding: 0 20px; border-radius: 999px; border: none; background: var(--c-porcelain); color: var(--c-ink); font-size: 13px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; }
+  .nav.is-solid:not(.is-dark) .nav__menu { background: var(--c-ink); color: var(--c-porcelain); }
+
+  @media (min-width: 1024px) {
+    .nav { height: 88px; }
+    .nav__links { display: flex; gap: 36px; font-size: 13px; letter-spacing: .16em; text-transform: uppercase; }
+    .nav__links a { text-decoration: none; position: relative; padding: 8px 0; }
+    .nav__links a::after { content: ''; position: absolute; left: 0; right: 0; bottom: 2px; height: 1px; background: currentColor; transform: scaleX(0); transform-origin: right; transition: transform var(--d-ui) var(--ease-silk); }
+    .nav__links a:hover::after { transform: scaleX(1); transform-origin: left; }
+    .nav__cta { display: inline-flex; align-items: center; height: 48px; padding: 0 26px; border-radius: 999px; background: var(--c-porcelain); color: var(--c-ink); font-size: 13px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; text-decoration: none; }
+    .nav.is-solid:not(.is-dark) .nav__cta { background: var(--c-ink); color: var(--c-porcelain); }
+    .nav__menu { display: none; }
+  }
+
+  /* Menu overlay — mở/đóng bằng GSAP */
+  .menu {
+    position: fixed; inset: 0; z-index: 70; background: var(--c-oxblood); color: var(--c-porcelain);
+    display: flex; flex-direction: column; padding: env(safe-area-inset-top) var(--gutter) max(20px, env(safe-area-inset-bottom));
+  }
+  .menu[hidden] { display: none; }
+  .menu__top { height: 64px; display: flex; align-items: center; justify-content: space-between; }
+  .menu__close { height: 44px; padding: 0 20px; border-radius: 999px; border: 1px solid var(--c-champagne); background: transparent; color: var(--c-champagne); font-size: 13px; font-weight: 500; letter-spacing: .08em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+  .menu__list { list-style: none; margin: 0; padding: 24px 0 0; flex: 1; }
+  .menu__list li { overflow: hidden; border-bottom: 1px solid rgb(234 217 185 / .25); }
+  .menu__list a { display: flex; align-items: baseline; gap: 16px; min-height: 76px; padding: 6px 0; text-decoration: none; }
+  .menu__list .num { font-size: 12px; color: var(--c-blush); width: 24px; }
+  .menu__label { font-family: var(--f-display); font-size: clamp(2.25rem, 9vw, 3.25rem); line-height: 1.4; }
+  .menu__list a:hover .menu__label { font-style: italic; color: var(--c-champagne); }
+  .menu__foot { display: grid; grid-template-columns: 96px 1fr; gap: 16px; align-items: end; padding-top: 20px; }
+  .menu__foot :global(.menu__img) { height: 128px; border-radius: 48px 48px 0 0; }
+  .menu__script { font-size: 34px; color: var(--c-champagne); }
+  .menu__date { font-size: 12px; color: var(--c-champagne); margin-top: 6px; }
+
+  /* Rèm chuyển cảnh */
+  .curtain {
+    position: fixed; inset: 0; z-index: 80; pointer-events: none; background: var(--c-oxblood);
+    display: grid; place-items: center; visibility: hidden;
+    color: var(--c-champagne); font-family: var(--f-display); font-style: italic; font-size: clamp(2.5rem, 2rem + 3vw, 5rem);
+  }
+</style>

@@ -1,0 +1,43 @@
+---
+import Photo from './Photo.astro';
+import { couple } from '../data/wedding';
+const people = [
+  { ...couple.groom, label: 'Chú rể', pos: '50% 18%' },
+  { ...couple.bride, label: 'Cô dâu', pos: '45% 24%' },
+];
+---
+<section class="cp" aria-label="Cô dâu và chú rể">
+  <div class="wrap cp__grid">
+    {people.map((p, i) => (
+      <figure class={`cp__fig cp__fig--${i}`}>
+        <div class="cp__arch" data-clip>
+          <Photo src={p.photo} alt={`${p.label} ${p.full}`} widths={[360, 540, 720, 1000]} sizes="(min-width: 1024px) 30vw, 46vw" pos={p.pos} class="cp__ph" />
+        </div>
+        <figcaption data-fade>
+          <span class="eyebrow">{p.label} · {p.role}</span>
+          <span class="cp__name">{p.full}</span>
+        </figcaption>
+      </figure>
+    ))}
+    <blockquote class="cp__quote" data-fade>“{couple.quote}”</blockquote>
+  </div>
+</section>
+
+<style>
+  .cp { padding-bottom: var(--section-y); }
+  .cp__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; align-items: start; }
+  .cp__fig { display: flex; flex-direction: column; gap: 12px; }
+  .cp__fig--1 { padding-top: 56px; }
+  .cp__arch { aspect-ratio: 3 / 4.3; border-radius: 999px 999px 0 0; overflow: hidden; }
+  .cp__arch :global(.cp__ph) { width: 100%; height: 100%; }
+  .cp__fig figcaption { display: flex; flex-direction: column; gap: 4px; }
+  .cp__fig .eyebrow { color: var(--c-graphite); }
+  .cp__name { font-family: var(--f-display); font-size: clamp(1.25rem, 1rem + 1.2vw, 2.25rem); line-height: 1.2; }
+  .cp__quote { grid-column: 1 / -1; margin-top: 24px; text-align: center; font-family: var(--f-display); font-style: italic; font-size: clamp(1.375rem, 1.1rem + 1.4vw, 2.5rem); line-height: 1.4; max-width: 28ch; justify-self: center; }
+  @media (min-width: 1024px) {
+    .cp__grid { grid-template-columns: 1fr 1fr 1fr; gap: 48px; align-items: center; }
+    .cp__fig--0 { grid-column: 1; grid-row: 1; }
+    .cp__fig--1 { grid-column: 3; grid-row: 1; padding-top: 160px; }
+    .cp__quote { grid-column: 2; grid-row: 1; margin: 0; }
+  }
+</style>
