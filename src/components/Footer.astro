@@ -1,4 +1,8 @@
 ---
+/**
+ * Cuối trang: "cào để mở" như thẻ cào — lớp đen phủ ảnh, khách rê / vuốt để cào loang ra,
+ * chữ ĐÔNG & CHÂU khổng lồ luôn nằm trên cùng. Cào đủ nhiều thì tự mở hết.
+ */
 import Photo from './Photo.astro';
 import { photos, site } from '../data/wedding';
 ---
@@ -11,25 +15,22 @@ import { photos, site } from '../data/wedding';
   </svg>
 
   <div class="wrap ft__in">
-    <div class="dr" data-drag-stage>
-      <!-- Lớp dưới: lộ ra khi kéo -->
+    <div class="dr" data-scratch-stage>
+      <!-- Lớp dưới: ảnh + lời cảm ơn, lộ ra khi cào -->
       <div class="dr__under">
         <Photo src={photos.veil} alt="Cô dâu chú rể dưới khăn voan" widths={[480, 800, 1200, 1800]} sizes="(min-width: 1024px) 92vw, 100vw" pos="40% 30%" class="dr__ph" />
-        <div class="dr__msg" data-drag-msg>
+        <div class="dr__msg" data-scratch-msg>
           <p class="script dr__thanks">Thank you!</p>
           <p class="dr__text">Cảm ơn bạn đã là một phần trong câu chuyện của chúng mình.</p>
         </div>
-        <button type="button" class="dr__close" data-drag-close tabindex="-1">Đóng lại ↑</button>
       </div>
-      <!-- Lớp phủ: kéo xuống để mở -->
-      <div class="dr__cover" data-drag-cover>
-        <button type="button" class="dr__pill" data-drag-pill aria-expanded="false">
-          <span data-drag-label>Kéo để mở</span>
-        </button>
-        <p class="dr__word" aria-hidden="true">
-          <span class="dr__w">Đông</span><span class="dr__amp">&amp;</span><span class="dr__w">Châu</span>
-        </p>
-      </div>
+      <!-- Lớp phủ để cào -->
+      <canvas class="dr__mask" data-scratch-canvas aria-hidden="true"></canvas>
+      <!-- Chữ khổng lồ luôn ở trên -->
+      <p class="dr__word" aria-hidden="true">
+        <span class="dr__w">Đông</span><span class="dr__amp">&amp;</span><span class="dr__w">Châu</span>
+      </p>
+      <button type="button" class="dr__pill" data-scratch-pill>Cào để mở</button>
     </div>
     <div class="ft__bottom"><span>Quang Đông &amp; Trang Châu</span><span class="num">{site.dateShort}</span></div>
   </div>
@@ -39,28 +40,25 @@ import { photos, site } from '../data/wedding';
   .ft { background: #0D0D0E; color: var(--c-porcelain); padding: calc(var(--section-y) * .6) 0 max(28px, env(safe-area-inset-bottom)); }
   .ft__in { display: flex; flex-direction: column; gap: 20px; }
 
-  .dr { position: relative; height: min(118vw, 78svh); border-radius: 28px; overflow: hidden; background: #000; isolation: isolate; }
+  .dr { position: relative; height: min(120vw, 70svh); border-radius: 28px; overflow: hidden; background: #050505; isolation: isolate; }
   .dr__under { position: absolute; inset: 0; }
   .dr__under :global(.dr__ph) { position: absolute; inset: 0; }
-  .dr__msg { position: absolute; inset: auto 0 0 0; z-index: 2; padding: 64px var(--gutter) 36px; background: linear-gradient(180deg, transparent, rgb(13 13 14 / .82)); display: flex; flex-direction: column; gap: 10px; }
-  .dr__thanks { font-size: clamp(3.25rem, 2.4rem + 4vw, 7rem); color: var(--c-champagne); }
-  .dr__text { font-family: var(--f-display); font-style: italic; font-size: clamp(1.25rem, 1rem + 1.2vw, 2.25rem); line-height: 1.35; max-width: 26ch; }
+  .dr__msg { position: absolute; inset: auto 0 0 0; z-index: 2; padding: 64px var(--gutter) 32px; background: linear-gradient(180deg, transparent, rgb(13 13 14 / .82)); display: flex; flex-direction: column; gap: 8px; opacity: 0; }
+  .dr__thanks { font-size: clamp(3rem, 2.4rem + 4vw, 7rem); color: var(--c-champagne); }
+  .dr__text { font-family: var(--f-display); font-style: italic; font-size: clamp(1.125rem, 1rem + 1.1vw, 2.125rem); line-height: 1.35; max-width: 26ch; }
 
-  .dr__close { position: absolute; top: 16px; right: 16px; z-index: 2; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgb(247 246 242 / .6); background: rgb(13 13 14 / .45); color: #fff; font: 600 12px/1 var(--f-text); letter-spacing: .16em; text-transform: uppercase; opacity: 0; visibility: hidden; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-  .dr__cover {
-    position: absolute; inset: 0; z-index: 3; background: #050505; border-radius: 28px;
-    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: clamp(16px, 4vh, 40px); touch-action: none; cursor: grab; user-select: none;
-    box-shadow: 0 -1px 0 rgb(255 255 255 / .06) inset;
-  }
-  .dr__cover:active { cursor: grabbing; }
+  .dr__mask { position: absolute; inset: 0; z-index: 3; width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; }
+  :global(.no-js) .dr__mask { display: none; }
+
   .dr__word {
-    margin: 0; display: flex; flex-direction: column; align-items: center; line-height: .9; padding-top: .12em;
+    position: absolute; inset: 0; z-index: 4; margin: 0; pointer-events: none;
+    display: flex; flex-direction: column; align-items: center; justify-content: center; line-height: .9; padding-top: .12em;
     font-family: var(--f-display); font-weight: 500; text-transform: uppercase; color: #fff;
-    font-size: clamp(5.5rem, 27vw, 9rem); letter-spacing: -.01em; filter: url(#ink-rough); pointer-events: none;
+    font-size: clamp(5.5rem, 27vw, 9rem); letter-spacing: -.01em; filter: url(#ink-rough);
   }
   .dr__amp { font-family: var(--f-script); text-transform: none; font-weight: 400; color: var(--c-blush); font-size: .62em; line-height: 1; margin: .05em 0 .02em; }
   .dr__pill {
-    position: relative; z-index: 2;
+    position: absolute; z-index: 5; left: 50%; top: 9%; translate: -50% 0;
     min-height: 44px; padding: 0 22px; border-radius: 999px; border: 1px solid #9C3B2E;
     background: #121212; color: #fff; font: 600 12px/1 var(--f-text); letter-spacing: .2em; text-transform: uppercase;
     box-shadow: 0 0 18px rgb(227 163 151 / .25);
@@ -69,9 +67,9 @@ import { photos, site } from '../data/wedding';
 
   @media (min-width: 1024px) {
     .dr { height: min(46vw, 82vh); border-radius: 40px; }
-    .dr__close { position: absolute; top: 16px; right: 16px; z-index: 2; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid rgb(247 246 242 / .6); background: rgb(13 13 14 / .45); color: #fff; font: 600 12px/1 var(--f-text); letter-spacing: .16em; text-transform: uppercase; opacity: 0; visibility: hidden; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
-  .dr__cover { border-radius: 40px; }
-    .dr__word { flex-direction: row; align-items: baseline; gap: .12em; font-size: 13vw; }
+    .dr__word { flex-direction: row; align-items: baseline; justify-content: center; gap: .12em; font-size: 13vw; padding-top: 0; align-content: center; flex-wrap: nowrap; }
+    .dr__word { align-items: center; }
     .dr__amp { font-size: .5em; }
+    .dr__pill { top: 12%; }
   }
 </style>

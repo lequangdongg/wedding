@@ -1,11 +1,10 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
-import { Draggable } from 'gsap/Draggable';
 import { S, $, $$, pad, reduced, isDesktop, body } from './shared';
 
 export function init() {
-gsap.registerPlugin(ScrollTrigger, SplitText, Draggable);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 ScrollTrigger.config({ ignoreMobileResize: true });
 S.refresh = () => ScrollTrigger.refresh();
 const cd = $('[data-countdown]');
@@ -149,60 +148,109 @@ if (!reduced) {
   if (cd) gsap.from($$('[data-cd]', cd), { yPercent: 60, autoAlpha: 0, stagger: 0.08, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: cd, start: 'top 75%', once: true } });
 }
 
-/* ================= Kéo để mở (như "drag to reveal") ================= */
-(function dragReveal() {
-  const stage = $('[data-drag-stage]');
-  const cover = $('[data-drag-cover]');
-  const pill = $<HTMLButtonElement>('[data-drag-pill]');
-  const label = $('[data-drag-label]');
-  const msg = $('[data-drag-msg]');
-  if (!stage || !cover || !pill) return;
-  const closeBtn2 = $<HTMLButtonElement>('[data-drag-close]');
-  const maxY = () => stage.clientHeight;
-  let open = false;
+/* ================= Cào để mở (như thẻ cào — "drag to reveal" của trang mẫu) ================= */
+(function scratchReveal() {
+  const stage = $('[data-scratch-stage]');
+  const canvas = $<HTMLCanvasElement>('[data-scratch-canvas]');
+  const pill = $<HTMLButtonElement>('[data-scratch-pill]');
+  const msg = $('[data-scratch-msg]');
+  if (!stage || !canvas || !pill) return;
+  const ctx = canvas.getContext('2d')!;
+  const GX = 36, GY = 28; // lưới để tính % đã cào
+  let grid = new Uint8Array(GX * GY);
+  let cleared = 0, done = false, started = false;
+  let w = 0, h = 0, dpr = 1, brush = 60;
+  let last: { x: number; y: number } | null = null;
 
-  const setState = (o: boolean) => {
-    open = o;
-    pill.setAttribute('aria-expanded', String(o));
-    if (label) label.textContent = o ? 'Đã mở' : 'Kéo để mở';
-    if (closeBtn2) { closeBtn2.tabIndex = o ? 0 : -1; gsap.to(closeBtn2, { autoAlpha: o ? 1 : 0, duration: 0.5, delay: o ? 0.6 : 0 }); }
-  };
-  const animateTo = (o: boolean, velocity = 0) => {
-    setState(o);
-    gsap.to(cover, { y: o ? maxY() : 0, duration: o ? 1.1 : 0.9, ease: o ? 'expo.out' : 'elastic.out(1, .65)', onUpdate: syncMsg });
-    if (o && msg) gsap.fromTo(msg.children, { y: 40, autoAlpha: 0 }, { y: 0, autoAlpha: 1, stagger: 0.12, duration: 1.1, ease: 'expo.out', delay: 0.15 });
-    void velocity;
-  };
-  const syncMsg = () => {
-    const p = gsap.utils.clamp(0, 1, (gsap.getProperty(cover, 'y') as number) / maxY());
-    gsap.set('.dr__ph', { scale: 1.15 - p * 0.15 });
-    gsap.set(cover, { borderRadius: p > 0.98 ? '28px 28px 28px 28px' : undefined });
+  const paint = () => {
+    const r = stage.getBoundingClientRect();
+    dpr = Math.min(2, window.devicePixelRatio || 1);
+    w = r.width; h = r.height;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    ctx.globalCompositeOperation = 'source-over';
+    ctx.fillStyle = '#050505';
+    ctx.fillRect(0, 0, w, h);
+    brush = Math.max(34, Math.min(w, h) * (isDesktop() ? 0.11 : 0.15));
+    grid = new Uint8Array(GX * GY); cleared = 0;
   };
 
-  const [drag] = Draggable.create(cover, {
-    type: 'y',
-    bounds: { minY: 0, maxY: stage.clientHeight },
-    edgeResistance: 0.85,
-    dragClickables: false,
-    onPress() { gsap.killTweensOf(cover); },
-    onDrag: syncMsg,
-    onRelease() {
-      const y = this.y as number;
-      const shouldOpen = y > maxY() * 0.22;
-      animateTo(shouldOpen);
-    },
+  const mark = (x: number, y: number) => {
+    const rx = brush / w * GX, ry = brush / h * GY;
+    const cx = x / w * GX, cy = y / h * GY;
+    for (let gy = Math.max(0, Math.floor(cy - ry)); gy <= Math.min(GY - 1, Math.ceil(cy + ry)); gy++)
+      for (let gx = Math.max(0, Math.floor(cx - rx)); gx <= Math.min(GX - 1, Math.ceil(cx + rx)); gx++) {
+        const dx = (gx + 0.5 - cx) / rx, dy = (gy + 0.5 - cy) / ry;
+        if (dx * dx + dy * dy <= 1 && !grid[gy * GX + gx]) { grid[gy * GX + gx] = 1; cleared++; }
+      }
+  };
+
+  // nét cào: vẽ blob tròn + nối các điểm để không bị đứt
+  const scratch = (x: number, y: number, auto = false) => {
+    if (done) return;
+    if (!started && !auto) { started = true; gsap.to(pill, { autoAlpha: 0, y: -10, duration: 0.4 }); }
+    ctx.globalCompositeOperation = 'destination-out';
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.lineWidth = brush * 2;
+    ctx.beginPath();
+    if (last) { ctx.moveTo(last.x, last.y); ctx.lineTo(x, y); ctx.stroke(); }
+    ctx.beginPath(); ctx.arc(x, y, brush * (0.9 + Math.random() * 0.25), 0, Math.PI * 2); ctx.fill();
+    // vài giọt loang quanh nét
+    for (let i = 0; i < 2; i++) {
+      const a = Math.random() * Math.PI * 2, d = brush * (0.7 + Math.random() * 0.5);
+      ctx.beginPath(); ctx.arc(x + Math.cos(a) * d, y + Math.sin(a) * d, brush * (0.35 + Math.random() * 0.3), 0, Math.PI * 2); ctx.fill();
+    }
+    if (last) { const steps = Math.ceil(Math.hypot(x - last.x, y - last.y) / (brush * 0.5)); for (let s = 1; s <= steps; s++) mark(last.x + (x - last.x) * s / steps, last.y + (y - last.y) * s / steps); }
+    mark(x, y);
+    last = { x, y };
+    if (cleared / grid.length > 0.5) revealAll();
+  };
+
+  const revealAll = () => {
+    if (done) return;
+    done = true;
+    gsap.to(pill, { autoAlpha: 0, duration: 0.3 });
+    gsap.to(canvas, { autoAlpha: 0, duration: 1.1, ease: 'power2.inOut' });
+    gsap.to('.dr__word', { yPercent: -18, scale: 0.86, autoAlpha: 0.9, duration: 1.4, ease: 'expo.inOut' });
+    gsap.fromTo('.dr__ph', { scale: 1.12 }, { scale: 1, duration: 1.8, ease: 'expo.out' });
+    if (msg) gsap.fromTo(msg, { autoAlpha: 0, y: 30 }, { autoAlpha: 1, y: 0, duration: 1.1, delay: 0.5, ease: 'expo.out' });
+  };
+
+  const pos = (e: PointerEvent) => { const r = canvas.getBoundingClientRect(); return { x: e.clientX - r.left, y: e.clientY - r.top }; };
+  const fine = matchMedia('(pointer: fine)').matches;
+  let down = false;
+  canvas.addEventListener('pointerdown', (e) => { down = true; last = null; canvas.setPointerCapture(e.pointerId); const p = pos(e); scratch(p.x, p.y); });
+  canvas.addEventListener('pointermove', (e) => {
+    if (!down && !fine) return; // chuột: rê là cào; cảm ứng: phải chạm & vuốt
+    const p = pos(e); scratch(p.x, p.y);
   });
-  pill.addEventListener('click', () => animateTo(!open));
-  closeBtn2?.addEventListener('click', () => { animateTo(false); pill.focus({ preventScroll: true }); });
-  window.addEventListener('resize', () => { drag.applyBounds({ minY: 0, maxY: maxY() }); gsap.set(cover, { y: open ? maxY() : 0 }); });
+  const up = () => { down = false; last = null; };
+  canvas.addEventListener('pointerup', up);
+  canvas.addEventListener('pointercancel', up);
+  canvas.addEventListener('pointerleave', () => { if (!down) last = null; });
+  pill.addEventListener('click', revealAll); // bàn phím / người không muốn cào
 
-  // gợi ý: khi cuộn tới, lớp phủ "nhấc" lên một chút + nút nhịp
+  paint();
+  let rw = window.innerWidth;
+  window.addEventListener('resize', () => { if (!done && Math.abs(window.innerWidth - rw) > 40) { rw = window.innerWidth; paint(); } });
+
+  // gợi ý: khi cuộn tới, tự "cào" một vệt nhỏ + nút nhịp nhẹ
   if (!reduced) {
-    gsap.timeline({ scrollTrigger: { trigger: stage, start: 'top 65%', once: true } })
-      .from('.dr__word', { yPercent: 30, autoAlpha: 0, duration: 1.2, ease: 'expo.out' })
-      .from(pill, { scale: 0.6, autoAlpha: 0, duration: 0.8, ease: 'back.out(2)' }, '-=.8')
-      .to(cover, { y: 56, duration: 0.6, ease: 'power2.out' }, '+=.2')
-      .to(cover, { y: 0, duration: 1, ease: 'elastic.out(1, .5)' });
+    ScrollTrigger.create({
+      trigger: stage, start: 'top 60%', once: true,
+      onEnter: () => {
+        gsap.from('.dr__word', { yPercent: 30, autoAlpha: 0, duration: 1.2, ease: 'expo.out' });
+        const o = { t: 0 };
+        gsap.to(o, {
+          t: 1, duration: 0.9, delay: 0.6, ease: 'power1.inOut',
+          onUpdate: () => {
+            if (started || done) return;
+            const x = w * (0.72 + 0.12 * o.t), y = h * (0.7 - 0.18 * Math.sin(o.t * Math.PI));
+            scratch(x, y, true);
+          },
+          onComplete: () => { last = null; },
+        });
+      },
+    });
     gsap.to(pill, { y: 6, repeat: -1, yoyo: true, duration: 0.9, ease: 'sine.inOut' });
   }
 })();
