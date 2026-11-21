@@ -14,7 +14,7 @@ npm run preview   # xem bản build
 
 ## Sửa nội dung
 Mọi chữ, giờ, địa điểm, ảnh nằm trong **`src/data/wedding.ts`**. Chỗ còn `[NGOẶC VUÔNG]` là thông tin chưa có:
-- Chuyện tình (`story`), tài khoản mừng cưới + mã QR (`gifts`).
+- Ảnh phần Khoảnh khắc (`moments`), tài khoản mừng cưới + mã QR (`gifts`).
 - **Video hero**: chép file vào `public/video/` rồi điền `media.heroVideoMp4` (khuyên dùng 720×1280, H.264, ≤ 4 MB, 8–12 s, không tiếng).
 - **Nhạc nền** (tuỳ chọn): `media.music`.
 - Ảnh: thay file trong `src/assets/photos/` (giữ tên) — lúc build Astro tự sinh AVIF/WebP nhiều kích thước.
@@ -34,8 +34,7 @@ Thư mục `dist/` là site tĩnh — kéo thả lên **Netlify Drop**, hoặc k
 | Ảnh: placeholder mờ (LQIP) + vệt sáng, ảnh thật mờ dần lên khi tải xong | `Photo.astro`, `scripts/lqip.mjs` (tự chạy khi build) |
 | Hero thu nhỏ/bo góc khi cuộn, chữ tiêu đề trượt lên theo dòng (SplitText) | `scripts/scroll.ts` |
 | Marquee 2 tầng, tăng tốc + đổi chiều theo vận tốc cuộn | `Marquee.astro` |
-| Chuyện tình: polaroid bay vào xếp chồng khi cuộn (kiểu "Tour dates") | `Story.astro` |
-| Album: ghim + cuộn ngang (desktop), vuốt (mobile) | `Album.astro` |
+| Khoảnh khắc: polaroid lớn bay vào rồi xoè quạt khi cuộn (kiểu "Tour dates") — thay cho album | `Story.astro`, danh sách ảnh `moments` trong `wedding.ts` |
 | Menu mở kiểu rèm, bấm mục -> rèm chuyển cảnh | `Nav.astro` |
 | Kéo để mở (Draggable): kéo lớp phủ chữ khổng lồ xuống để lộ ảnh + lời cảm ơn | `Footer.astro` |
 

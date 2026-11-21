@@ -138,31 +138,6 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
     gsap.from(pols[0], { y: -window.innerHeight * 0.7, rotation: -20, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: tour, start: 'top 70%', once: true } });
   }
 
-  /* Album: desktop ghim + cuộn ngang; mobile vuốt native */
-  const album = $('[data-album]');
-  const track = album ? $('[data-track]', album) : null;
-  const bar = album ? $('[data-progress]', album) : null;
-  const curA = album ? $('[data-album-cur]', album) : null;
-  const items = album ? $$('[data-album-item]', album) : [];
-  const setAlbumProgress = (p: number) => {
-    if (bar) gsap.set(bar, { scaleX: 0.14 + p * 0.86 });
-    if (curA) curA.textContent = pad(1 + Math.round(p * (items.length - 1)));
-  };
-  if (album && track && desktop) {
-    const dist = () => track.scrollWidth - window.innerWidth + 64;
-    const h = gsap.to(track, {
-      x: () => -dist(), ease: 'none',
-      scrollTrigger: { trigger: album, pin: '[data-album-inner]', start: 'top top', end: () => `+=${dist()}`, scrub: 1, invalidateOnRefresh: true, anticipatePin: 1, onUpdate: (s) => setAlbumProgress(s.progress) },
-    });
-    items.forEach((it) => {
-      gsap.from($('.ph', it), { scale: 1.25, ease: 'none', scrollTrigger: { trigger: it, containerAnimation: h, start: 'left right', end: 'right left', scrub: true } });
-    });
-  } else if (album && track) {
-    gsap.from(items, { x: 80, autoAlpha: 0, stagger: 0.08, duration: 1, ease: 'expo.out', scrollTrigger: { trigger: track, start: 'top 85%', once: true } });
-    const onScroll = () => { const max = track.scrollWidth - track.clientWidth; setAlbumProgress(max ? track.scrollLeft / max : 0); };
-    track.addEventListener('scroll', onScroll, { passive: true });
-    return () => track.removeEventListener('scroll', onScroll);
-  }
 });
 
 /* Thẻ sự kiện + đếm ngược */
@@ -238,7 +213,7 @@ if (navEl) {
   // nền sáng sau hero, tối khi đang ở section nền tối
   ScrollTrigger.create({ trigger: '.hero', start: 'bottom 80px', onToggle: (s) => navEl.classList.toggle('is-solid', s.isActive), end: 'max' });
   let darkCount = 0;
-  $$('.mq, .tour, .al, .ev, .cd, .ft').forEach((sec) => ScrollTrigger.create({
+  $$('.mq, .tour, .ev, .cd, .ft').forEach((sec) => ScrollTrigger.create({
     trigger: sec, start: 'top 64px', end: 'bottom 64px',
     onToggle: (s) => { darkCount += s.isActive ? 1 : -1; navEl.classList.toggle('is-dark', darkCount > 0); },
   }));

@@ -120,22 +120,14 @@ export const moments = [
   { photo: gardenClose, pos: '60% 35%', alt: 'Chú rể nhìn cô dâu giữa khu vườn' },
   { photo: studioVeil, pos: '50% 35%', alt: 'Nắm tay, khăn voan dài' },
   { photo: garden, pos: '50% 35%', alt: 'Hai bạn vẫy tay khoe nhẫn cưới' },
+  { photo: bride, pos: '45% 30%', alt: 'Cô dâu Trang Châu cầm bó đồng tiền hồng' },
 ];
 
-export const album = [
-  { src: studioVeil, alt: 'Cô dâu chú rể nắm tay, khăn voan dài trong studio', pos: '50% 40%' },
-  { src: dance, alt: 'Khiêu vũ trong studio ngập nắng', pos: '45% 40%' },
-  { src: gardenClose, alt: 'Chú rể nhìn cô dâu trong khu vườn', pos: '70% 40%' },
-  { src: garden, alt: 'Hai bạn vẫy tay khoe nhẫn cưới', pos: '50% 40%' },
-  { src: gardenSofa, alt: 'Cô dâu chú rể trên sofa trắng giữa vườn', pos: '50% 50%' },
-  { src: bride, alt: 'Cô dâu Trang Châu cầm bó đồng tiền hồng', pos: '45% 35%' },
-  { src: studioCouple, alt: 'Ảnh đôi trong studio', pos: '50% 30%' },
-];
 
 /** Menu (không có mục Chuyện tình). */
 export const nav = [
   { id: 'loi-moi', label: 'Lời mời' },
-  { id: 'album', label: 'Album' },
+  { id: 'khoanh-khac', label: 'Khoảnh khắc' },
   { id: 'su-kien', label: 'Sự kiện' },
   { id: 'mung-cuoi', label: 'Mừng cưới' },
 ];
