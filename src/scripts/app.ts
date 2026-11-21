@@ -10,14 +10,47 @@ $$<HTMLImageElement>('.ph img').forEach((img) => {
   else { img.addEventListener('load', done, { once: true }); img.addEventListener('error', done, { once: true }); }
 });
 
+/* ================= Video hero (nếu có): chọn bản mobile/desktop, ảnh nằm dưới làm poster ================= */
+const heroVideo = $<HTMLVideoElement>('[data-hero-video]');
+if (heroVideo && !reduced && !(navigator as any).connection?.saveData) {
+  const k = isDesktop() ? 'd' : 'm';
+  const add = (src: string | undefined, type: string) => { if (!src) return; const so = document.createElement('source'); so.src = src; so.type = type; heroVideo.appendChild(so); };
+  add(heroVideo.dataset[k + 'Webm'], 'video/webm');
+  add(heroVideo.dataset[k + 'Mp4'], 'video/mp4');
+  heroVideo.preload = 'auto';
+  heroVideo.addEventListener('playing', () => heroVideo.classList.add('is-playing'), { once: true });
+  const start = () => heroVideo.play().catch(() => {});
+  if (document.readyState === 'complete') start(); else window.addEventListener('load', start, { once: true });
+}
+
+/* ================= Tên khách mời (?ten=...) ================= */
+const guest = (new URLSearchParams(location.search).get('ten') || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+if (guest) {
+  $$('[data-guest-name]').forEach((el) => (el.textContent = guest));
+  $$('[data-guest]').forEach((el) => { el.hidden = false; });
+  $$('[data-no-guest]').forEach((el) => { el.hidden = true; });
+}
+
 /* ================= Bên mời + đếm ngược ================= */
 type Side = 'nam' | 'nu';
 const urlSide = new URLSearchParams(location.search).get('ben');
-let side: Side = urlSide === 'nha-gai' || urlSide === 'nu' ? 'nu' : 'nam';
+let side: Side =
+  urlSide === 'nha-gai' || urlSide === 'nu' ? 'nu'
+  : urlSide === 'nha-trai' || urlSide === 'nam' ? 'nam'
+  : root.dataset.side === 'nu' ? 'nu' : 'nam'; // trang /nha-gai/ đặt sẵn data-side
 const cd = $('[data-countdown]');
+// ?now=2026-12-30T10:00 để xem thử giao diện sau ngày cưới
+const nowOverride = Date.parse(new URLSearchParams(location.search).get('now') || '');
+const now = () => (Number.isNaN(nowOverride) ? Date.now() : nowOverride);
 function tick() {
   if (!cd) return;
-  let t = Math.max(0, Math.floor((Date.parse(cd.dataset[side] || '') - Date.now()) / 1000));
+  const n = now();
+  const passed = Date.parse(cd.dataset[side] || '') <= n;
+  $$('[data-cd-before]', cd).forEach((el) => { el.hidden = passed; });
+  const afterEl = $('[data-cd-after]', cd); if (afterEl) afterEl.hidden = !passed;
+  const live = $('[data-cd-live]', cd);
+  if (live) live.hidden = !(n >= Date.parse(cd.dataset.liveFrom || '') && n <= Date.parse(cd.dataset.liveTo || ''));
+  let t = Math.max(0, Math.floor((Date.parse(cd.dataset[side] || '') - n) / 1000));
   const d = Math.floor(t / 86400); t -= d * 86400;
   const h = Math.floor(t / 3600); t -= h * 3600;
   const m = Math.floor(t / 60);
@@ -176,8 +209,16 @@ const musicBtn = $('#music-btn');
 const audio = $<HTMLAudioElement>('#music');
 musicBtn?.addEventListener('click', () => {
   if (!audio) return;
-  if (audio.paused) audio.play().then(() => musicBtn.setAttribute('aria-pressed', 'true')).catch(() => {});
-  else { audio.pause(); musicBtn.setAttribute('aria-pressed', 'false'); }
+  if (audio.paused) {
+    audio.volume = 0;
+    audio.play().then(() => {
+      musicBtn.setAttribute('aria-pressed', 'true');
+      gsap.to(audio, { volume: 0.6, duration: 1.6, ease: 'power1.out' });
+    }).catch(() => {});
+  } else {
+    musicBtn.setAttribute('aria-pressed', 'false');
+    gsap.to(audio, { volume: 0, duration: 0.6, ease: 'power1.in', onComplete: () => audio.pause() });
+  }
 });
 
 

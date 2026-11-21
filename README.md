@@ -1,6 +1,6 @@
 # Website cưới — Quang Đông & Trang Châu
 
-Astro (SSG) · mobile-first · GSAP (ScrollTrigger, SplitText, Draggable) · Lenis cuộn mượt trên desktop.
+Astro (SSG) · mobile-first · GSAP (ScrollTrigger, SplitText) · Lenis cuộn mượt trên desktop.
 
 JS chia 2 phần: ~30 KB gzip tải ngay (preloader + intro), phần chuyển động theo cuộn (~35 KB) tải sau khi intro xong / khi khách bắt đầu cuộn.
 
@@ -15,14 +15,27 @@ npm run preview   # xem bản build
 ## Sửa nội dung
 Mọi chữ, giờ, địa điểm, ảnh nằm trong **`src/data/wedding.ts`**. Chỗ còn `[NGOẶC VUÔNG]` là thông tin chưa có:
 - Ảnh phần Khoảnh khắc (`moments`), tài khoản mừng cưới + mã QR (`gifts`).
-- **Video hero**: chép file vào `public/video/` rồi điền `media.heroVideoMp4` (khuyên dùng 720×1280, H.264, ≤ 4 MB, 8–12 s, không tiếng).
-- **Nhạc nền** (tuỳ chọn): `media.music`.
 - Ảnh: thay file trong `src/assets/photos/` (giữ tên) — lúc build Astro tự sinh AVIF/WebP nhiều kích thước.
-- Đổi `site` trong `astro.config.mjs` thành tên miền thật (để ảnh chia sẻ Facebook/Zalo đúng).
+- Đổi `site` trong `astro.config.mjs` thành tên miền thật (để ảnh chia sẻ Facebook/Zalo và file lịch đúng).
 
-## Link riêng cho từng bên
-- Khách nhà gái: `https://ten-mien/?ben=nha-gai` → hiện Tiệc 27/12 (Nguyệt Hà) + Lễ Vu Quy, đếm ngược đến 27/12, thứ tự gia đình như thiệp nhà gái.
-- Khách nhà trai: `https://ten-mien/?ben=nha-trai` (mặc định).
+### Đã chuẩn bị sẵn — chỉ cần điền
+| Tính năng | Điền ở đâu | Ghi chú |
+|---|---|---|
+| **Video hero** | `media.heroVideo` | `bash scripts/video.sh video-goc.mp4 12 10` (cần ffmpeg) → ra 4 file trong `public/video/`. Điện thoại tải bản dọc, máy tính bản ngang; tiết kiệm dữ liệu / giảm chuyển động thì giữ ảnh tĩnh. |
+| **Nhạc nền** | `media.music` = `'/music/ten-bai.mp3'`, `media.musicTitle` | Chép mp3 (~128 kbps) vào `public/music/`. Nút nhạc góc phải, bật/tắt có fade âm lượng. |
+| **Logo** | `brand.logo` = `'/logo.svg'` | Chưa có thì dùng monogram Đ ⚘ C. `public/favicon.svg` có thể thay bằng logo. |
+| **Album sau cưới** | `after.albumUrl` (Google Photos/Drive) | Sau 29/12 phần đếm ngược tự đổi thành "Cảm ơn bạn đã đến chung vui" + nút album. |
+| **Livestream** | `after.livestreamUrl`, `after.liveFrom/liveTo` | Trong khung giờ đó hiện nút "Xem trực tiếp"; sau đó thành "Xem lại". |
+| **Ảnh chia sẻ** | `python3 scripts/og.py` | Sinh `public/og-nha-trai.jpg`, `og-nha-gai.jpg` (1200×630) mỗi bên một ảnh + `apple-touch-icon.png`. |
+
+Xem trước giao diện sau đám cưới: thêm `?now=2026-12-30T10:00` vào link.
+
+## Link riêng cho từng bên & từng khách
+- Khách nhà trai: `https://ten-mien/nha-trai/` (trang chủ `/` cũng là nhà trai).
+- Khách nhà gái: `https://ten-mien/nha-gai/` → Tiệc 27/12 (Nguyệt Hà) + Lễ Vu Quy, đếm ngược đến 27/12, thứ tự gia đình như thiệp nhà gái, ảnh chia sẻ riêng. (`?ben=nha-gai` vẫn dùng được.)
+- **Tên khách**: thêm `?ten=Anh Tuấn & chị Linh` → hiện "Kính gửi …" ở màn chờ, lời mời và lời cảm ơn cuối trang.
+- **Trang tạo link + mã QR**: `https://ten-mien/tao-link/` (không index Google). Nhập tên, chọn bên → sao chép link, tải QR (PNG 1024px để in lên thiệp). Dán cả danh sách khách → xuất CSV.
+- **Thêm vào lịch**: mỗi sự kiện có file `/lich/<id>.ics` (iPhone, Outlook, Android) có nhắc trước 1 ngày và 2 giờ, kèm link Google Calendar.
 
 ## Deploy
 Thư mục `dist/` là site tĩnh — kéo thả lên **Netlify Drop**, hoặc kết nối repo với **Vercel / Cloudflare Pages / Netlify** (build: `npm run build`, output: `dist`).
@@ -36,6 +49,6 @@ Thư mục `dist/` là site tĩnh — kéo thả lên **Netlify Drop**, hoặc k
 | Marquee 2 tầng, tăng tốc + đổi chiều theo vận tốc cuộn | `Marquee.astro` |
 | Khoảnh khắc: polaroid lớn bay vào rồi xoè quạt khi cuộn (kiểu "Tour dates") — thay cho album | `Story.astro`, danh sách ảnh `moments` trong `wedding.ts` |
 | Menu mở kiểu rèm, bấm mục -> rèm chuyển cảnh | `Nav.astro` |
-| Kéo để mở (Draggable): kéo lớp phủ chữ khổng lồ xuống để lộ ảnh + lời cảm ơn | `Footer.astro` |
+| Cào thẻ: giữ chuột / chạm rồi lau lớp chữ khổng lồ để lộ ảnh + lời cảm ơn (quá 50% tự mở hết) | `Footer.astro`, `scripts/scroll.ts` |
 
 Tắt màn chờ: `site.preloader = false` trong `wedding.ts`. Tất cả tôn trọng `prefers-reduced-motion`.

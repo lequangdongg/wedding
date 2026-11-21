@@ -21,12 +21,34 @@ export const site = {
   preloader: true,
 };
 
-/** Video hero: đặt file vào /public/video/ rồi điền đường dẫn. Để null sẽ dùng ảnh + hiệu ứng zoom chậm. */
+/**
+ * VIDEO HERO + NHẠC NỀN — chép file vào /public rồi điền đường dẫn. null = không dùng.
+ * Tạo video đúng chuẩn: xem scripts/video.sh (ffmpeg). Mobile dọc 720×1280, desktop ngang 1920×1080.
+ */
 export const media = {
-  heroVideoMp4: null as string | null, // ví dụ '/video/hero-720.mp4'
-  heroVideoWebm: null as string | null, // ví dụ '/video/hero-720.webm'
-  /** Nhạc nền (tuỳ chọn) — ví dụ '/audio/song.mp3'. null = ẩn nút nhạc. */
+  heroVideo: {
+    mobile: { mp4: null as string | null, webm: null as string | null }, // ví dụ '/video/hero-m.mp4'
+    desktop: { mp4: null as string | null, webm: null as string | null }, // ví dụ '/video/hero-d.mp4'
+  },
+  /** Nhạc nền (mp3, ~128kbps). Ví dụ '/audio/song.mp3'. Chỉ phát khi khách bấm nút nhạc. */
   music: null as string | null,
+  musicTitle: '' as string, // tên bài hiển thị nhỏ cạnh nút (tuỳ chọn)
+};
+
+/** LOGO — đặt file vào /public (svg hoặc png nền trong) rồi điền, ví dụ '/logo.svg'. null = monogram chữ Đ | C. */
+export const brand = {
+  logo: null as string | null,
+};
+
+/**
+ * SAU NGÀY CƯỚI — khi đã qua giờ đếm ngược, phần đếm ngược tự đổi thành lời cảm ơn + các nút dưới.
+ * Livestream: hiện nút "Xem trực tiếp" từ `liveFrom` đến `liveTo`.
+ */
+export const after = {
+  albumUrl: null as string | null, // link Google Photos / Drive album ảnh cưới
+  livestreamUrl: null as string | null, // link Facebook / YouTube live
+  liveFrom: '2026-12-29T09:30:00+07:00',
+  liveTo: '2026-12-29T14:00:00+07:00',
 };
 
 export const photos = { garden, gardenClose, gardenSofa, studioVeil, studioCouple, dance, veil, bride, groom };
@@ -45,6 +67,7 @@ export const families: Record<SideKey, { side: string; father: string; mother: s
 };
 
 export type WeddingEvent = {
+  id: string; // dùng cho file lịch /lich/<id>.ics
   kind: string;
   host: string;
   weekday: string;
@@ -60,7 +83,7 @@ export type WeddingEvent = {
 };
 
 export const sides: Record<SideKey, {
-  label: string; sub: string; ceremony: string; param: string;
+  label: string; sub: string; ceremony: string; param: string; og: string; shareTitle: string; shareDesc: string;
   countdown: { iso: string; label: string };
   events: WeddingEvent[];
 }> = {
@@ -69,16 +92,19 @@ export const sides: Record<SideKey, {
     sub: 'Đà Nẵng · 29.12',
     ceremony: 'Lễ Thành Hôn',
     param: 'nha-trai',
+    og: '/og-nha-trai.jpg',
+    shareTitle: 'Quang Đông & Trang Châu · Lễ Thành Hôn 29.12.2026',
+    shareDesc: 'Trân trọng kính mời bạn đến dự Lễ Thành Hôn & Tiệc cưới · Thứ Ba 29.12.2026 · Golden Phoenix, Đà Nẵng',
     countdown: { iso: '2026-12-29T10:00:00+07:00', label: 'Lễ Thành Hôn · 10:00 · 29.12.2026' },
     events: [
       {
-        kind: 'Lễ Thành Hôn', host: 'Tư gia nhà trai', weekday: 'Thứ Ba', day: '29', time: '10 giờ 00',
+        id: 'nha-trai-le-thanh-hon', kind: 'Lễ Thành Hôn', host: 'Tư gia nhà trai', weekday: 'Thứ Ba', day: '29', time: '10 giờ 00',
         lunar: 'Nhằm ngày 21 tháng 11 năm Bính Ngọ', venue: 'Tư gia nhà trai',
         addr: 'K74/H10/17 Võ Văn Kiệt, P. An Hải, TP. Đà Nẵng', mapQuery: 'K74/H10/17 Võ Văn Kiệt, An Hải, Đà Nẵng',
         start: '2026-12-29T10:00:00+07:00', end: '2026-12-29T11:00:00+07:00',
       },
       {
-        kind: 'Tiệc cưới', host: 'Nhà trai', weekday: 'Thứ Ba', day: '29', time: '11 giờ 00',
+        id: 'nha-trai-tiec-cuoi', kind: 'Tiệc cưới', host: 'Nhà trai', weekday: 'Thứ Ba', day: '29', time: '11 giờ 00',
         lunar: 'Nhằm ngày 21 tháng 11 năm Bính Ngọ', venue: 'Trung tâm Hội nghị & Tiệc cưới Golden Phoenix', hall: 'Sảnh C',
         addr: 'A8.2 Lô 1,2 Đường 2/9, Hòa Cường, TP. Đà Nẵng', mapQuery: 'Golden Phoenix, Đường 2/9, Hòa Cường, Đà Nẵng',
         start: '2026-12-29T11:00:00+07:00', end: '2026-12-29T14:00:00+07:00',
@@ -90,17 +116,20 @@ export const sides: Record<SideKey, {
     sub: 'Phú Ninh · 27 & 29.12',
     ceremony: 'Lễ Vu Quy',
     param: 'nha-gai',
+    og: '/og-nha-gai.jpg',
+    shareTitle: 'Trang Châu & Quang Đông · Lễ Vu Quy 27 & 29.12.2026',
+    shareDesc: 'Trân trọng kính mời bạn đến dự Tiệc cưới (CN 27.12) & Lễ Vu Quy (T3 29.12.2026) · Phú Ninh, Đà Nẵng',
     countdown: { iso: '2026-12-27T10:30:00+07:00', label: 'Tiệc cưới nhà gái · 10:30 · 27.12.2026' },
     events: [
       {
-        kind: 'Tiệc cưới', host: 'Nhà gái', weekday: 'Chủ Nhật', day: '27', time: '10 giờ 30',
+        id: 'nha-gai-tiec-cuoi', kind: 'Tiệc cưới', host: 'Nhà gái', weekday: 'Chủ Nhật', day: '27', time: '10 giờ 30',
         // Thiệp in ghi "21 tháng 11" — theo lịch âm, 27/12/2026 là 19/11 Bính Ngọ. Kiểm tra lại.
         lunar: 'Nhằm ngày 19 tháng 11 năm Bính Ngọ', venue: 'Nhà hàng tiệc cưới Nguyệt Hà',
         addr: 'X. Phú Ninh, TP. Đà Nẵng', mapQuery: 'Nhà hàng tiệc cưới Nguyệt Hà, Phú Ninh, Đà Nẵng',
         start: '2026-12-27T10:30:00+07:00', end: '2026-12-27T13:30:00+07:00',
       },
       {
-        kind: 'Lễ Vu Quy', host: 'Tư gia nhà gái', weekday: 'Thứ Ba', day: '29', time: '07 giờ 00',
+        id: 'nha-gai-le-vu-quy', kind: 'Lễ Vu Quy', host: 'Tư gia nhà gái', weekday: 'Thứ Ba', day: '29', time: '07 giờ 00',
         lunar: 'Nhằm ngày 21 tháng 11 năm Bính Ngọ', venue: 'Tư gia nhà gái',
         addr: 'Thôn Dương Đàn, X. Phú Ninh, TP. Đà Nẵng', mapQuery: 'Thôn Dương Đàn, Phú Ninh, Đà Nẵng',
         start: '2026-12-29T07:00:00+07:00', end: '2026-12-29T09:00:00+07:00',
@@ -141,6 +170,7 @@ export const gifts = [
 // ---- helpers ----
 const toGcal = (iso: string) => new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 export const mapsUrl = (q: string) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
+export const icsUrl = (e: WeddingEvent) => `/lich/${e.id}.ics`;
 export const calendarUrl = (e: WeddingEvent) =>
   'https://calendar.google.com/calendar/render?action=TEMPLATE' +
   '&text=' + encodeURIComponent(`${e.kind} · Quang Đông & Trang Châu`) +

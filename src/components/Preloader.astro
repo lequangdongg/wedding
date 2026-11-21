@@ -1,9 +1,10 @@
 ---
 import { Image } from 'astro:assets';
 import { photos, site } from '../data/wedding';
+import Monogram from './Monogram.astro';
 ---
 {site.preloader && <div class="loader" id="loader" aria-hidden="true">
-  <div class="loader__top"><span>The Love Book</span><span>{site.dateShort}</span></div>
+  <div class="loader__top"><span class="loader__mono"><Monogram /></span><span>{site.dateShort}</span></div>
   <div class="loader__mid">
     <div class="loader__oval" data-loader-oval>
       <Image src={photos.veil} alt="" widths={[200, 400]} sizes="200px" loading="eager" fetchpriority="high" quality={60} class="loader__img" />
@@ -15,7 +16,7 @@ import { photos, site } from '../data/wedding';
     </p>
   </div>
   <div class="loader__bottom">
-    <span class="loader__hint">Đang chuẩn bị<br />thiệp mời của bạn…</span>
+    <span class="loader__hint"><span data-no-guest>Đang chuẩn bị<br />thiệp mời của bạn…</span><span data-guest hidden>Thiệp mời dành riêng cho<br /><b data-guest-name></b></span></span>
     <span class="loader__count num" id="loader-count">00</span>
   </div>
   <div class="loader__bar"><span id="loader-bar"></span></div>
@@ -28,7 +29,8 @@ import { photos, site } from '../data/wedding';
     padding: max(48px, env(safe-area-inset-top)) var(--gutter) 32px;
   }
   :global(.no-js) .loader, :global(.skip-loader) .loader { display: none; }
-  .loader__top { display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--c-champagne); }
+  .loader__mono { font-size: 26px; letter-spacing: 0; color: var(--c-porcelain); }
+  .loader__top { align-items: center; display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--c-champagne); }
   .loader__mid { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
   .loader__oval { width: clamp(140px, 14vw, 200px); aspect-ratio: 5 / 7; border-radius: 999px 999px 0 0; overflow: hidden; }
   .loader__oval { animation: ovalIn 1.6s var(--ease-silk) both; }
@@ -42,6 +44,8 @@ import { photos, site } from '../data/wedding';
   @keyframes nameIn { from { transform: translateY(36px); } }
   .loader__bottom { display: flex; justify-content: space-between; align-items: flex-end; }
   .loader__hint { font-size: 12px; line-height: 1.5; color: var(--c-champagne); }
+  .loader__hint b { font-weight: 600; color: var(--c-porcelain); font-size: 14px; }
+  .loader__hint [hidden] { display: none; }
   .loader__count { font-family: var(--f-display); font-size: clamp(5rem, 4rem + 5vw, 9rem); line-height: .8; }
   .loader__bar { height: 1px; background: rgb(234 217 185 / .25); }
   .loader__bar span { display: block; height: 1px; background: var(--c-champagne); transform-origin: left; transform: scaleX(0); }

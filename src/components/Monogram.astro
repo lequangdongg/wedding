@@ -1,0 +1,32 @@
+---
+/**
+ * Monogram Đ | C. Nếu brand.logo có đường dẫn (vd '/logo.svg' trong /public) thì dùng logo đó,
+ * không thì vẽ monogram chữ với nhành hoa mảnh ở giữa (gợi lại logo trên thiệp in).
+ */
+import { brand } from '../data/wedding';
+interface Props { class?: string; label?: string }
+const { class: cls = '', label = 'Đông & Châu' } = Astro.props;
+---
+{brand.logo ? (
+  <img class:list={['mono-logo', cls]} src={brand.logo} alt={label} />
+) : (
+  <span class:list={['mono', cls]} role="img" aria-label={label}>
+    <span aria-hidden="true">Đ</span>
+    <svg class="mono__stem" viewBox="0 0 20 48" aria-hidden="true" focusable="false">
+      <g fill="none" stroke="currentColor" stroke-width="1.1" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M10 14 C10 24 9 34 10 47" />
+        <path d="M10 30 C6 28 4 25 4 22 C7 23 9 26 10 30" />
+        <path d="M10 36 C14 34 16 31 16 28 C13 29 11 32 10 36" />
+        <circle cx="10" cy="9" r="1.6" />
+        <path d="M10 7.4 C8 3 12 3 10 7.4 M11.5 8.2 C15.5 6 16 10 11.6 9.6 M11 10.6 C13.5 14 10 15 10 10.8 M9 10.6 C6.5 14 10 15 10 10.8 M8.5 8.2 C4.5 6 4 10 8.4 9.6" />
+      </g>
+    </svg>
+    <span aria-hidden="true">C</span>
+  </span>
+)}
+
+<style>
+  .mono { display: inline-flex; align-items: center; gap: .02em; font-family: var(--f-display); line-height: 1; }
+  .mono__stem { width: .42em; height: 1.05em; color: var(--c-blush); margin: 0 .04em; }
+  .mono-logo { height: 1.2em; width: auto; display: inline-block; }
+</style>

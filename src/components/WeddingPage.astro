@@ -1,0 +1,37 @@
+---
+/** Toàn bộ trang cưới. Dùng chung cho / (mặc định nhà trai), /nha-trai/ và /nha-gai/. */
+import Base from '../layouts/Base.astro';
+import Preloader from './Preloader.astro';
+import Nav from './Nav.astro';
+import Hero from './Hero.astro';
+import Marquee from './Marquee.astro';
+import Invitation from './Invitation.astro';
+import Couple from './Couple.astro';
+import Story from './Story.astro';
+import Events from './Events.astro';
+import Countdown from './Countdown.astro';
+import Gift from './Gift.astro';
+import Footer from './Footer.astro';
+import MusicToggle from './MusicToggle.astro';
+import { sides, type SideKey } from '../data/wedding';
+
+interface Props { side: SideKey }
+const { side } = Astro.props;
+const s = sides[side];
+---
+<Base side={side} title={s.shareTitle} description={s.shareDesc} ogImage={s.og}>
+  <Preloader />
+  <Nav />
+  <main>
+    <Hero />
+    <Marquee />
+    <Invitation />
+    <Couple />
+    <Story />
+    <Events />
+    <Countdown />
+    <Gift />
+  </main>
+  <Footer />
+  <MusicToggle />
+</Base>

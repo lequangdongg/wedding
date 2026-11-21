@@ -1,14 +1,29 @@
 ---
+/** Nút nhạc nền nổi góc phải dưới. Chỉ hiện khi media.music có đường dẫn. Nhạc chỉ phát khi khách bấm (trình duyệt chặn tự phát). */
 import Icon from './Icon.astro';
 import { media } from '../data/wedding';
 ---
 {media.music && (
-  <>
-    <button type="button" class="music" id="music-btn" aria-label="Bật / tắt nhạc nền" aria-pressed="false"><Icon name="music" size={18} /></button>
+  <div class="music">
+    {media.musicTitle && <span class="music__title" data-music-title>{media.musicTitle}</span>}
+    <button type="button" class="music__btn" id="music-btn" aria-label="Bật / tắt nhạc nền" aria-pressed="false">
+      <span class="music__icon"><Icon name="music" size={18} /></span>
+      <span class="music__eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+    </button>
     <audio id="music" src={media.music} loop preload="none"></audio>
-  </>
+  </div>
 )}
 <style>
-  .music { position: fixed; right: var(--gutter); bottom: max(20px, env(safe-area-inset-bottom)); z-index: 60; width: 48px; height: 48px; border-radius: 999px; border: 1px solid rgb(234 217 185 / .6); background: rgb(13 13 14 / .7); color: var(--c-champagne); display: grid; place-items: center; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
-  .music[aria-pressed='true'] { background: var(--c-champagne); color: var(--c-oxblood); }
+  .music { position: fixed; right: var(--gutter); bottom: max(20px, env(safe-area-inset-bottom)); z-index: 60; display: flex; align-items: center; gap: 10px; }
+  .music__title { font-size: 11px; letter-spacing: .12em; color: var(--c-champagne); background: rgb(13 13 14 / .7); padding: 6px 12px; border-radius: 999px; opacity: 0; transform: translateX(8px); transition: opacity .4s, transform .4s var(--ease-silk); pointer-events: none; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+  .music:has([aria-pressed='true']) .music__title { opacity: 1; transform: none; }
+  .music__btn { width: 48px; height: 48px; border-radius: 999px; border: 1px solid rgb(234 217 185 / .6); background: rgb(13 13 14 / .7); color: var(--c-champagne); display: grid; place-items: center; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
+  .music__btn > * { grid-area: 1 / 1; }
+  .music__eq { display: none; gap: 3px; align-items: flex-end; height: 16px; }
+  .music__eq i { width: 3px; height: 100%; background: currentColor; border-radius: 2px; animation: eq 1s ease-in-out infinite; transform-origin: bottom; }
+  .music__eq i:nth-child(2) { animation-delay: -.3s; } .music__eq i:nth-child(3) { animation-delay: -.6s; } .music__eq i:nth-child(4) { animation-delay: -.15s; }
+  @keyframes eq { 0%, 100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
+  .music__btn[aria-pressed='true'] { background: var(--c-champagne); color: var(--c-oxblood); }
+  .music__btn[aria-pressed='true'] .music__icon { display: none; }
+  .music__btn[aria-pressed='true'] .music__eq { display: flex; }
 </style>

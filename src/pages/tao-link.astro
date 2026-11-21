@@ -1,0 +1,141 @@
+---
+/**
+ * Trang nội bộ (không đưa vào menu, không cho Google index): tạo link thiệp có tên khách + mã QR để in lên thiệp giấy.
+ * Mở: <tên-miền>/tao-link/
+ */
+import '../styles/global.css';
+---
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Tạo link thiệp mời · Đông & Châu</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+  </head>
+  <body>
+    <main class="tl">
+      <header class="tl__head">
+        <p class="eyebrow">Công cụ nội bộ</p>
+        <h1 class="h2">Tạo link thiệp mời</h1>
+        <p class="muted">Mỗi khách một link riêng: trang sẽ hiện "Kính gửi <em>tên khách</em>" và mở đúng lịch trình của bên mời. In mã QR lên thiệp giấy để khách quét.</p>
+      </header>
+
+      <section class="tl__card">
+        <h2 class="tl__h">Một khách</h2>
+        <label class="tl__field">Tên khách (như sẽ hiện trên thiệp)
+          <input id="name" type="text" placeholder="Anh Tuấn & chị Linh" autocomplete="off" maxlength="60" />
+        </label>
+        <fieldset class="tl__field">
+          <legend>Bên mời</legend>
+          <label class="tl__radio"><input type="radio" name="side" value="nha-trai" checked /> Nhà trai (29.12 · Đà Nẵng)</label>
+          <label class="tl__radio"><input type="radio" name="side" value="nha-gai" /> Nhà gái (27 & 29.12 · Phú Ninh)</label>
+        </fieldset>
+        <label class="tl__field">Tên miền website
+          <input id="base" type="url" />
+        </label>
+        <div class="tl__out">
+          <canvas id="qr" width="240" height="240" aria-label="Mã QR của link"></canvas>
+          <div class="tl__outr">
+            <code id="link" class="tl__link"></code>
+            <div class="tl__btns">
+              <button type="button" class="btn btn--wine" id="copy">Sao chép link</button>
+              <a class="btn btn--line" id="dl" download="qr.png" href="#">Tải mã QR (PNG)</a>
+              <a class="btn btn--line" id="open" target="_blank" rel="noopener" href="#">Mở thử</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="tl__card">
+        <h2 class="tl__h">Nhiều khách một lúc</h2>
+        <label class="tl__field"><span>Mỗi dòng một khách. Thêm <b>| nha-gai</b> cuối dòng nếu là khách nhà gái (mặc định theo lựa chọn ở trên).</span>
+          <textarea id="bulk" rows="6" placeholder={'Anh Tuấn & chị Linh\nCô chú Hùng | nha-gai\nBạn Minh'}></textarea>
+        </label>
+        <div class="tl__btns">
+          <button type="button" class="btn btn--ink" id="make">Tạo danh sách</button>
+          <a class="btn btn--line" id="csv" download="link-thiep-moi.csv" href="#" hidden>Tải file CSV</a>
+        </div>
+        <ol id="list" class="tl__list"></ol>
+      </section>
+      <p id="toast" class="tl__toast" role="status" aria-live="polite"></p>
+    </main>
+
+    <script>
+      import QRCode from 'qrcode';
+      const $ = <T extends HTMLElement>(s: string) => document.querySelector(s) as T;
+      const nameEl = $<HTMLInputElement>('#name'), baseEl = $<HTMLInputElement>('#base');
+      const linkEl = $('#link'), qr = $<HTMLCanvasElement>('#qr'), dl = $<HTMLAnchorElement>('#dl'), open = $<HTMLAnchorElement>('#open');
+      baseEl.value = location.origin;
+      const side = () => (document.querySelector('input[name=side]:checked') as HTMLInputElement).value;
+      const build = (name: string, s: string) => {
+        const u = new URL(`/${s}/`, baseEl.value || location.origin);
+        if (name.trim()) u.searchParams.set('ten', name.trim());
+        return u.toString();
+      };
+      const slug = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'd').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'khach';
+      const render = async (url: string, name: string) => {
+        linkEl.textContent = decodeURI(url).replace(/\+/g, ' '); open.href = url;
+        await QRCode.toCanvas(qr, url, { width: 240, margin: 2, color: { dark: '#3B0A10', light: '#FFFFFF' }, errorCorrectionLevel: 'M' });
+        dl.href = await QRCode.toDataURL(url, { width: 1024, margin: 2, color: { dark: '#3B0A10', light: '#FFFFFF' } });
+        dl.download = `qr-${slug(name)}.png`;
+      };
+      const update = () => render(build(nameEl.value, side()), nameEl.value);
+      [nameEl, baseEl].forEach((el) => el.addEventListener('input', update));
+      document.querySelectorAll('input[name=side]').forEach((el) => el.addEventListener('change', update));
+      update();
+
+      const toast = (m: string) => { const t = $('#toast'); t.textContent = m; t.classList.add('is-on'); setTimeout(() => t.classList.remove('is-on'), 1800); };
+      const copy = async (t: string) => { try { await navigator.clipboard.writeText(t); toast('Đã sao chép'); } catch { toast('Không sao chép được, hãy bôi đen để chép'); } };
+      $('#copy').addEventListener('click', () => copy(open.href));
+
+      $('#make').addEventListener('click', () => {
+        const rows = ($<HTMLTextAreaElement>('#bulk').value || '').split('\n').map((l) => l.trim()).filter(Boolean).map((l) => {
+          const [n, s] = l.split('|').map((x) => x.trim());
+          const sd = s === 'nha-gai' || s === 'nha-trai' ? s : side();
+          return { name: n, side: sd, url: build(n, sd) };
+        });
+        const list = $('#list'); list.innerHTML = '';
+        rows.forEach((r) => {
+          const li = document.createElement('li');
+          const b = document.createElement('b'); b.textContent = r.name;
+          const sp = document.createElement('span'); sp.textContent = r.side === 'nha-gai' ? 'Nhà gái' : 'Nhà trai';
+          const c = document.createElement('code'); c.textContent = decodeURI(r.url).replace(/\+/g, ' ');
+          const q = document.createElement('button'); q.type = 'button'; q.className = 'btn btn--line'; q.textContent = 'Xem QR';
+          q.addEventListener('click', () => { nameEl.value = r.name; render(r.url, r.name); window.scrollTo({ top: 0, behavior: 'smooth' }); });
+          const cp = document.createElement('button'); cp.type = 'button'; cp.className = 'btn btn--line'; cp.textContent = 'Chép';
+          cp.addEventListener('click', () => copy(r.url));
+          li.append(b, sp, c, q, cp); list.append(li);
+        });
+        const csv = '﻿Tên khách,Bên,Link\n' + rows.map((r) => `"${r.name.replace(/"/g, '""')}",${r.side},${r.url}`).join('\n');
+        const a = $<HTMLAnchorElement>('#csv'); a.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' })); a.hidden = !rows.length;
+      });
+    </script>
+
+    <style>
+      body { background: var(--c-porcelain); }
+      .tl { max-width: 880px; margin: 0 auto; padding: 48px 20px 80px; display: flex; flex-direction: column; gap: 28px; }
+      .tl__head { display: flex; flex-direction: column; gap: 10px; }
+      .tl__head .h2 { font-size: clamp(2.25rem, 1.8rem + 2vw, 3.5rem); }
+      .tl__card { background: #fff; border: 1px solid var(--c-mist-deep); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 16px; }
+      .tl__h { font-family: var(--f-display); font-weight: 400; font-size: 26px; }
+      .tl__field { display: flex; flex-direction: column; gap: 8px; font-size: 14px; font-weight: 500; border: none; margin: 0; padding: 0; }
+      .tl__field legend { margin-bottom: 8px; }
+      .tl__field input[type=text], .tl__field input[type=url], .tl__field textarea { font: 400 16px/1.5 var(--f-text); padding: 12px 14px; border: 1px solid var(--c-mist-deep); border-radius: 8px; background: var(--c-porcelain); color: var(--c-ink); }
+      .tl__radio { display: flex; align-items: center; gap: 10px; font-weight: 400; min-height: 40px; }
+      .tl__out { display: grid; grid-template-columns: 240px 1fr; gap: 20px; align-items: center; }
+      .tl__outr { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+      .tl__link { display: block; font-size: 13px; background: var(--c-mist); padding: 10px 12px; border-radius: 8px; word-break: break-all; }
+      .tl__btns { display: flex; flex-wrap: wrap; gap: 10px; }
+      .tl__list { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 10px; font-size: 14px; }
+      .tl__list :global(li) { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 0; border-bottom: 1px solid var(--c-mist); }
+      .tl__list :global(code) { flex: 1 1 100%; font-size: 12px; color: var(--c-graphite); word-break: break-all; }
+      .tl__list :global(span) { font-size: 12px; color: var(--c-bordeaux); }
+      .tl__list :global(.btn) { min-height: 36px; padding: 0 14px; font-size: 12px; }
+      .tl__toast { position: fixed; left: 50%; bottom: 24px; translate: -50% 0; background: var(--c-ink); color: #fff; padding: 10px 18px; border-radius: 999px; font-size: 13px; opacity: 0; transition: opacity .3s; pointer-events: none; }
+      .tl__toast.is-on { opacity: 1; }
+      @media (max-width: 640px) { .tl__out { grid-template-columns: 1fr; justify-items: center; } }
+    </style>
+  </body>
+</html>

@@ -1,6 +1,6 @@
 ---
 import Icon from './Icon.astro';
-import { sides, mapsUrl, calendarUrl, type SideKey } from '../data/wedding';
+import { sides, mapsUrl, calendarUrl, icsUrl, type SideKey } from '../data/wedding';
 const keys: SideKey[] = ['nu', 'nam'];
 ---
 <section class="ev" id="su-kien">
@@ -42,8 +42,9 @@ const keys: SideKey[] = ['nu', 'nam'];
             </div>
             <div class="card__btns">
               <a class="btn btn--ink" href={mapsUrl(e.mapQuery)} target="_blank" rel="noopener"><Icon name="pin" /> Chỉ đường</a>
-              <a class="btn btn--line" href={calendarUrl(e)} target="_blank" rel="noopener"><Icon name="cal" /> Thêm vào lịch</a>
+              <a class="btn btn--line" href={icsUrl(e)}><Icon name="cal" /> Thêm vào lịch</a>
             </div>
+            <p class="card__gcal">Dùng Google Calendar? <a href={calendarUrl(e)} target="_blank" rel="noopener">Thêm vào Google Calendar</a></p>
           </article>
         ))}
       </div>
@@ -81,6 +82,8 @@ const keys: SideKey[] = ['nu', 'nam'];
   .card__venue p { font-size: 14px; line-height: 1.6; }
   .card__btns { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: auto; }
   .card__btns .btn { padding: 0 12px; font-size: 13px; }
+  .card__gcal { font-size: 12px; color: var(--c-graphite); text-align: center; margin-top: -6px; }
+  .card__gcal a { color: var(--c-bordeaux); }
 
   @media (min-width: 1024px) {
     .ev__head { flex-direction: row; justify-content: space-between; align-items: flex-end; margin-bottom: 40px; }

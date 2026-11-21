@@ -4,6 +4,10 @@ import { families, sides } from '../data/wedding';
 <section class="inv" id="loi-moi">
   <div class="wrap inv__in">
     <p class="eyebrow" data-fade>01 / 04 — Trân trọng kính mời</p>
+    <p class="inv__guest" data-guest hidden>
+      <span class="inv__guest-label">Kính gửi</span>
+      <span class="inv__guest-name" data-guest-name></span>
+    </p>
     <h2 class="h2" data-split>Đến chung vui <em class="it accent">cùng</em> gia đình chúng tôi</h2>
     <div class="inv__fams">
       {(['nam', 'nu'] as const).map((k, i) => (
@@ -25,6 +29,10 @@ import { families, sides } from '../data/wedding';
   .inv { padding: var(--section-y) 0 calc(var(--section-y) * .6); text-align: center; }
   .inv__in { max-width: 920px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
   .inv .h2 { font-size: clamp(2.5rem, 1.8rem + 3vw, 5rem); }
+  .inv__guest { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 4px 0 8px; }
+  .inv__guest[hidden] { display: none; }
+  .inv__guest-label { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--c-graphite); }
+  .inv__guest-name { font-family: var(--f-display); font-style: italic; font-size: clamp(2rem, 1.6rem + 2vw, 3.25rem); line-height: 1.2; color: var(--c-bordeaux); padding: 0 .4em .15em; border-bottom: 2px dotted var(--c-mist-deep); }
   .inv__fams { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 8px; }
   :global(html[data-side='nu']) .fam--nu { order: -1; }
   .fam { border-top: 1px solid var(--c-ink); padding-top: 14px; display: flex; flex-direction: column; gap: 6px; }

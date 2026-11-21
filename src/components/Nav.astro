@@ -1,10 +1,11 @@
 ---
 import Photo from './Photo.astro';
 import Icon from './Icon.astro';
+import Monogram from './Monogram.astro';
 import { nav, photos, site } from '../data/wedding';
 ---
 <header class="nav" id="nav">
-  <a href="#top" class="nav__mono" data-goto title="Về đầu trang">Đ<span class="it">&amp;</span>C</a>
+  <a href="#top" class="nav__mono" data-goto title="Về đầu trang"><Monogram /></a>
   <nav class="nav__links" aria-label="Mục lục">
     {nav.map((n) => <a href={`#${n.id}`} data-goto>{n.label}</a>)}
   </nav>
@@ -16,7 +17,7 @@ import { nav, photos, site } from '../data/wedding';
 
 <div class="menu" id="menu" role="dialog" aria-modal="true" aria-label="Mục lục" hidden>
   <div class="menu__top">
-    <span class="menu__mono">Đ<span class="it">&amp;</span>C</span>
+    <span class="menu__mono"><Monogram /></span>
     <button type="button" class="menu__close" id="menu-close"><Icon name="close" size={14} /> Đóng</button>
   </div>
   <ol class="menu__list">
@@ -53,7 +54,7 @@ import { nav, photos, site } from '../data/wedding';
   .nav.is-dark { background: rgb(13 13 14 / .72); color: var(--c-porcelain); border-bottom-color: rgb(255 255 255 / .08); }
   .nav__mono, .menu__mono { font-family: var(--f-display); font-size: 22px; text-decoration: none; letter-spacing: .04em; }
   .nav__mono .it, .menu__mono .it { color: var(--c-blush); }
-  .nav.is-solid:not(.is-dark) .nav__mono .it { color: var(--c-bordeaux); }
+  .nav.is-solid:not(.is-dark) .nav__mono :global(.mono__stem) { color: var(--c-bordeaux); }
   .nav__links { display: none; }
   .nav__actions { display: flex; align-items: center; gap: 8px; }
   .nav__cta { display: none; }
