@@ -74,16 +74,19 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
     gsap.fromTo(ph, { yPercent: -6 }, { yPercent: 6, ease: 'none', scrollTrigger: { trigger: ph.parentElement, start: 'top bottom', end: 'bottom top', scrub: true } });
   });
 
-  /* Marquee: chạy vô hạn, tăng tốc + đổi chiều theo vận tốc cuộn */
-  const rows = $$('[data-marquee]');
-  const loops = rows.map((r) => {
+  /* Marquee + dải ảnh: chạy vô hạn, tăng tốc + đổi chiều theo vận tốc cuộn (mỗi nhóm hàng có trigger riêng) */
+  const groups = new Map<HTMLElement, gsap.core.Tween[]>();
+  $$('[data-marquee]').forEach((r) => {
     const dir = Number(r.dataset.marquee) || 1;
-    return gsap.fromTo(r, { xPercent: dir > 0 ? 0 : -50 }, { xPercent: dir > 0 ? -50 : 0, duration: dir > 0 ? 18 : 28, ease: 'none', repeat: -1 });
+    const dur = Number(r.dataset.speed) || (dir > 0 ? 18 : 28);
+    const tw = gsap.fromTo(r, { xPercent: dir > 0 ? 0 : -50 }, { xPercent: dir > 0 ? -50 : 0, duration: dur, ease: 'none', repeat: -1, paused: true });
+    const g = r.parentElement as HTMLElement;
+    groups.set(g, [...(groups.get(g) || []), tw]);
   });
-  if (rows[0]) {
+  groups.forEach((loops, g) => {
     let sign = 1;
     ScrollTrigger.create({
-      trigger: rows[0].parentElement, start: 'top bottom', end: 'bottom top',
+      trigger: g, start: 'top bottom', end: 'bottom top',
       onToggle: (s) => loops.forEach((l) => (s.isActive ? l.play() : l.pause())),
       onUpdate: (s) => {
         const v = s.getVelocity();
@@ -93,7 +96,7 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
         loops.forEach((l) => gsap.to(l, { timeScale: boost * sign, duration: 0.2, overwrite: true, onComplete: () => gsap.to(l, { timeScale: sign, duration: 1.2 }) }));
       },
     });
-  }
+  });
 
   /* Khoảnh khắc: polaroid bay vào rồi xoè quạt sang hai bên (kiểu "Tour dates") */
   const tour = $('[data-tour]');
@@ -105,15 +108,17 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
     // vị trí của ảnh j khi đã có k ảnh trên bàn (ảnh mới nhất ở giữa, ảnh cũ dạt dần ra hai bên)
     const slot = (j: number, k: number) => {
       const d = k - 1 - j;
-      if (d <= 0) return { x: 0, y: 0, rotation: k % 2 ? -2.5 : 3, scale: 1 };
+      if (d <= 0) return { x: 0, y: 0, rotation: k % 2 ? -2.5 : 3, scale: 1, autoAlpha: 1 };
       const side = d % 2 ? -1 : 1;
-      const dist = Math.ceil(d / 2);
+      const raw = Math.ceil(d / 2);
+      const dist = Math.min(raw, 4); // ảnh cũ hơn nữa xếp chồng phía sau rồi mờ đi
       const spread = desktop ? W() * 0.44 : W() * 0.16;
       return {
         x: side * (dist * spread + (desktop ? 0 : 0)),
         y: desktop ? dist * 14 - 6 : -dist * 22,
         rotation: side * (4 + dist * 3.5),
         scale: 1 - dist * (desktop ? 0.05 : 0.06),
+        autoAlpha: raw > 4 ? 0 : 1,
       };
     };
     const offscreen = (i: number) => ({ x: (i % 2 ? -1 : 1) * W() * 0.25, y: window.innerHeight * 1.1, rotation: i % 2 ? -26 : 24, scale: 1 });
@@ -123,7 +128,7 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
     const tl = gsap.timeline({
       defaults: { ease: 'power3.out', duration: 1 },
       scrollTrigger: {
-        trigger: tour, pin: '[data-tour-pin]', start: 'top top', end: () => `+=${(n - 1) * window.innerHeight * 0.8}`,
+        trigger: tour, pin: '[data-tour-pin]', start: 'top top', end: () => `+=${(n - 1) * window.innerHeight * 0.6}`,
         scrub: 0.8, invalidateOnRefresh: true, anticipatePin: 1,
         onUpdate: (s) => { if (cur) cur.textContent = pad(Math.min(n, 1 + Math.round(s.progress * (n - 1)))); },
       },
@@ -136,6 +141,34 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
     // vào section: ảnh đầu tiên rơi xuống bàn
     gsap.from(pols[0], { y: -window.innerHeight * 0.7, rotation: -20, duration: 1.4, ease: 'expo.out', scrollTrigger: { trigger: tour, start: 'top 70%', once: true } });
   }
+  /* THE LOVE BOOK: ghim section, cuộn dọc -> sách trượt ngang; trang mở ra khi vào khung */
+  const bk = $('[data-book]');
+  if (bk) {
+    bk.classList.add('is-pinned');
+    const track = $('[data-book-track]', bk)!;
+    const cur = $('[data-book-cur]', bk);
+    const total = $('[data-book-total]', bk);
+    const units = desktop ? $$('[data-spread]', bk) : $$('[data-page]', bk);
+    if (total) total.textContent = pad(units.length);
+    const dist = () => Math.max(0, track.scrollWidth - window.innerWidth);
+    const slide = gsap.to(track, {
+      x: () => -dist(), ease: 'none',
+      scrollTrigger: {
+        trigger: bk, pin: '[data-book-pin]', start: 'top top', end: () => `+=${dist()}`, scrub: 0.6, invalidateOnRefresh: true, anticipatePin: 1,
+        onUpdate: (st) => { if (cur) cur.textContent = pad(Math.min(units.length, 1 + Math.round(st.progress * (units.length - 0.6)))); },
+      },
+    });
+    $$('[data-page]', bk).forEach((pg) => {
+      const right = desktop && pg.classList.contains('bk__page--r');
+      gsap.fromTo(pg,
+        right ? { rotateY: -120, autoAlpha: 0 } : { rotateY: desktop ? 0 : -28, scale: desktop ? 0.94 : 0.9, autoAlpha: desktop ? 0.6 : 0.55 },
+        {
+          rotateY: 0, scale: 1, autoAlpha: 1, ease: right ? 'power2.out' : 'none',
+          scrollTrigger: { trigger: pg, containerAnimation: slide, start: right ? 'left 92%' : 'left 100%', end: right ? 'left 45%' : 'left 55%', scrub: true },
+        });
+    });
+  }
+
 
 });
 
@@ -262,7 +295,7 @@ if (navEl) {
   // nền sáng sau hero, tối khi đang ở section nền tối
   ScrollTrigger.create({ trigger: '.hero', start: 'bottom 80px', onToggle: (s) => navEl.classList.toggle('is-solid', s.isActive), end: 'max' });
   let darkCount = 0;
-  $$('.mq, .tour, .ev, .cd, .ft').forEach((sec) => ScrollTrigger.create({
+  $$('.mq, .tour, .fs, .ev, .cd, .ft').forEach((sec) => ScrollTrigger.create({
     trigger: sec, start: 'top 64px', end: 'bottom 64px',
     onToggle: (s) => { darkCount += s.isActive ? 1 : -1; navEl.classList.toggle('is-dark', darkCount > 0); },
   }));

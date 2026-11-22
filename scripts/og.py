@@ -74,16 +74,17 @@ def og(photo, out, names, lines, pos=0.5):
     print('->', out)
 
 
-og('garden-close.jpg', 'og-nha-trai.jpg', ('Quang Đông', 'Trang Châu'),
-   ['Lễ Thành Hôn · Thứ Ba 29.12.2026', 'Golden Phoenix · Đà Nẵng'], pos=0.55)
-og('garden-sofa.jpg', 'og-nha-gai.jpg', ('Trang Châu', 'Quang Đông'),
-   ['Tiệc cưới CN 27.12 · Vu Quy T3 29.12.2026', 'Phú Ninh · Đà Nẵng'], pos=0.5)
-Image.open(os.path.join(ROOT, 'public', 'og-nha-trai.jpg')).save(os.path.join(ROOT, 'public', 'og.jpg'), quality=86)
+if __name__ == '__main__':
+    og('garden-close.jpg', 'og-nha-trai.jpg', ('Quang Đông', 'Trang Châu'),
+       ['Lễ Thành Hôn · Thứ Ba 29.12.2026', 'Golden Phoenix · Đà Nẵng'], pos=0.55)
+    og('garden-sofa.jpg', 'og-nha-gai.jpg', ('Trang Châu', 'Quang Đông'),
+       ['Tiệc cưới CN 27.12 · Vu Quy T3 29.12.2026', 'Phú Ninh · Đà Nẵng'], pos=0.5)
+    Image.open(os.path.join(ROOT, 'public', 'og-nha-trai.jpg')).save(os.path.join(ROOT, 'public', 'og.jpg'), quality=86)
 
-# Icon iPhone (Thêm vào màn hình chính)
-ic = Image.new('RGB', (180, 180), OXBLOOD)
-d = ImageDraw.Draw(ic)
-f = load('playfair-display', '400-normal', 84)
-draw(d, (90 - width(f, 'ĐC') / 2, 34), 'ĐC', f, CHAMP)
-ic.save(os.path.join(ROOT, 'public', 'apple-touch-icon.png'))
-print('-> apple-touch-icon.png')
+    # Icon iPhone (Thêm vào màn hình chính)
+    ic = Image.new('RGB', (180, 180), OXBLOOD)
+    d = ImageDraw.Draw(ic)
+    f = load('playfair-display', '400-normal', 84)
+    draw(d, (90 - width(f, 'ĐC') / 2, 34), 'ĐC', f, CHAMP)
+    ic.save(os.path.join(ROOT, 'public', 'apple-touch-icon.png'))
+    print('-> apple-touch-icon.png')

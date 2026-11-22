@@ -1,0 +1,27 @@
+---
+/** Dải phim: 2 hàng ảnh chạy ngược chiều nhau, tăng tốc theo vận tốc cuộn (dùng chung cơ chế với Marquee). */
+import Photo from './Photo.astro';
+import { strip } from '../data/wedding';
+const half = Math.ceil(strip.length / 2);
+const rows = [strip.slice(0, half), strip.slice(half)];
+---
+<section class="fs" aria-label="Những khoảnh khắc khác">
+  {rows.map((row, r) => (<>
+    {r === 1 && <p class="fs__line" aria-hidden="true"><span class="script">every moment</span> with you</p>}
+    <div class="fs__row" data-marquee={r ? -1 : 1} data-speed={r ? 90 : 80}>
+      {/* 4 bản: mỗi nửa (2 bản) luôn rộng hơn màn hình -> vòng lặp -50% không hở */}
+      {[0, 1, 2, 3].map((copy) => row.map((p) => (
+        <Photo src={p} alt="" widths={[240, 360, 520]} sizes="(min-width: 1024px) 220px, 32vw" quality={68} class="fs__ph" aria-hidden={copy ? 'true' : undefined} />
+      )))}
+    </div>
+  </>))}
+</section>
+
+<style>
+  .fs { position: relative; background: var(--c-ink); padding: 40px 0; display: flex; flex-direction: column; gap: 12px; overflow: hidden; }
+  .fs__row { display: flex; gap: 12px; width: max-content; padding-right: 12px; will-change: transform; }
+  .fs__row :global(.fs__ph) { flex: none; width: clamp(118px, 32vw, 220px); aspect-ratio: 3 / 4; border-radius: 6px; overflow: hidden; }
+  .fs__row:nth-child(2) :global(.fs__ph) { width: clamp(100px, 26vw, 180px); }
+  .fs__line { margin: 6px 0; text-align: center; font-family: var(--f-display); font-size: clamp(1.75rem, 1rem + 3.4vw, 4.75rem); line-height: 1; text-transform: uppercase; color: var(--c-porcelain); }
+  .fs__line .script { text-transform: none; color: var(--c-champagne); margin-right: .15em; }
+</style>

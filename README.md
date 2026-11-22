@@ -21,7 +21,8 @@ Mọi chữ, giờ, địa điểm, ảnh nằm trong **`src/data/wedding.ts`**.
 ### Đã chuẩn bị sẵn — chỉ cần điền
 | Tính năng | Điền ở đâu | Ghi chú |
 |---|---|---|
-| **Video hero** | `media.heroVideo` | `bash scripts/video.sh video-goc.mp4 12 10` (cần ffmpeg) → ra 4 file trong `public/video/`. Điện thoại tải bản dọc, máy tính bản ngang; tiết kiệm dữ liệu / giảm chuyển động thì giữ ảnh tĩnh. |
+| **Video hero** | `media.heroVideo` | Đang dùng video **ghép từ ảnh** (`python3 scripts/film.py`, Ken Burns ~20s lặp: dọc 9:16 cho điện thoại, khung 3:4 cho máy tính). Chỉ tải sau khi intro xong nên không làm chậm trang. Có video quay thật: `bash scripts/video.sh video-goc.mp4 12 10`. |
+| **Reel đăng story** | `python3 scripts/film.py reel` | Ra `reel.mp4` 1080×1920 ~36s có tên + ngày cưới (không đưa lên git). |
 | **Nhạc nền** | `media.music` = `'/music/ten-bai.mp3'`, `media.musicTitle` | Chép mp3 (~128 kbps) vào `public/music/`. Nút nhạc góc phải, bật/tắt có fade âm lượng. |
 | **Logo** | `brand.logo` = `'/logo.svg'` | Chưa có thì dùng monogram Đ ⚘ C. `public/favicon.svg` có thể thay bằng logo. |
 | **Album sau cưới** | `after.albumUrl` (Google Photos/Drive) | Sau 29/12 phần đếm ngược tự đổi thành "Cảm ơn bạn đã đến chung vui" + nút album. |
@@ -47,7 +48,9 @@ Thư mục `dist/` là site tĩnh — kéo thả lên **Netlify Drop**, hoặc k
 | Ảnh: placeholder mờ (LQIP) + vệt sáng, ảnh thật mờ dần lên khi tải xong | `Photo.astro`, `scripts/lqip.mjs` (tự chạy khi build) |
 | Hero thu nhỏ/bo góc khi cuộn, chữ tiêu đề trượt lên theo dòng (SplitText) | `scripts/scroll.ts` |
 | Marquee 2 tầng, tăng tốc + đổi chiều theo vận tốc cuộn | `Marquee.astro` |
-| Khoảnh khắc: polaroid lớn bay vào rồi xoè quạt khi cuộn (kiểu "Tour dates") — thay cho album | `Story.astro`, danh sách ảnh `moments` trong `wedding.ts` |
+| Khoảnh khắc: polaroid lớn bay vào rồi xoè quạt khi cuộn (kiểu "Tour dates") | `Story.astro`, danh sách ảnh `moments` trong `wedding.ts` |
+| The Love Book: album in (bìa + trang đôi) trượt ngang khi cuộn, trang phải mở ra như lật sách | `Book.astro`, ảnh trong `src/assets/book/` (p00 = bìa, p01–p10 = nửa trái/phải của từng trang đôi) |
+| Dải phim 2 hàng ảnh chạy ngược chiều, tăng tốc theo tốc độ cuộn | `Filmstrip.astro`, danh sách `strip` trong `wedding.ts` |
 | Menu mở kiểu rèm, bấm mục -> rèm chuyển cảnh | `Nav.astro` |
 | Cào thẻ: giữ chuột / chạm rồi lau lớp chữ khổng lồ để lộ ảnh + lời cảm ơn (quá 50% tự mở hết) | `Footer.astro`, `scripts/scroll.ts` |
 

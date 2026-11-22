@@ -15,12 +15,19 @@ const heroVideo = $<HTMLVideoElement>('[data-hero-video]');
 if (heroVideo && !reduced && !(navigator as any).connection?.saveData) {
   const k = isDesktop() ? 'd' : 'm';
   const add = (src: string | undefined, type: string) => { if (!src) return; const so = document.createElement('source'); so.src = src; so.type = type; heroVideo.appendChild(so); };
-  add(heroVideo.dataset[k + 'Webm'], 'video/webm');
-  add(heroVideo.dataset[k + 'Mp4'], 'video/mp4');
-  heroVideo.preload = 'auto';
   heroVideo.addEventListener('playing', () => heroVideo.classList.add('is-playing'), { once: true });
-  const start = () => heroVideo.play().catch(() => {});
-  if (document.readyState === 'complete') start(); else window.addEventListener('load', start, { once: true });
+  // Chỉ tải video sau khi intro xong + trang đã load -> không tranh băng thông với ảnh đầu trang (LCP)
+  let started = false;
+  const start = () => {
+    if (started) return; started = true;
+    add(heroVideo.dataset[k + 'Webm'], 'video/webm');
+    add(heroVideo.dataset[k + 'Mp4'], 'video/mp4');
+    heroVideo.preload = 'auto'; heroVideo.load();
+    heroVideo.play().catch(() => {});
+  };
+  const later = () => setTimeout(start, 600);
+  window.addEventListener('dc:intro-done', () => (document.readyState === 'complete' ? later() : window.addEventListener('load', later, { once: true })), { once: true });
+  window.addEventListener('load', () => setTimeout(start, 4000), { once: true });
 }
 
 /* ================= Tên khách mời (?ten=...) ================= */

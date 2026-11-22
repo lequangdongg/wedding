@@ -1,0 +1,68 @@
+---
+/**
+ * THE LOVE BOOK — album cưới in (bìa + các trang đôi). Cuộn dọc -> sách trượt ngang, trang phải mở ra như lật sách.
+ * Mobile: từng trang lẻ; Desktop: trang đôi. Không có JS / giảm chuyển động: vuốt ngang bình thường.
+ */
+import Photo from './Photo.astro';
+import { book } from '../data/wedding';
+const spreads = [[book[0]], ...Array.from({ length: Math.ceil((book.length - 1) / 2) }, (_, i) => book.slice(1 + i * 2, 3 + i * 2))];
+---
+<section class="bk" id="love-book" data-book aria-label="The Love Book — album cưới">
+  <div class="bk__pin" data-book-pin>
+    <header class="bk__head">
+      <h2 class="bk__title"><span class="script">The</span> Love Book</h2>
+      <p class="bk__meta"><span class="eyebrow">Album cưới</span><span class="num"><b data-book-cur>01</b> / <span data-book-total>{String(spreads.length).padStart(2, '0')}</span></span></p>
+    </header>
+    <div class="bk__track" data-book-track>
+      {spreads.map((sp, i) => (
+        <div class:list={['bk__spread', { 'bk__spread--cover': i === 0 }]} data-spread>
+          {sp.map((p, j) => (
+            <figure class:list={['bk__page', sp.length === 2 && (j ? 'bk__page--r' : 'bk__page--l')]} data-page>
+              <Photo src={p} alt={i === 0 ? 'Bìa album The Love Book — Quang Đông & Trang Châu' : `Album cưới, trang ${i * 2 - 1 + j}`}
+                widths={[360, 540, 720, 1080]} sizes="(min-width: 1024px) 34vh, 78vw" quality={74} class="bk__ph" />
+            </figure>
+          ))}
+        </div>
+      ))}
+      <div class="bk__end" aria-hidden="true"><span class="script">to be continued…</span></div>
+    </div>
+    <p class="bk__hint" aria-hidden="true">Cuộn để lật trang <i>→</i></p>
+  </div>
+</section>
+
+<style>
+  .bk { background: #ECE8E1; color: var(--c-ink); }
+  .bk__pin { position: relative; min-height: 100svh; display: flex; flex-direction: column; justify-content: center; gap: 20px; padding: 88px 0 28px; overflow: hidden; }
+  .bk__head { padding: 0 var(--gutter); display: flex; flex-direction: column; gap: 6px; }
+  .bk__title { font-family: var(--f-display); font-weight: 400; font-size: clamp(2.75rem, 2rem + 4vw, 6.5rem); line-height: .95; text-transform: uppercase; letter-spacing: -.01em; }
+  .bk__title .script { text-transform: none; color: var(--c-oxblood); font-size: .8em; margin-right: .1em; }
+  .bk__meta { display: flex; justify-content: space-between; align-items: baseline; border-top: 1px solid rgb(23 24 26 / .2); padding-top: 10px; }
+  .bk__meta .num { font-size: 13px; letter-spacing: .1em; }
+
+  .bk__track { display: flex; align-items: center; gap: 18px; padding: 8px var(--gutter) 20px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; perspective: 1600px; }
+  .bk__track::-webkit-scrollbar { display: none; }
+  .bk__spread { display: contents; }
+  .bk__page { position: relative; flex: none; margin: 0; height: min(64svh, 118vw); aspect-ratio: 1422 / 2000; scroll-snap-align: center; background: #fff; box-shadow: 0 24px 48px -18px rgb(23 24 26 / .35), 0 2px 6px rgb(23 24 26 / .08); transform-style: preserve-3d; backface-visibility: hidden; }
+  .bk__page :global(.bk__ph) { position: absolute; inset: 0; }
+  .bk__page::after { content: ''; position: absolute; inset: 0; pointer-events: none; }
+  .bk__page--l::after { background: linear-gradient(270deg, rgb(0 0 0 / .14), rgb(0 0 0 / 0) 9%); }
+  .bk__page--r::after { background: linear-gradient(90deg, rgb(0 0 0 / .16), rgb(0 0 0 / 0) 10%); }
+  .bk__end { flex: none; width: 52vw; display: grid; place-items: center; font-size: clamp(2rem, 1.5rem + 2vw, 3.5rem); color: var(--c-oxblood); }
+  .bk__hint { padding: 0 var(--gutter); font-size: 11px; letter-spacing: .28em; text-transform: uppercase; color: rgb(23 24 26 / .55); }
+  .bk__hint i { font-style: normal; display: inline-block; animation: nudge 1.6s ease-in-out infinite; }
+  @keyframes nudge { 50% { transform: translateX(6px); } }
+
+  /* JS bật ghim cuộn: bỏ thanh cuộn ngang, GSAP điều khiển */
+  :global(.bk.is-pinned) .bk__track { overflow: visible; scroll-snap-type: none; width: max-content; }
+
+  @media (min-width: 1024px) {
+    .bk__pin { padding: 120px 0 40px; gap: 28px; }
+    .bk__head { flex-direction: row; align-items: flex-end; justify-content: space-between; }
+    .bk__meta { border: none; flex-direction: column; align-items: flex-end; gap: 6px; }
+    .bk__track { gap: 7vw; padding-inline: 8vw; }
+    .bk__spread { display: flex; perspective: 2200px; }
+    .bk__page { height: min(64vh, 34vw); }
+    .bk__page--r { transform-origin: left center; }
+    .bk__end { width: 30vw; }
+  }
+</style>

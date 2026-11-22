@@ -2,6 +2,7 @@
  * TOÀN BỘ NỘI DUNG CỦA TRANG — sửa ở đây, không cần đụng vào component.
  * Chỗ nào còn [NGOẶC VUÔNG] là thông tin chưa có, cần điền.
  */
+import type { ImageMetadata } from 'astro';
 import garden from '../assets/photos/garden.jpg';
 import gardenClose from '../assets/photos/garden-close.jpg';
 import gardenSofa from '../assets/photos/garden-sofa.jpg';
@@ -11,6 +12,12 @@ import dance from '../assets/photos/dance.jpg';
 import veil from '../assets/photos/veil.jpg';
 import bride from '../assets/photos/bride.jpg';
 import groom from '../assets/photos/groom.jpg';
+import walk from '../assets/photos/walk.jpg';
+import arm from '../assets/photos/arm.jpg';
+import facing from '../assets/photos/facing.jpg';
+import bridePortrait from '../assets/photos/bride-portrait.jpg';
+import veilLift from '../assets/photos/veil-lift.jpg';
+import groomSit from '../assets/photos/groom-sit.jpg';
 
 export const site = {
   title: 'Quang Đông & Trang Châu — 29.12.2026',
@@ -23,12 +30,13 @@ export const site = {
 
 /**
  * VIDEO HERO + NHẠC NỀN — chép file vào /public rồi điền đường dẫn. null = không dùng.
- * Tạo video đúng chuẩn: xem scripts/video.sh (ffmpeg). Mobile dọc 720×1280, desktop ngang 1920×1080.
+ * Video hero hiện tại được ghép tự động từ ảnh: python3 scripts/film.py (Ken Burns, ~20s lặp).
+ * Có video quay thật thì dùng scripts/video.sh rồi đổi đường dẫn.
  */
 export const media = {
   heroVideo: {
-    mobile: { mp4: null as string | null, webm: null as string | null }, // ví dụ '/video/hero-m.mp4'
-    desktop: { mp4: null as string | null, webm: null as string | null }, // ví dụ '/video/hero-d.mp4'
+    mobile: { mp4: '/video/hero-m.mp4' as string | null, webm: '/video/hero-m.webm' as string | null },
+    desktop: { mp4: '/video/hero-d.mp4' as string | null, webm: '/video/hero-d.webm' as string | null },
   },
   /** Nhạc nền (mp3, ~128kbps). Ví dụ '/audio/song.mp3'. Chỉ phát khi khách bấm nút nhạc. */
   music: null as string | null,
@@ -51,7 +59,7 @@ export const after = {
   liveTo: '2026-12-29T14:00:00+07:00',
 };
 
-export const photos = { garden, gardenClose, gardenSofa, studioVeil, studioCouple, dance, veil, bride, groom };
+export const photos = { garden, gardenClose, gardenSofa, studioVeil, studioCouple, dance, veil, bride, groom, walk, arm, facing, bridePortrait, veilLift, groomSit };
 
 export const couple = {
   groom: { short: 'Quang Đông', full: 'Lê Quang Đông', role: 'Út Nam', photo: groom },
@@ -144,13 +152,24 @@ export const defaultSide: SideKey = 'nam';
 /** Khoảnh khắc — xấp polaroid bay vào xoè quạt khi cuộn (như "Tour dates"). Thứ tự = thứ tự xuất hiện. */
 export const moments = [
   { photo: studioCouple, pos: '50% 30%', alt: 'Hai bạn trong studio ngập nắng' },
+  { photo: walk, pos: '50% 40%', alt: 'Nắm tay nhau bước đi' },
   { photo: dance, pos: '50% 38%', alt: 'Khiêu vũ trong studio' },
   { photo: gardenSofa, pos: '50% 45%', alt: 'Trên sofa trắng giữa vườn' },
+  { photo: facing, pos: '45% 40%', alt: 'Nhìn nhau mỉm cười' },
   { photo: gardenClose, pos: '60% 35%', alt: 'Chú rể nhìn cô dâu giữa khu vườn' },
+  { photo: veilLift, pos: '45% 35%', alt: 'Chú rể nâng khăn voan' },
   { photo: studioVeil, pos: '50% 35%', alt: 'Nắm tay, khăn voan dài' },
+  { photo: arm, pos: '45% 35%', alt: 'Khoác tay nhau' },
   { photo: garden, pos: '50% 35%', alt: 'Hai bạn vẫy tay khoe nhẫn cưới' },
-  { photo: bride, pos: '45% 30%', alt: 'Cô dâu Trang Châu cầm bó đồng tiền hồng' },
+  { photo: bridePortrait, pos: '45% 30%', alt: 'Cô dâu Trang Châu cầm bó đồng tiền hồng' },
 ];
+
+/** THE LOVE BOOK — trang album cưới (bìa + 5 trang đôi, mỗi trang đôi cắt làm 2 trang lẻ). */
+const bookFiles = import.meta.glob<{ default: ImageMetadata }>('../assets/book/p*.jpg', { eager: true });
+export const book = Object.keys(bookFiles).sort().map((k) => bookFiles[k].default);
+
+/** Dải phim ảnh chạy ngang (dùng hết ảnh còn lại). */
+export const strip = [walk, bridePortrait, dance, groomSit, veil, facing, gardenSofa, arm, groom, veilLift, studioCouple, bride, gardenClose, studioVeil, garden];
 
 
 /** Menu (không có mục Chuyện tình). */
