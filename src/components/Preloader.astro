@@ -1,14 +1,17 @@
 ---
-import { Image } from 'astro:assets';
-import { photos, site } from '../data/wedding';
+import { site } from '../data/wedding';
 import Monogram from './Monogram.astro';
 ---
 {site.preloader && <div class="loader" id="loader" aria-hidden="true">
   <div class="loader__top"><span class="loader__mono"><Monogram /></span><span>{site.dateShort}</span></div>
   <div class="loader__mid">
-    <div class="loader__oval" data-loader-oval>
-      <Image src={photos.veil} alt="" widths={[200, 400]} sizes="200px" loading="eager" fetchpriority="high" quality={60} class="loader__img" />
-    </div>
+    <!-- Trái tim vẽ bằng MỘT nét liền: đường kẻ đi vào, vẽ trọn trái tim rồi đi tiếp — vẽ tới đâu = tải tới đó -->
+    <svg class="loader__heart" viewBox="0 0 240 116" data-loader-heart>
+      <path class="loader__fill" data-heart-fill d="M120 98 C96 82 64 62 64 40 C64 24 76 14 90 14 C104 14 114 24 120 34 C126 24 136 14 150 14 C164 14 176 24 176 40 C176 62 144 82 120 98 Z" />
+      <path class="loader__line" data-heart-line pathLength="1"
+        d="M0 100 H108 C113 100 117 99 120 98 C96 82 64 62 64 40 C64 24 76 14 90 14 C104 14 114 24 120 34 C126 24 136 14 150 14 C164 14 176 24 176 40 C176 62 144 82 120 98 C123 99 127 100 132 100 H240" />
+      <circle class="loader__pen" r="2.6" data-heart-pen />
+    </svg>
     <p class="loader__names" data-loader-names>
       <span>Quang Đông</span>
       <span class="script">and</span>
@@ -16,26 +19,24 @@ import Monogram from './Monogram.astro';
     </p>
   </div>
   <div class="loader__bottom">
-    <span class="loader__hint"><span data-no-guest>Đang chuẩn bị<br />thiệp mời của bạn…</span><span data-guest hidden>Thiệp mời dành riêng cho<br /><b data-guest-name></b></span></span>
-    <span class="loader__count num" id="loader-count">00</span>
+    <span class="loader__hint"><span data-no-guest>Đang chuẩn bị thiệp mời của bạn…</span><span data-guest hidden>Thiệp mời dành riêng cho<br /><b data-guest-name></b></span></span>
   </div>
-  <div class="loader__bar"><span id="loader-bar"></span></div>
 </div>}
 
 <style>
   .loader {
     position: fixed; inset: 0; z-index: 100; background: var(--c-oxblood); color: var(--c-porcelain);
-    display: grid; grid-template-rows: auto 1fr auto auto; gap: 16px;
+    display: grid; grid-template-rows: auto 1fr auto; gap: 16px;
     padding: max(48px, env(safe-area-inset-top)) var(--gutter) 32px;
   }
   :global(.no-js) .loader, :global(.skip-loader) .loader { display: none; }
   .loader__mono { font-size: 26px; letter-spacing: 0; color: var(--c-porcelain); }
   .loader__top { align-items: center; display: flex; justify-content: space-between; font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--c-champagne); }
   .loader__mid { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 28px; }
-  .loader__oval { width: clamp(140px, 14vw, 200px); aspect-ratio: 5 / 7; border-radius: 999px 999px 0 0; overflow: hidden; }
-  .loader__oval { animation: ovalIn 1.6s var(--ease-silk) both; }
-  .loader__oval :global(.loader__img) { width: 100%; height: 100%; object-fit: cover; object-position: 40% 30%; }
-  @keyframes ovalIn { from { transform: scale(.82); border-radius: 999px; } }
+  .loader__heart { width: min(70vw, 380px); overflow: visible; }
+  .loader__line { fill: none; stroke: var(--c-champagne); stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 1 1; stroke-dashoffset: 1; }
+  .loader__fill { fill: var(--c-blush); opacity: 0; transform-box: fill-box; transform-origin: 50% 60%; }
+  .loader__pen { fill: var(--c-porcelain); filter: drop-shadow(0 0 6px rgb(234 217 185 / .9)); opacity: 0; }
   .loader__names { display: flex; flex-direction: column; align-items: center; text-align: center; font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-size: clamp(2.5rem, 2rem + 2.5vw, 4.5rem); line-height: 1.08; text-transform: uppercase; }
   .loader__names .script { color: var(--c-blush); text-transform: none; }
   .loader__names > span { white-space: nowrap; }
@@ -43,11 +44,8 @@ import Monogram from './Monogram.astro';
   .loader__names > :nth-child(2) { animation-delay: .08s; }
   .loader__names > :nth-child(3) { animation-delay: .16s; }
   @keyframes nameIn { from { transform: translateY(36px); } }
-  .loader__bottom { display: flex; justify-content: space-between; align-items: flex-end; }
-  .loader__hint { font-size: 12px; line-height: 1.5; color: var(--c-champagne); }
+  .loader__bottom { display: flex; justify-content: center; text-align: center; }
+  .loader__hint { font-size: 12px; line-height: 1.5; letter-spacing: .06em; color: var(--c-champagne); }
   .loader__hint b { font-weight: 600; color: var(--c-porcelain); font-size: 14px; }
   .loader__hint [hidden] { display: none; }
-  .loader__count { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-size: clamp(5rem, 4rem + 5vw, 9rem); line-height: .8; }
-  .loader__bar { height: 1px; background: rgb(234 217 185 / .25); }
-  .loader__bar span { display: block; height: 1px; background: var(--c-champagne); transform-origin: left; transform: scaleX(0); }
 </style>

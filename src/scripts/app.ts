@@ -111,8 +111,11 @@ function heroIntro() {
     heroIntro();
     return;
   }
-  const count = $('#loader-count')!;
-  const bar = $('#loader-bar')!;
+  const line = $<SVGPathElement>('[data-heart-line]')! as unknown as SVGPathElement;
+  const fill = $('[data-heart-fill]')!;
+  const pen = $('[data-heart-pen]')!;
+  const total = line.getTotalLength();
+  gsap.set(pen, { opacity: 1 });
   // trạng thái tải thật: ảnh hero + font
   const heroImg = $<HTMLImageElement>('[data-hero-media] img');
   let ready = 0;
@@ -132,12 +135,19 @@ function heroIntro() {
     const target = elapsed > MAX ? 1 : Math.min(elapsed / MIN, 0.15 + ready * 0.85);
     p.v += (target - p.v) * 0.12;
     if (target >= 1 && p.v > 0.995) p.v = 1;
-    count.textContent = pad(Math.round(p.v * 100));
-    gsap.set(bar, { scaleX: p.v });
+    // vẽ trái tim theo tiến độ tải (không hiện %), đầu bút sáng chạy theo nét
+    line.style.strokeDashoffset = String(1 - p.v);
+    const pt = line.getPointAtLength(total * p.v);
+    pen.setAttribute('cx', String(pt.x)); pen.setAttribute('cy', String(pt.y));
     if (p.v < 1) return;
     gsap.ticker.remove(loop);
     gsap.timeline()
-      .to('[data-loader-names] > *, .loader__top, .loader__bottom', { yPercent: -40, autoAlpha: 0, duration: 0.6, stagger: 0.04, ease: 'power3.in' })
+      .to(pen, { opacity: 0, duration: 0.3 })
+      .to(fill, { opacity: 1, duration: 0.5, ease: 'power2.out' }, 0)
+      // nhịp tim: thình thịch 2 lần
+      .to(fill, { keyframes: [{ scale: 1.14, duration: 0.14 }, { scale: 1, duration: 0.18 }, { scale: 1.2, duration: 0.14 }, { scale: 1, duration: 0.3 }], ease: 'power1.inOut' }, 0.15)
+      .to('[data-loader-heart]', { scale: 1.06, duration: 0.3, yoyo: true, repeat: 1, ease: 'power1.inOut' }, 0.15)
+      .to('[data-loader-heart], [data-loader-names] > *, .loader__top, .loader__bottom', { yPercent: -40, autoAlpha: 0, duration: 0.6, stagger: 0.04, ease: 'power3.in' }, '+=.1')
       .to(el, { yPercent: -100, duration: 1.2, ease: 'expo.inOut' }, '-=.15')
       .add(heroIntro, '-=.75')
       .add(() => el.remove());
