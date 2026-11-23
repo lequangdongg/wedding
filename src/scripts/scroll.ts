@@ -109,17 +109,24 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
     });
   });
 
-  /* Chuyện của tụi mình: chữ hiện ra theo đúng nhịp cuộn — cuộn tới đâu, từng chữ trồi lên + rõ dần tới đó */
+  /* Chuyện của tụi mình — "Parallax Lines": cả đoạn hiện ra một lượt, mỗi dòng trượt vào từ hai phía
+     với tốc độ khác nhau theo cuộn (dòng lẻ từ trái, dòng chẵn từ phải), về đúng hàng khi đoạn văn tới giữa màn hình */
   const story = $$('[data-reveal]');
   if (story.length) {
     document.fonts.ready.then(() => {
       story.forEach((el) => {
-        const split = SplitText.create(el, { type: 'lines,words', mask: 'lines', linesClass: 'ln', wordsClass: 'w' });
-        split.lines.forEach((line) => {
-          gsap.fromTo(line.querySelectorAll('.w'), { yPercent: 110, opacity: 0, rotate: 4 }, {
-            yPercent: 0, opacity: 1, rotate: 0, ease: 'power2.out', stagger: 0.12,
-            scrollTrigger: { trigger: line, start: 'top 94%', end: 'top 62%', scrub: 0.5 },
-          });
+        SplitText.create(el, {
+          type: 'lines', linesClass: 'ln', autoSplit: true,
+          onSplit: (self) => {
+            const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: 'top 95%', end: 'center 55%', scrub: 0.8 } });
+            self.lines.forEach((line, i) => {
+              const dir = i % 2 ? 1 : -1;
+              const dist = (desktop ? 18 : 26) + (i % 3) * (desktop ? 9 : 12); // % bề ngang dòng — mỗi dòng một tốc độ
+              tl.fromTo(line, { xPercent: dir * dist, opacity: 0.08 }, { xPercent: 0, opacity: 1, ease: 'power2.out', duration: 1 }, 0);
+            });
+            tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'none' }, 0); // cả đoạn hiện 1 lượt
+            return tl;
+          },
         });
       });
       ScrollTrigger.refresh();
