@@ -1,10 +1,11 @@
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
+import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { S, $, $$, pad, reduced, isDesktop, body } from './shared';
 
 export function init() {
-gsap.registerPlugin(ScrollTrigger, SplitText);
+gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin);
 ScrollTrigger.config({ ignoreMobileResize: true });
 S.refresh = () => ScrollTrigger.refresh();
 const cd = $('[data-countdown]');
@@ -109,25 +110,48 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
     });
   });
 
-  /* Chuyện của tụi mình — "Parallax Lines": cả đoạn hiện ra một lượt, mỗi dòng trượt vào từ hai phía
-     với tốc độ khác nhau theo cuộn (dòng lẻ từ trái, dòng chẵn từ phải), về đúng hàng khi đoạn văn tới giữa màn hình */
+  /* Chuyện của tụi mình — kiểu gsap.com/text: vào tới đoạn nào, cả đoạn chạy một chuỗi hiệu ứng:
+     1) từng chữ bật lên khỏi mép dòng (che theo dòng) nối đuôi nhau
+     2) chữ nhấn (**...**) lật lên thành bản đỏ đô nghiêng (2 bản xếp chồng), số thì xáo chữ */
   const story = $$('[data-reveal]');
   if (story.length) {
     document.fonts.ready.then(() => {
       story.forEach((el) => {
-        SplitText.create(el, {
-          type: 'lines', linesClass: 'ln', autoSplit: true,
-          onSplit: (self) => {
-            const tl = gsap.timeline({ scrollTrigger: { trigger: el, start: 'top 95%', end: 'center 55%', scrub: 0.8 } });
-            self.lines.forEach((line, i) => {
-              const dir = i % 2 ? 1 : -1;
-              const dist = (desktop ? 18 : 26) + (i % 3) * (desktop ? 9 : 12); // % bề ngang dòng — mỗi dòng một tốc độ
-              tl.fromTo(line, { xPercent: dir * dist, opacity: 0.08 }, { xPercent: 0, opacity: 1, ease: 'power2.out', duration: 1 }, 0);
-            });
-            tl.fromTo(el, { opacity: 0 }, { opacity: 1, duration: 0.25, ease: 'none' }, 0); // cả đoạn hiện 1 lượt
-            return tl;
-          },
+        const split = SplitText.create(el, { type: 'lines,words', mask: 'lines', linesClass: 'ln', wordsClass: 'w' });
+        const rolls: HTMLElement[][] = [];
+        const nums: HTMLElement[] = [];
+        // tìm các cụm chữ nhấn trong danh sách chữ đã tách (so khớp liên tiếp, bỏ dấu câu)
+        const norm = (t: string) => t.toLowerCase().replace(/[.,!?;:"“”()]/g, '').trim();
+        const words = split.words as HTMLElement[];
+        const keys = words.map((w) => norm(w.textContent || ''));
+        const hit = new Set<HTMLElement>();
+        (JSON.parse(el.dataset.hl || '[]') as string[]).forEach((ph) => {
+          const tk = ph.split(/\s+/).map(norm);
+          for (let i = 0; i + tk.length <= keys.length; i++) {
+            if (tk.every((t, j) => keys[i + j] === t)) { for (let j = 0; j < tk.length; j++) hit.add(words[i + j]); break; }
+          }
         });
+        words.filter((w) => hit.has(w)).forEach((w) => {
+          const txt = (w.textContent || '').trim();
+          const roll = document.createElement('span'); roll.className = 'roll';
+          const a = document.createElement('span'); a.textContent = txt;
+          const b2 = document.createElement('span'); b2.textContent = txt; b2.setAttribute('aria-hidden', 'true');
+          roll.append(a, b2); w.replaceChildren(roll);
+          rolls.push([a, b2, roll]);
+          if (/^\d+[.,]?$/.test(txt)) nums.push(b2);
+        });
+        rolls.forEach(([, b2]) => gsap.set(b2, { yPercent: 110 }));
+        gsap.set(split.words, { yPercent: 120, rotate: 7, opacity: 0, transformOrigin: '0% 100%' });
+        const tl = gsap.timeline({ paused: true });
+        tl.to(split.words, { yPercent: 0, rotate: 0, opacity: 1, duration: 1.1, ease: 'expo.out', stagger: { each: 0.022 } });
+        rolls.forEach(([a, b2, roll], i) => {
+          const at = 0.55 + i * 0.12;
+          // bản nghiêng hẹp hơn -> co bề ngang theo để không hở khoảng trắng
+          tl.fromTo(roll, { width: a.offsetWidth }, { width: b2.offsetWidth, duration: 0.7, ease: 'power3.inOut' }, at)
+            .to(a, { yPercent: -110, duration: 0.7, ease: 'power3.inOut' }, at).to(b2, { yPercent: 0, duration: 0.7, ease: 'power3.inOut' }, at);
+        });
+        nums.forEach((n) => tl.to(n, { duration: 1.1, scrambleText: { text: n.textContent || '', chars: '0123456789', speed: 0.5 } }, 0.55));
+        ScrollTrigger.create({ trigger: el, start: 'top 85%', once: true, onEnter: () => tl.play() });
       });
       ScrollTrigger.refresh();
     });

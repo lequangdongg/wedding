@@ -1,6 +1,9 @@
 ---
 import Photo from './Photo.astro';
 import { couple, keep } from '../data/wedding';
+// **chữ nhấn**: bỏ dấu ** khi hiển thị, gửi danh sách chữ nhấn cho JS (lật lên thành bản đỏ đô)
+const plain = (t: string) => t.replace(/\*\*(.+?)\*\*/g, '$1');
+const marks = (t: string) => JSON.stringify([...t.matchAll(/\*\*(.+?)\*\*/g)].map((m) => m[1]));
 const people = [
   { ...couple.groom, label: 'Chú rể', pos: '50% 18%' },
   { ...couple.bride, label: 'Cô dâu', pos: '45% 24%' },
@@ -26,7 +29,7 @@ const people = [
     </header>
   </div>
   <div class="wrap cp__story" data-story>
-    {couple.story.map((para, i) => <p class:list={['cp__p', { 'cp__p--first': i === 0 }]} data-reveal>{para}</p>)}
+    {couple.story.map((para, i) => <p class:list={['cp__p', { 'cp__p--first': i === 0 }]} data-reveal data-hl={marks(para)}>{plain(para)}</p>)}
     <p class="cp__sign hand" data-fade>— Đông &amp; Châu</p>
   </div>
 </section>
@@ -48,6 +51,11 @@ const people = [
   /* Đoạn chuyện tình: chữ hiện dần theo cuộn (scroll.ts -> [data-reveal]) */
   .cp__story { max-width: 1100px; margin-top: clamp(48px, 8vw, 120px); display: flex; flex-direction: column; gap: 1.1em;
     font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 500; font-size: clamp(1.45rem, 1.05rem + 1.9vw, 2.75rem); line-height: 1.42; letter-spacing: -.005em; color: var(--c-ink); }
+  .cp__p :global(.ln) { padding-block: .12em; margin-block: -.12em; } /* chừa chỗ cho dấu tiếng Việt khi che dòng */
+  /* chữ nhấn: 2 bản xếp chồng, bản dưới (đỏ đô, nghiêng) lật lên thay bản trên */
+  .cp__p :global(.roll) { display: inline-block; position: relative; vertical-align: top; overflow: visible clip; padding-block: .14em; margin-block: -.14em; }
+  .cp__p :global(.roll > span) { display: block; white-space: nowrap; }
+  .cp__p :global(.roll > span + span) { position: absolute; left: 0; top: .14em; color: var(--c-bordeaux); font-style: italic; }
   .cp__sign { align-self: flex-end; font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.6rem); color: var(--c-bordeaux); }
   @media (min-width: 1024px) {
     .cp__grid { grid-template-columns: 1fr 1fr 1fr; gap: 48px; align-items: center; }

@@ -65,11 +65,11 @@ export const photos = { garden, gardenClose, gardenSofa, studioVeil, studioCoupl
 export const couple = {
   groom: { short: 'Quang Đông', full: 'Lê Quang Đông', role: 'Út Nam', photo: groom },
   bride: { short: 'Trang Châu', full: 'Nguyễn Thị Trang Châu', role: 'Quý Nữ', photo: bride },
-  /** Chuyện của tụi mình — mỗi phần tử là một đoạn (hiện từng chữ khi cuộn). */
+  /** Chuyện của tụi mình — mỗi phần tử là một đoạn. Bọc **chữ** để làm điểm nhấn (chữ đó lật lên thành bản màu đỏ đô). */
   story: [
-    'Lần đầu chúng mình gặp nhau là giữa năm 2024, khi ấy Trang Châu đang vẫy vùng với những biến cố gia đình sau khi từ Sài Gòn về Đà Nẵng. Còn Đông Lê vẫn vai trò là con út trong gia đình 3 anh chị em, hằng ngày được ba mẹ yêu chiều. Hai con người, hai thái cực, hai kiểu tư duy khác nhau và tưởng chừng tụi mình chỉ có thể làm bạn nếu một trong hai không thay đổi.',
-    'Ấy vậy mà, bằng sự chân thành và kiên trì, Đông Lê đã từng bước – bước vào cuộc đời Trang Châu, đã hiện diện, sánh vai cùng với Trang Châu ở mọi nơi. Chàng IT khô khan năm ấy giờ đã có người vẽ vời những gam màu sắc khác hơn, chàng IT năm nào giờ đã trưởng thành một người đàn ông.',
-    'Kể về chuyện tình của tụi mình, không thể không nhắc đến chị Tài và công ty Hodfords, nơi những con người thiện lành hiện diện, bồi đắp cho tình cảm của cả hai. Đến lúc này, khi tình yêu của cả hai đã đâm chồi nảy lộc, chúng mình thật sự muốn gửi lời biết ơn đến những người đã yêu thương và đưa lối cho chúng mình.',
+    'Lần đầu chúng mình gặp nhau là giữa năm **2024**, khi ấy Trang Châu đang vẫy vùng với những biến cố gia đình sau khi từ **Sài Gòn** về **Đà Nẵng**. Còn Đông Lê vẫn vai trò là con út trong gia đình 3 anh chị em, hằng ngày được ba mẹ yêu chiều. Hai con người, **hai thái cực**, hai kiểu tư duy khác nhau và tưởng chừng tụi mình chỉ có thể làm bạn nếu một trong hai không thay đổi.',
+    'Ấy vậy mà, bằng sự **chân thành** và **kiên trì**, Đông Lê đã từng bước – bước vào cuộc đời Trang Châu, đã hiện diện, **sánh vai** cùng với Trang Châu ở mọi nơi. Chàng IT khô khan năm ấy giờ đã có người vẽ vời những gam màu sắc khác hơn, chàng IT năm nào giờ đã trưởng thành **một người đàn ông**.',
+    'Kể về chuyện tình của tụi mình, không thể không nhắc đến **chị Tài** và công ty **Hodfords**, nơi những con người thiện lành hiện diện, bồi đắp cho tình cảm của cả hai. Đến lúc này, khi tình yêu của cả hai đã **đâm chồi nảy lộc**, chúng mình thật sự muốn gửi lời **biết ơn** đến những người đã yêu thương và đưa lối cho chúng mình.',
   ],
 };
 
