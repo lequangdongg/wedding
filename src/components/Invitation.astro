@@ -1,5 +1,5 @@
 ---
-import { families, sides } from '../data/wedding';
+import { families, sides, keep } from '../data/wedding';
 ---
 <section class="inv" id="loi-moi">
   <div class="wrap inv__in">
@@ -13,7 +13,7 @@ import { families, sides } from '../data/wedding';
       {(['nam', 'nu'] as const).map((k, i) => (
         <div class={`fam fam--${k}`} data-fade>
           <p class="eyebrow">{families[k].side}</p>
-          <p class="fam__names">Ông {families[k].father}<br />Bà {families[k].mother}</p>
+          <p class="fam__names">Ông {keep(families[k].father)}<br />Bà {keep(families[k].mother)}</p>
           <p class="fam__addr muted">{families[k].addr}</p>
         </div>
       ))}

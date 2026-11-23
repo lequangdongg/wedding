@@ -2,7 +2,8 @@
 import Photo from './Photo.astro';
 import { photos, media, site } from '../data/wedding';
 // Tách chữ sẵn lúc build (không cần SplitText ở trình duyệt) -> intro nhẹ hơn
-const words = ['Quang', 'Đông', '&', 'Trang', 'Châu'];
+// Mỗi tên là một cụm KHÔNG BAO GIỜ xuống dòng giữa chừng; cỡ chữ tự co theo bề ngang màn hình
+const groups = [['Quang', 'Đông'], ['&'], ['Trang', 'Châu']];
 const v = media.heroVideo;
 const hasVideo = Boolean(v.mobile.mp4 || v.desktop.mp4);
 ---
@@ -34,8 +35,12 @@ const hasVideo = Boolean(v.mobile.mp4 || v.desktop.mp4);
   <div class="hero__bottom" data-hero-bottom>
     <p class="hero__script script" aria-hidden="true" data-hero-script>Blooming day</p>
     <h1 class="hero__names" data-hero-title aria-label="Quang Đông và Trang Châu">
-      {words.map((w) => (
-        <span class="w" aria-hidden="true">{w === '&' ? <em class="c">&amp;</em> : [...w].map((ch) => <span class="c">{ch}</span>)}</span>
+      {groups.map((g, gi) => (
+        <span class:list={['nm', { 'nm--amp': g[0] === '&' }]} aria-hidden="true">
+          {g.map((w) => (
+            <span class="w">{w === '&' ? <em class="c">&amp;</em> : [...w].map((ch) => <span class="c">{ch}</span>)}</span>
+          ))}
+        </span>
       ))}
     </h1>
     <div class="hero__meta" data-hero-fade>
@@ -66,7 +71,10 @@ const hasVideo = Boolean(v.mobile.mp4 || v.desktop.mp4);
 
   .hero__bottom { position: absolute; left: var(--gutter); right: var(--gutter); bottom: max(32px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 18px; }
   .hero__script { font-size: clamp(2.75rem, 2rem + 4vw, 8rem); color: var(--c-champagne); transform: rotate(-4deg); transform-origin: left; margin-bottom: -8px; }
-  .hero__names { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 400; font-size: clamp(3.5rem, 15.5vw, 5rem); line-height: .94; letter-spacing: -.02em; text-transform: uppercase; }
+  .hero__names { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 400; font-size: min(5rem, calc((100vw - 2 * var(--gutter)) / 7.9)); line-height: .98; letter-spacing: -.02em; text-transform: uppercase; }
+  .hero__names .nm { display: block; white-space: nowrap; }
+  .hero__names .nm--amp { line-height: .8; }
+  .hero__names .nm .w:last-child { margin-right: 0; }
   .hero__names em { font-style: italic; text-transform: none; color: var(--c-blush); }
   .hero__names .w { display: inline-block; overflow: clip; padding: .08em 0 .04em; margin: -.08em .24em -.04em 0; vertical-align: top; }
   .hero__names .c { display: inline-block; }
@@ -77,7 +85,7 @@ const hasVideo = Boolean(v.mobile.mp4 || v.desktop.mp4);
   @keyframes cue { 0% { transform: translateY(-100%); } 50% { transform: none; } 100% { transform: translateY(100%); } }
 
   @media (min-width: 1024px) {
-    .hero { min-height: 760px; }
+    .hero { min-height: 600px; }
     /* Máy tính: video ghép ảnh tràn toàn màn hình (3 cột ảnh) */
     .hero__media :global(.hero__ph) { --pos: 60% 28% !important; }
     .hero__video { object-position: 50% 0%; } /* màn hình thấp hơn 16:9 thì cắt phía dưới, không cắt đầu */
@@ -86,7 +94,11 @@ const hasVideo = Boolean(v.mobile.mp4 || v.desktop.mp4);
     .hero__book { display: block; position: absolute; top: 112px; left: 0; right: 0; text-align: center; font-size: 13px; letter-spacing: .24em; text-transform: uppercase; }
     .hero__bottom { bottom: 48px; }
     .hero__script { position: absolute; left: 6vw; bottom: calc(100% + 12vh); margin: 0; transform: rotate(-6deg); }
-    .hero__names { text-align: center; font-size: var(--t-display); line-height: .9; }
+    /* "QUANG ĐÔNG &" một dòng, "TRANG CHÂU" một dòng — không bao giờ tách tên */
+    .hero__names { text-align: center; font-size: min(var(--t-display), calc((100vw - 2 * var(--gutter)) / 9), 18svh); line-height: .92; }
+    .hero__names .nm { display: inline-block; vertical-align: top; }
+    .hero__names .nm--amp { line-height: inherit; margin-left: .2em; }
+    .hero__names .nm:last-child { display: block; }
     .hero__meta { border-top: none; padding-top: 0; position: absolute; left: 0; right: 0; bottom: calc(100% + 32px); font-size: 14px; }
   }
 </style>

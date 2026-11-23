@@ -211,6 +211,8 @@ export const gifts = [
 
 
 // ---- helpers ----
+/** Giữ 2 chữ cuối của tên dính nhau (không bị rớt dòng giữa tên): 'Nguyễn Thị Trang Châu' -> '…Trang\u00a0Châu' */
+export const keep = (name: string) => name.replace(/\s+(\S+)\s+(\S+)$/, ' $1\u00a0$2');
 const toGcal = (iso: string) => new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 export const mapsUrl = (q: string) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
 export const icsUrl = (e: WeddingEvent) => `/lich/${e.id}.ics`;

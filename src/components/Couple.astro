@@ -1,6 +1,6 @@
 ---
 import Photo from './Photo.astro';
-import { couple } from '../data/wedding';
+import { couple, keep } from '../data/wedding';
 const people = [
   { ...couple.groom, label: 'Chú rể', pos: '50% 18%' },
   { ...couple.bride, label: 'Cô dâu', pos: '45% 24%' },
@@ -15,7 +15,7 @@ const people = [
         </div>
         <figcaption data-fade>
           <span class="eyebrow">{p.label} · {p.role}</span>
-          <span class="cp__name">{p.full}</span>
+          <span class="cp__name">{keep(p.full)}</span>
         </figcaption>
       </figure>
     ))}
