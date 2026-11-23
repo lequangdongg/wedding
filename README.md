@@ -21,10 +21,10 @@ Mọi chữ, giờ, địa điểm, ảnh nằm trong **`src/data/wedding.ts`**.
 ### Đã chuẩn bị sẵn — chỉ cần điền
 | Tính năng | Điền ở đâu | Ghi chú |
 |---|---|---|
-| **Video hero** | `media.heroVideo` | Đang dùng video **ghép từ ảnh** (`python3 scripts/film.py`, Ken Burns ~20s lặp: dọc 9:16 cho điện thoại, khung 3:4 cho máy tính). Chỉ tải sau khi intro xong nên không làm chậm trang. Có video quay thật: `bash scripts/video.sh video-goc.mp4 12 10`. |
-| **Reel đăng story** | `python3 scripts/film.py reel` | Ra `reel.mp4` 1080×1920 ~36s có tên + ngày cưới (không đưa lên git). |
+| **Video hero** | `media.heroVideo` | Đang dùng video **ghép từ ảnh** (`python3 scripts/film.py`: điện thoại dọc 9:16 ~20s; máy tính tràn màn hình 16:9, 3 cột ảnh đổi lệch nhịp ~15s). Chỉ tải sau khi intro xong nên không làm chậm trang. Có video quay thật: `bash scripts/video.sh video-goc.mp4 12 10`. |
 | **Nhạc nền** | `media.music` = `'/music/ten-bai.mp3'`, `media.musicTitle` | Chép mp3 (~128 kbps) vào `public/music/`. Nút nhạc góc phải, bật/tắt có fade âm lượng. |
 | **Logo** | `brand.logo` = `'/logo.svg'` | Chưa có thì dùng monogram Đ ⚘ C. `public/favicon.svg` có thể thay bằng logo. |
+| **Sổ lời chúc** | `wishes.endpoint` | Trang tĩnh không tự lưu được → dùng **Google Sheet + Apps Script** (miễn phí, dữ liệu trong Drive của bạn). Làm theo `scripts/wishes-apps-script.gs` (5 phút) rồi dán URL `/exec` vào. Chưa điền: chế độ xem thử, lời chúc chỉ lưu trên máy đang xem. Ẩn lời chúc: bỏ tick cột "Hiện" trong Sheet. |
 | **Album sau cưới** | `after.albumUrl` (Google Photos/Drive) | Sau 29/12 phần đếm ngược tự đổi thành "Cảm ơn bạn đã đến chung vui" + nút album. |
 | **Livestream** | `after.livestreamUrl`, `after.liveFrom/liveTo` | Trong khung giờ đó hiện nút "Xem trực tiếp"; sau đó thành "Xem lại". |
 | **Ảnh chia sẻ** | `python3 scripts/og.py` | Sinh `public/og-nha-trai.jpg`, `og-nha-gai.jpg` (1200×630) mỗi bên một ảnh + `apple-touch-icon.png`. |

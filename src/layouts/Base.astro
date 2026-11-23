@@ -1,8 +1,8 @@
 ---
 import '../styles/global.css';
 import { site } from '../data/wedding';
-import displayFont from '@fontsource/playfair-display/files/playfair-display-latin-400-normal.woff2?url';
-import displayFontVi from '@fontsource/playfair-display/files/playfair-display-vietnamese-400-normal.woff2?url';
+import displayFont from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-normal.woff2?url';
+import displayFontVi from '@fontsource/cormorant-garamond/files/cormorant-garamond-vietnamese-500-normal.woff2?url';
 
 interface Props { side?: 'nam' | 'nu'; title?: string; description?: string; ogImage?: string; noindex?: boolean }
 const { side, title = site.title, description = site.description, ogImage = '/og.jpg', noindex = false } = Astro.props;

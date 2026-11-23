@@ -64,7 +64,12 @@ export const photos = { garden, gardenClose, gardenSofa, studioVeil, studioCoupl
 export const couple = {
   groom: { short: 'Quang Đông', full: 'Lê Quang Đông', role: 'Út Nam', photo: groom },
   bride: { short: 'Trang Châu', full: 'Nguyễn Thị Trang Châu', role: 'Quý Nữ', photo: bride },
-  quote: 'Every day with you is a new adventure, a new chapter in our love story.',
+  /** Chuyện của tụi mình — mỗi phần tử là một đoạn (hiện từng chữ khi cuộn). */
+  story: [
+    'Lần đầu chúng mình gặp nhau là giữa năm 2024, khi ấy Trang Châu đang vẫy vùng với những biến cố gia đình sau khi từ Sài Gòn về Đà Nẵng. Còn Đông Lê vẫn vai trò là con út trong gia đình 3 anh chị em, hằng ngày được ba mẹ yêu chiều. Hai con người, hai thái cực, hai kiểu tư duy khác nhau và tưởng chừng tụi mình chỉ có thể làm bạn nếu một trong hai không thay đổi.',
+    'Ấy vậy mà, bằng sự chân thành và kiên trì, Đông Lê đã từng bước – bước vào cuộc đời Trang Châu, đã hiện diện, sánh vai cùng với Trang Châu ở mọi nơi. Chàng IT khô khan năm ấy giờ đã có người vẽ vời những gam màu sắc khác hơn, chàng IT năm nào giờ đã trưởng thành một người đàn ông.',
+    'Kể về chuyện tình của tụi mình, không thể không nhắc đến chị Tài và công ty Hodfords, nơi những con người thiện lành hiện diện, bồi đắp cho tình cảm của cả hai. Đến lúc này, khi tình yêu của cả hai đã đâm chồi nảy lộc, chúng mình thật sự muốn gửi lời biết ơn đến những người đã yêu thương và đưa lối cho chúng mình.',
+  ],
 };
 
 export type SideKey = 'nam' | 'nu';
@@ -177,8 +182,27 @@ export const nav = [
   { id: 'loi-moi', label: 'Lời mời' },
   { id: 'khoanh-khac', label: 'Khoảnh khắc' },
   { id: 'su-kien', label: 'Sự kiện' },
+  { id: 'loi-chuc', label: 'Lời chúc' },
   { id: 'mung-cuoi', label: 'Mừng cưới' },
 ];
+
+/**
+ * SỔ LỜI CHÚC — trang tĩnh không tự lưu được, cần một nơi lưu bên ngoài.
+ * Khuyên dùng: Google Sheet + Apps Script (miễn phí, dữ liệu nằm trong Drive của bạn, sửa/ẩn lời chúc ngay trên Sheet).
+ * Cách cài: xem scripts/wishes-apps-script.gs (5 phút) -> dán URL web app (…/exec) vào `endpoint`.
+ * endpoint = null: chế độ XEM THỬ — lời chúc chỉ lưu trên máy đang xem, có ghi chú rõ cho khách.
+ */
+export const wishes = {
+  endpoint: null as string | null,
+  max: 300,
+  relations: ['Gia đình', 'Bạn bè', 'Đồng nghiệp', 'Hàng xóm'],
+  ideas: [
+    'Trăm năm hạnh phúc, đầu bạc răng long!',
+    'Chúc hai bạn mãi yêu nhau như ngày đầu.',
+    'Sớm có tin vui nhé!',
+    'Hẹn gặp ở tiệc cưới, nâng ly chúc mừng!',
+  ],
+};
 
 export const gifts = [
   { who: 'Chú rể', name: '[TÊN CHỦ TÀI KHOẢN]', bank: '[NGÂN HÀNG]', account: '[SỐ TÀI KHOẢN]', qr: null as string | null },

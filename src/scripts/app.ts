@@ -239,3 +239,14 @@ window.addEventListener('dc:intro-done', () => idle(loadScroll), { once: true })
 setTimeout(() => idle(loadScroll), 6000);
 // trình duyệt khôi phục vị trí cuộn giữa trang -> tải ngay để bố cục (pin) đúng từ đầu
 if (window.scrollY > 50) loadScroll();
+
+/* ================= Sổ lời chúc: chỉ tải code khi khách cuộn gần tới ================= */
+const wishesEl = $('[data-wishes]');
+if (wishesEl) {
+  const io = new IntersectionObserver((es) => {
+    if (!es.some((e) => e.isIntersecting)) return;
+    io.disconnect();
+    import('./wishes').then((m) => m.init(wishesEl));
+  }, { rootMargin: '900px 0px' });
+  io.observe(wishesEl);
+}

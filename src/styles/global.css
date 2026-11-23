@@ -7,12 +7,13 @@
 @import '@fontsource/be-vietnam-pro/vietnamese-500.css';
 @import '@fontsource/be-vietnam-pro/latin-600.css';
 @import '@fontsource/be-vietnam-pro/vietnamese-600.css';
-@import '@fontsource/playfair-display/latin-400.css';
-@import '@fontsource/playfair-display/vietnamese-400.css';
-@import '@fontsource/playfair-display/latin-400-italic.css';
-@import '@fontsource/playfair-display/vietnamese-400-italic.css';
-@import '@fontsource/playfair-display/latin-500.css';
-@import '@fontsource/playfair-display/vietnamese-500.css';
+/* Chữ trang trọng: Cormorant Garamond (có đủ dấu tiếng Việt). 500 = thường, 600 = nhấn mạnh */
+@import '@fontsource/cormorant-garamond/latin-500.css';
+@import '@fontsource/cormorant-garamond/vietnamese-500.css';
+@import '@fontsource/cormorant-garamond/latin-500-italic.css';
+@import '@fontsource/cormorant-garamond/vietnamese-500-italic.css';
+@import '@fontsource/cormorant-garamond/latin-600.css';
+@import '@fontsource/cormorant-garamond/vietnamese-600.css';
 @import '@fontsource/patrick-hand/latin-400.css';
 @import '@fontsource/patrick-hand/vietnamese-400.css';
 /* Great Vibes không có dấu tiếng Việt -> CHỈ dùng cho chữ tiếng Anh */
@@ -24,7 +25,9 @@
   --c-bordeaux: #7A1420; --c-oxblood: #3B0A10; --c-pine: #1E3226;
   --c-champagne: #EAD9B9; --c-blush: #E3A397; --c-rose: #B5524A;
 
-  --f-display: 'Playfair Display', 'Times New Roman', serif;
+  --f-display: 'Cormorant Garamond', 'Times New Roman', serif;
+  /* Cormorant có chữ thường nhỏ -> phóng đều mọi chữ trang trọng cho dễ đọc (đổi 1 chỗ này để to/nhỏ toàn trang) */
+  --fsa-display: .44;
   --f-text: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --f-script: 'Great Vibes', cursive;
   --f-hand: 'Patrick Hand', 'Comic Sans MS', cursive;
@@ -67,7 +70,7 @@ h1, h2, h3, p, figure, blockquote { margin: 0; }
 /* type */
 .eyebrow { font-size: 11px; font-weight: 500; letter-spacing: .24em; text-transform: uppercase; color: var(--c-bordeaux); }
 @media (min-width: 1024px) { .eyebrow { font-size: 12px; } }
-.h2 { font-family: var(--f-display); font-weight: 400; font-size: var(--t-h2); line-height: 1; letter-spacing: -.01em; }
+.h2 { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 400; font-size: var(--t-h2); line-height: 1; letter-spacing: -.01em; }
 .it { font-style: italic; }
 .accent { color: var(--c-bordeaux); }
 .script { font-family: var(--f-script); font-weight: 400; line-height: 1; }

@@ -1,10 +1,10 @@
 """
 Ghép ảnh thành video (Ken Burns: zoom/lia chậm + chuyển mờ) — không cần quay phim.
   pip install pillow fonttools brotli   (cần ffmpeg)
-  python3 scripts/film.py            -> public/video/hero-m.mp4/.webm (dọc 9:16, điện thoại)
-                                        public/video/hero-d.mp4/.webm (khung 3:4 ở giữa trang máy tính)
-  python3 scripts/film.py reel       -> reel.mp4 1080x1920 ~35s có chữ, để đăng story/Zalo/TikTok
-Đổi thứ tự/ảnh ở HERO và REEL bên dưới. Mỗi dòng: (file trong src/assets/, tâm x, tâm y, zoom từ, zoom tới).
+  python3 scripts/film.py            -> public/video/hero-m.mp4/.webm (dọc ~9:19.5, điện thoại, giữ nguyên cả ảnh)
+                                        public/video/hero-d.mp4/.webm (16:9 tràn màn hình máy tính, 3 cột ảnh)
+  (thêm 'mobile' hoặc 'desktop' để chỉ làm 1 bản)
+Đổi thứ tự/ảnh ở HERO (điện thoại) và TRI (máy tính, 3 cột) bên dưới. Mỗi dòng: (file trong src/assets/, tâm x, tâm y, zoom từ, zoom tới).
 """
 import os, sys, subprocess, math
 from PIL import Image, ImageDraw, ImageFilter
@@ -13,37 +13,19 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 A = os.path.join(ROOT, 'src', 'assets')
 OUT = os.path.join(ROOT, 'public', 'video')
 
-HERO = [
-    ('photos/garden-close.jpg', .62, .30, 1.00, 1.12),
-    ('photos/walk.jpg', .50, .45, 1.14, 1.02),
-    ('photos/bride-portrait.jpg', .45, .30, 1.00, 1.10),
-    ('photos/dance.jpg', .52, .40, 1.12, 1.00),
-    ('photos/veil-lift.jpg', .45, .40, 1.00, 1.10),
-    ('photos/facing.jpg', .40, .45, 1.10, 1.00),
-    ('photos/garden-sofa.jpg', .50, .50, 1.00, 1.12),
-    ('photos/arm.jpg', .40, .40, 1.12, 1.00),
-    ('photos/veil.jpg', .52, .40, 1.00, 1.10),
-    ('photos/groom-sit.jpg', .45, .35, 1.10, 1.00),
+HERO = [  # điện thoại: ảnh giữ nguyên cả khung (fit), zoom rất nhẹ
+    ('photos/garden-close.jpg', .5, .5, 1.00, 1.04),
+    ('photos/walk.jpg', .5, .5, 1.04, 1.00),
+    ('photos/bride-portrait.jpg', .5, .5, 1.00, 1.04),
+    ('photos/dance.jpg', .5, .5, 1.04, 1.00),
+    ('photos/veil-lift.jpg', .5, .5, 1.00, 1.04),
+    ('photos/facing.jpg', .5, .5, 1.04, 1.00),
+    ('photos/garden-sofa.jpg', .5, .5, 1.00, 1.04),
+    ('photos/arm.jpg', .5, .5, 1.04, 1.00),
+    ('photos/veil.jpg', .5, .5, 1.00, 1.04),
+    ('photos/groom-sit.jpg', .5, .5, 1.04, 1.00),
 ]
 
-REEL = [
-    ('photos/garden-close.jpg', .62, .30, 1.00, 1.10),
-    ('photos/garden.jpg', .72, .45, 1.06, 1.00),
-    ('photos/walk.jpg', .50, .45, 1.00, 1.10),
-    ('photos/bride-portrait.jpg', .45, .30, 1.10, 1.00),
-    ('photos/groom.jpg', .50, .40, 1.00, 1.08),
-    ('photos/dance.jpg', .52, .40, 1.10, 1.00),
-    ('photos/veil-lift.jpg', .45, .40, 1.00, 1.10),
-    ('photos/facing.jpg', .40, .45, 1.10, 1.00),
-    ('photos/bride.jpg', .50, .40, 1.00, 1.10),
-    ('photos/arm.jpg', .40, .40, 1.10, 1.00),
-    ('photos/garden-sofa.jpg', .50, .50, 1.00, 1.10),
-    ('photos/groom-sit.jpg', .45, .35, 1.10, 1.00),
-    ('photos/studio-veil.jpg', .50, .40, 1.00, 1.10),
-    ('photos/veil.jpg', .52, .40, 1.10, 1.00),
-    ('book/p00.jpg', .50, .40, 1.00, 1.08),
-    ('photos/studio-couple.jpg', .50, .40, 1.08, 1.00),
-]
 
 
 def ease(x):
@@ -51,8 +33,21 @@ def ease(x):
 
 
 class Shot:
-    def __init__(self, path, fx, fy, z0, z1, W, H):
+    def __init__(self, path, fx, fy, z0, z1, W, H, fit=False):
         im = Image.open(os.path.join(A, path)).convert('RGB')
+        if fit:
+            # GIỮ NGUYÊN CẢ ẢNH (không cắt người): ảnh vừa khít bề ngang khung, phần thừa trên/dưới là chính ảnh đó phóng to + làm mờ
+            K = 1.35
+            CW, CH = round(W * K), round(H * K)
+            sc = min(CW / im.width, CH / im.height)
+            fg = im.resize((round(im.width * sc), round(im.height * sc)), Image.LANCZOS)
+            sb = max(CW / im.width, CH / im.height) * 1.08
+            bg = im.resize((round(im.width * sb / 6), round(im.height * sb / 6)), Image.BILINEAR).filter(ImageFilter.GaussianBlur(5))
+            bg = bg.resize((round(im.width * sb), round(im.height * sb)), Image.BILINEAR)
+            bg = bg.crop(((bg.width - CW) // 2, (bg.height - CH) // 2, (bg.width - CW) // 2 + CW, (bg.height - CH) // 2 + CH))
+            bg = Image.blend(bg, Image.new('RGB', bg.size, (23, 24, 26)), 0.35)
+            bg.paste(fg, ((CW - fg.width) // 2, (CH - fg.height) // 2))
+            im, fx, fy = bg, .5, .5
         # khung lớn nhất cùng tỉ lệ W:H nằm trong ảnh, rồi thu nhỏ ảnh về ~1.35x khung ra (nét + nhanh)
         r = W / H
         cw, ch = (im.height * r, im.height) if im.width / im.height > r else (im.width, im.width / r)
@@ -71,8 +66,8 @@ class Shot:
         return self.im.transform((self.W, self.H), Image.EXTENT, box, Image.BICUBIC)
 
 
-def render(seq, W, H, fps, P, X, loop, writer, overlay=None):
-    shots = [Shot(*s, W, H) for s in seq]
+def render(seq, W, H, fps, P, X, loop, writer, overlay=None, fit=False):
+    shots = [Shot(*s, W, H, fit) for s in seq]
     N = len(shots)
     total = N * P if loop else (N - 1) * P + P + X
     for f in range(int(total * fps)):
@@ -94,57 +89,76 @@ def ffmpeg(W, H, fps, out, args):
     return subprocess.Popen(['ffmpeg', '-y', '-loglevel', 'error', '-f', 'rawvideo', '-pix_fmt', 'rgb24', '-s', f'{W}x{H}', '-r', str(fps), '-i', '-', *args, out], stdin=subprocess.PIPE)
 
 
-def encode(seq, W, H, name, fps=25, P=2.0, X=0.7):
+def encode(seq, W, H, name, fps=25, P=2.0, X=0.7, fit=False):
     os.makedirs(OUT, exist_ok=True)
     mp4 = os.path.join(OUT, name + '.mp4')
     w = ffmpeg(W, H, fps, mp4, ['-an', '-c:v', 'libx264', '-preset', 'slow', '-crf', '27', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-movflags', '+faststart'])
-    render(seq, W, H, fps, P, X, True, w)
+    render(seq, W, H, fps, P, X, True, w, fit=fit)
     w.stdin.close(); w.wait()
     subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', mp4, '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '40', '-row-mt', '1', '-deadline', 'good', '-cpu-used', '2', '-an', os.path.join(OUT, name + '.webm')], check=True)
     # ảnh poster = khung đầu
-    Shot(*seq[0], W, H).frame(0).save(os.path.join(OUT, name + '.jpg'), quality=78)
+    Shot(*seq[0], W, H, fit).frame(0).save(os.path.join(OUT, name + '.jpg'), quality=78)
     for ext in ('mp4', 'webm', 'jpg'):
         p = os.path.join(OUT, f'{name}.{ext}')
         print(f'{p}: {os.path.getsize(p) / 1e6:.2f} MB')
 
 
-def reel():
-    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-    from og import load, draw, width
-    W, H, fps = 1080, 1920, 30
-    names = load('playfair-display', '400-normal', 112)
-    amp = load('playfair-display', '400-italic', 96)
-    small = load('be-vietnam-pro', '500-normal', 30)
-    grad = Image.linear_gradient('L').resize((W, H))
+# ---------- Máy tính: tràn màn hình 16:9, 3 cột ảnh dọc, mỗi cột đổi ảnh lệch nhịp (ảnh mới đẩy từ dưới lên) ----------
+TRI = [  # máy tính: tâm y = 0 -> luôn giữ mép trên ảnh (không cắt đầu); zoom tối đa 4%
+    [('photos/garden-close.jpg', .45, 0, 1.00, 1.04), ('photos/dance.jpg', .5, 0, 1.04, 1.00), ('photos/veil-lift.jpg', .5, 0, 1.00, 1.04),
+     ('photos/arm.jpg', .45, 0, 1.04, 1.00), ('photos/groom.jpg', .5, 0, 1.00, 1.04)],
+    [('photos/walk.jpg', .5, 0, 1.04, 1.00), ('photos/bride-portrait.jpg', .45, 0, 1.00, 1.04), ('photos/studio-couple.jpg', .5, 0, 1.04, 1.00),
+     ('photos/garden-sofa.jpg', .5, 0, 1.00, 1.04), ('photos/veil.jpg', .5, 0, 1.04, 1.00)],
+    [('photos/bride.jpg', .5, 0, 1.00, 1.04), ('photos/facing.jpg', .45, 0, 1.04, 1.00), ('photos/groom-sit.jpg', .45, 0, 1.00, 1.04),
+     ('photos/studio-veil.jpg', .5, 0, 1.04, 1.00), ('photos/garden.jpg', .5, 0, 1.00, 1.04)],
+]
 
-    def card(img, a, lines):
-        if a <= 0: return img
-        shade = Image.new('RGB', (W, H), (23, 12, 14))
-        img = Image.composite(shade, img, grad.point(lambda v: int(v * 0.85 * a)))
-        d = ImageDraw.Draw(img, 'RGBA')
-        y = H - 600
-        for text, fonts, fill in lines:
-            x = (W - width(fonts, text)) / 2
-            draw(d, (x, y), text, fonts, fill + (int(255 * a),))
-            y += {id(names): 150, id(amp): 118}.get(id(fonts), 58)
-        return img
 
-    def overlay(img, t, total):
-        a = min(1, t / .8) * (1 - ease((t - 3.2) / .8))
-        img = card(img, a, [('Quang Đông', names, (247, 246, 242)), ('&', amp, (227, 163, 151)), ('Trang Châu', names, (247, 246, 242)), ('THE LOVE BOOK · 29.12.2026', small, (234, 217, 185))])
-        b = ease((t - (total - 4)) / .8)
-        return card(img, b, [('Hẹn gặp bạn', names, (247, 246, 242)), ('29 · 12 · 2026', small, (234, 217, 185)), ('ĐÀ NẴNG', small, (234, 217, 185))])
+def encode_tri(name='hero-d', W=1920, H=1080, gap=6, fps=25, P=3.0, X=0.9, stagger=0.45):
+    n = len(TRI)
+    pw = (W - gap * (n - 1)) // n
+    cols = [[Shot(*s, pw, H) for s in col] for col in TRI]
+    N = len(TRI[0])
+    T = N * P  # cả 3 cột cùng chu kỳ -> vòng lặp liền mạch
 
-    out = os.path.join(ROOT, 'reel.mp4')
-    w = ffmpeg(W, H, fps, out, ['-an', '-c:v', 'libx264', '-preset', 'slow', '-crf', '22', '-pix_fmt', 'yuv420p', '-movflags', '+faststart'])
-    render(REEL, W, H, fps, 2.2, 0.7, False, w, overlay)
+    def col_frame(shots, t):
+        t %= T
+        i = int(t // P)
+        tau = t - i * P
+        cur = shots[i].frame((tau + X) / (P + X))
+        if tau < P - X:
+            return cur
+        nxt = shots[(i + 1) % N].frame((tau - P + X) / (P + X))
+        e = ease((tau - (P - X)) / X)
+        out = Image.new('RGB', (pw, H))
+        out.paste(cur, (0, round(-H * 0.35 * e)))
+        out.paste(nxt, (0, round(H * (1 - e))))
+        return out
+
+    os.makedirs(OUT, exist_ok=True)
+    mp4 = os.path.join(OUT, name + '.mp4')
+    w = ffmpeg(W, H, fps, mp4, ['-an', '-c:v', 'libx264', '-preset', 'slow', '-crf', '28', '-pix_fmt', 'yuv420p', '-profile:v', 'high', '-movflags', '+faststart'])
+    first = None
+    for f in range(int(T * fps)):
+        t = f / fps
+        frame = Image.new('RGB', (W, H), (23, 24, 26))
+        for k, shots in enumerate(cols):
+            # cột giữa đổi trước, hai cột bên đổi sau -> nhịp sóng từ giữa ra
+            off = 2 * stagger if k == n // 2 else stagger
+            frame.paste(col_frame(shots, t + off), (k * (pw + gap), 0))
+        if first is None: first = frame
+        w.stdin.write(frame.tobytes())
     w.stdin.close(); w.wait()
-    print(out, f'{os.path.getsize(out) / 1e6:.1f} MB')
+    subprocess.run(['ffmpeg', '-y', '-loglevel', 'error', '-i', mp4, '-c:v', 'libvpx-vp9', '-b:v', '0', '-crf', '42', '-row-mt', '1', '-deadline', 'good', '-cpu-used', '2', '-an', os.path.join(OUT, name + '.webm')], check=True)
+    first.save(os.path.join(OUT, name + '.jpg'), quality=78)
+    for ext in ('mp4', 'webm', 'jpg'):
+        p = os.path.join(OUT, f'{name}.{ext}')
+        print(f'{p}: {os.path.getsize(p) / 1e6:.2f} MB')
 
 
 if __name__ == '__main__':
-    if 'reel' in sys.argv:
-        reel()
-    else:
-        encode(HERO, 720, 1280, 'hero-m')
-        encode(HERO, 768, 1056, 'hero-d')
+    if 'desktop' not in sys.argv:
+        # tỉ lệ ~9:19.5 = màn hình điện thoại hiện nay; ảnh giữ nguyên, không cắt người
+        encode(HERO, 720, 1560, 'hero-m', fit=True)
+    if 'mobile' not in sys.argv:
+        encode_tri('hero-d')

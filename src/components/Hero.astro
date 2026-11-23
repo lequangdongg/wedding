@@ -1,5 +1,4 @@
 ---
-import { Image } from 'astro:assets';
 import Photo from './Photo.astro';
 import { photos, media, site } from '../data/wedding';
 // Tách chữ sẵn lúc build (không cần SplitText ở trình duyệt) -> intro nhẹ hơn
@@ -8,17 +7,13 @@ const v = media.heroVideo;
 const hasVideo = Boolean(v.mobile.mp4 || v.desktop.mp4);
 ---
 <section class="hero" id="top" aria-label="Quang Đông và Trang Châu">
-  <div class="hero__bg" aria-hidden="true">
-    <Image src={photos.garden} alt="" width={64} quality={50} loading="lazy" />
-  </div>
-
   <div class="hero__frame" data-hero-frame>
     <div class="hero__media" data-hero-media>
       <Photo
         src={photos.gardenClose}
         alt="Quang Đông nhìn Trang Châu giữa khu vườn"
         widths={[480, 720, 1080, 1440]}
-        sizes="(min-width: 1024px) 32vw, 100vw"
+        sizes="100vw"
         eager
         pos="62% 30%"
         quality={72}
@@ -52,12 +47,16 @@ const hasVideo = Boolean(v.mobile.mp4 || v.desktop.mp4);
 
 <style>
   .hero { position: relative; height: 100svh; min-height: 600px; overflow: clip; background: var(--c-ink); color: var(--c-porcelain); }
-  .hero__bg { display: none; }
   .hero__frame { position: absolute; inset: 0; overflow: hidden; will-change: transform; }
   .hero__media { position: absolute; inset: 0; }
   .hero__media :global(.hero__ph) { position: absolute; inset: 0; }
   .hero__video { position: absolute; inset: 0; z-index: 2; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 1.2s var(--ease-soft); }
   .hero__video.is-playing { opacity: 1; }
+  /* Điện thoại: ảnh/video giữ nguyên cả khung (không cắt người), phần trống là ảnh làm mờ — khớp với video */
+  @media (max-width: 1023px) {
+    .hero__media :global(.hero__ph img) { object-fit: contain; }
+    .hero__media :global(.hero__ph)::before { filter: blur(26px) brightness(.62); transform: scale(1.25); }
+  }
   .hero__scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(23 24 26 / .45) 0%, rgb(23 24 26 / 0) 26%, rgb(23 24 26 / 0) 46%, rgb(23 24 26 / .78) 100%); pointer-events: none; }
 
   .hero__side { position: absolute; top: calc(88px + env(safe-area-inset-top)); font-size: 11px; letter-spacing: .24em; text-transform: uppercase; line-height: 1.6; }
@@ -67,7 +66,7 @@ const hasVideo = Boolean(v.mobile.mp4 || v.desktop.mp4);
 
   .hero__bottom { position: absolute; left: var(--gutter); right: var(--gutter); bottom: max(32px, env(safe-area-inset-bottom)); display: flex; flex-direction: column; gap: 18px; }
   .hero__script { font-size: clamp(2.75rem, 2rem + 4vw, 8rem); color: var(--c-champagne); transform: rotate(-4deg); transform-origin: left; margin-bottom: -8px; }
-  .hero__names { font-family: var(--f-display); font-weight: 400; font-size: clamp(3.5rem, 15.5vw, 5rem); line-height: .94; letter-spacing: -.02em; text-transform: uppercase; }
+  .hero__names { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 400; font-size: clamp(3.5rem, 15.5vw, 5rem); line-height: .94; letter-spacing: -.02em; text-transform: uppercase; }
   .hero__names em { font-style: italic; text-transform: none; color: var(--c-blush); }
   .hero__names .w { display: inline-block; overflow: clip; padding: .08em 0 .04em; margin: -.08em .24em -.04em 0; vertical-align: top; }
   .hero__names .c { display: inline-block; }
@@ -79,10 +78,10 @@ const hasVideo = Boolean(v.mobile.mp4 || v.desktop.mp4);
 
   @media (min-width: 1024px) {
     .hero { min-height: 760px; }
-    .hero__bg { display: block; position: absolute; inset: -60px; }
-    .hero__bg :global(img) { width: 100%; height: 100%; object-fit: cover; filter: blur(22px) brightness(.6); transform: scale(1.1); }
-    .hero__frame { inset: auto; left: 50%; top: 15vh; width: min(30vw, 460px); height: 66vh; margin-left: calc(min(30vw, 460px) / -2); }
-    .hero__scrim { background: linear-gradient(180deg, rgb(23 24 26 / .35), rgb(23 24 26 / 0) 30%, rgb(23 24 26 / 0) 60%, rgb(23 24 26 / .45)); }
+    /* Máy tính: video ghép ảnh tràn toàn màn hình (3 cột ảnh) */
+    .hero__media :global(.hero__ph) { --pos: 60% 28% !important; }
+    .hero__video { object-position: 50% 0%; } /* màn hình thấp hơn 16:9 thì cắt phía dưới, không cắt đầu */
+    .hero__scrim { background: linear-gradient(180deg, rgb(23 24 26 / .5) 0%, rgb(23 24 26 / .08) 26%, rgb(23 24 26 / .1) 48%, rgb(23 24 26 / .72) 100%); }
     .hero__side { top: 140px; font-size: 13px; }
     .hero__book { display: block; position: absolute; top: 112px; left: 0; right: 0; text-align: center; font-size: 13px; letter-spacing: .24em; text-transform: uppercase; }
     .hero__bottom { bottom: 48px; }

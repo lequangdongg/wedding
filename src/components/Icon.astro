@@ -1,5 +1,5 @@
 ---
-interface Props { name: 'pin' | 'cal' | 'copy' | 'play' | 'music' | 'close' | 'plus' | 'arrow'; size?: number }
+interface Props { name: 'pin' | 'cal' | 'copy' | 'play' | 'music' | 'close' | 'plus' | 'arrow' | 'send' | 'heart'; size?: number }
 const { name, size = 16 } = Astro.props;
 const paths: Record<Props['name'], string> = {
   pin: '<path d="M12 21s-7-6.3-7-11a7 7 0 0 1 14 0c0 4.7-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/>',
@@ -10,6 +10,8 @@ const paths: Record<Props['name'], string> = {
   close: '<path d="M6 6l12 12M18 6L6 18"/>',
   plus: '<path d="M12 5v14M5 12h14"/>',
   arrow: '<path d="M5 12h14M13 6l6 6-6 6"/>',
+  send: '<path d="M21 3L10 14"/><path d="M21 3l-7 18-4-7-7-4z"/>',
+  heart: '<path d="M12 20s-7.5-4.6-9.2-9.4C1.6 7.2 3.8 4 7 4c2 0 3.6 1.2 5 3 1.4-1.8 3-3 5-3 3.2 0 5.4 3.2 4.2 6.6C19.5 15.4 12 20 12 20z"/>',
 };
 ---
 <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" set:html={paths[name]} />

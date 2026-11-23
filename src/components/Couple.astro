@@ -19,7 +19,15 @@ const people = [
         </figcaption>
       </figure>
     ))}
-    <blockquote class="cp__quote" data-fade>“{couple.quote}”</blockquote>
+    <header class="cp__head">
+      <p class="eyebrow" data-fade>Since 2024</p>
+      <h2 class="h2 cp__h" data-split>Chuyện của <em class="it accent">tụi mình</em></h2>
+      <p class="cp__script script" data-fade>our story</p>
+    </header>
+  </div>
+  <div class="wrap cp__story" data-story>
+    {couple.story.map((para, i) => <p class:list={['cp__p', { 'cp__p--first': i === 0 }]} data-reveal>{para}</p>)}
+    <p class="cp__sign hand" data-fade>— Đông &amp; Châu</p>
   </div>
 </section>
 
@@ -32,12 +40,19 @@ const people = [
   .cp__arch :global(.cp__ph) { width: 100%; height: 100%; }
   .cp__fig figcaption { display: flex; flex-direction: column; gap: 4px; }
   .cp__fig .eyebrow { color: var(--c-graphite); }
-  .cp__name { font-family: var(--f-display); font-size: clamp(1.25rem, 1rem + 1.2vw, 2.25rem); line-height: 1.2; }
-  .cp__quote { grid-column: 1 / -1; margin-top: 24px; text-align: center; font-family: var(--f-display); font-style: italic; font-size: clamp(1.375rem, 1.1rem + 1.4vw, 2.5rem); line-height: 1.4; max-width: 28ch; justify-self: center; }
+  .cp__name { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-size: clamp(1.25rem, 1rem + 1.2vw, 2.25rem); line-height: 1.2; }
+  .cp__head { grid-column: 1 / -1; grid-row: 1; order: -1; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; margin-bottom: 20px; }
+  .cp__h { font-size: clamp(2.5rem, 1.8rem + 3vw, 5rem); }
+  .cp__script { font-size: clamp(2.25rem, 1.8rem + 2vw, 4rem); color: var(--c-blush); margin-top: -.35em; transform: rotate(-4deg); }
+  .cp__fig--0 { grid-row: 2; } .cp__fig--1 { grid-row: 2; }
+  /* Đoạn chuyện tình: chữ hiện dần theo cuộn (scroll.ts -> [data-reveal]) */
+  .cp__story { max-width: 1100px; margin-top: clamp(48px, 8vw, 120px); display: flex; flex-direction: column; gap: 1.1em;
+    font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 500; font-size: clamp(1.45rem, 1.05rem + 1.9vw, 2.75rem); line-height: 1.42; letter-spacing: -.005em; color: var(--c-ink); }
+  .cp__sign { align-self: flex-end; font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.6rem); color: var(--c-bordeaux); }
   @media (min-width: 1024px) {
     .cp__grid { grid-template-columns: 1fr 1fr 1fr; gap: 48px; align-items: center; }
     .cp__fig--0 { grid-column: 1; grid-row: 1; }
     .cp__fig--1 { grid-column: 3; grid-row: 1; padding-top: 160px; }
-    .cp__quote { grid-column: 2; grid-row: 1; margin: 0; }
+    .cp__head { grid-column: 2; grid-row: 1; margin: 0; }
   }
 </style>

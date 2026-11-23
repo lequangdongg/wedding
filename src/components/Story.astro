@@ -1,54 +1,55 @@
 ---
 /**
- * KHOẢNH KHẮC — xấp polaroid lớn, cuộn tới đâu ảnh bay vào tới đó rồi xoè quạt sang hai bên
- * (cảm hứng từ phần "Tour dates" của trang mẫu). Không có chú thích dưới ảnh.
+ * KHOẢNH KHẮC — mỗi ảnh một màn hình, cuộn tới đâu xem từng ảnh tới đó (ảnh sau kéo màn từ dưới lên).
+ * Ảnh luôn hiện TRỌN (không cắt người), phần trống hai bên/trên dưới là chính ảnh đó làm mờ.
+ * Không JS / giảm chuyển động: các ảnh xếp dọc, cuộn bình thường.
  */
 import Photo from './Photo.astro';
 import { moments } from '../data/wedding';
 const total = String(moments.length).padStart(2, '0');
 ---
-<section class="tour" id="khoanh-khac" data-tour aria-label="Khoảnh khắc">
-  <div class="tour__pin" data-tour-pin>
-    <h2 class="tour__title hand" data-tour-title>Khoảnh khắc</h2>
-    <p class="tour__meta"><span class="eyebrow">02 / 04</span><span class="num"><b data-tour-cur>01</b> / {total}</span></p>
-    <div class="tour__stage" data-tour-stage>
-      {moments.map((m, i) => (
-        <figure class="pol" data-pol style={`z-index:${i + 1}`}>
-          <Photo src={m.photo} alt={m.alt} widths={[480, 720, 1080, 1440]} sizes="(min-width: 1024px) 40vw, 84vw" pos={m.pos} class="pol__ph" />
-        </figure>
-      ))}
+<section class="mo" id="khoanh-khac" data-moments aria-label="Khoảnh khắc">
+  <div class="mo__pin" data-mo-pin>
+    {moments.map((m, i) => (
+      <figure class="mo__slide" data-mo-slide style={`z-index:${i + 1}`}>
+        <Photo src={m.photo} alt={m.alt} widths={[480, 720, 1080, 1440]} sizes="(min-width: 1024px) 60vh, 100vw" pos="50% 50%" quality={74} class="mo__ph" />
+      </figure>
+    ))}
+    <div class="mo__ui" aria-hidden="true">
+      <h2 class="mo__title hand">Khoảnh khắc</h2>
+      <p class="mo__meta"><span class="eyebrow">02 / 05</span><span class="num"><b data-mo-cur>01</b> / {total}</span></p>
+      <div class="mo__bar"><i data-mo-bar></i></div>
     </div>
   </div>
 </section>
 
 <style>
-  .tour { background: #0B0B0C; color: var(--c-porcelain); }
-  .tour__pin { position: relative; height: 100svh; min-height: 560px; overflow: hidden; }
-  .tour__title {
-    position: absolute; left: max(4px, calc(var(--gutter) - 18px)); top: 50%; z-index: 0; margin: 0;
-    writing-mode: vertical-rl; transform: translateY(-50%) rotate(180deg); white-space: nowrap;
-    font-size: clamp(3.5rem, 12svh, 12rem); line-height: .82; letter-spacing: .01em; text-transform: uppercase; color: #E8784A;
-  }
-  .tour__meta { position: absolute; z-index: 20; top: calc(76px + env(safe-area-inset-top)); right: var(--gutter); display: flex; gap: 14px; align-items: baseline; font-size: 12px; color: var(--c-champagne); }
-  .tour__meta .eyebrow { color: #E8784A; }
-  .tour__meta b { font-weight: 500; color: var(--c-porcelain); }
-  .tour__stage { position: absolute; inset: 0; z-index: 1; }
-  /* Polaroid lớn, khung tối như ảnh mẫu */
-  .pol {
-    --w: min(76vw, 500px);
-    position: absolute; left: 56%; top: 52%; margin: 0; width: var(--w);
-    transform: translate(-50%, -50%);
-    background: #161616; padding: calc(var(--w) * .035) calc(var(--w) * .035) calc(var(--w) * .09);
-    border-radius: 8px; border: 1px solid rgb(255 255 255 / .06);
-    box-shadow: 0 40px 80px -30px rgb(0 0 0 / .85), 0 12px 24px -12px rgb(0 0 0 / .6);
-  }
-  .pol :global(.pol__ph) { width: 100%; aspect-ratio: 1 / 1.02; border-radius: 3px; }
-  @media (min-width: 768px) {
-    .pol { --w: min(58vw, 560px); left: 53%; }
-  }
+  .mo { background: #0B0B0C; color: var(--c-porcelain); }
+  .mo__pin { position: relative; }
+  .mo__slide { position: relative; margin: 0; height: 100svh; min-height: 520px; overflow: hidden; }
+  .mo__slide :global(.mo__ph) { position: absolute; inset: 0; background: #0B0B0C; }
+  /* nền = chính ảnh đó (bản LQIP) làm mờ + tối */
+  .mo__slide :global(.mo__ph)::before { filter: blur(28px) brightness(.5) saturate(1.1); transform: scale(1.25); }
+  .mo__slide :global(.mo__ph img) { object-fit: contain; padding: calc(64px + env(safe-area-inset-top)) 0 56px; will-change: transform; }
+
+  .mo__ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
+  .mo__title { position: absolute; left: var(--gutter); top: calc(14px + env(safe-area-inset-top)); margin: 0; font-size: 40px; line-height: 1; color: #E8784A; text-transform: uppercase; }
+  .mo__meta { position: absolute; right: var(--gutter); top: calc(26px + env(safe-area-inset-top)); display: flex; gap: 12px; align-items: baseline; font-size: 12px; color: var(--c-champagne); }
+  .mo__meta .eyebrow { color: #E8784A; }
+  .mo__meta b { font-weight: 500; color: var(--c-porcelain); }
+  .mo__bar { position: absolute; left: var(--gutter); right: var(--gutter); bottom: max(22px, env(safe-area-inset-bottom)); height: 2px; background: rgb(247 246 242 / .2); }
+  .mo__bar i { position: absolute; inset: 0; background: var(--c-porcelain); transform-origin: left; transform: scaleX(0); }
+
+  /* JS bật: các ảnh chồng đúng chỗ, GSAP lần lượt kéo từng ảnh lên */
+  :global(.mo.is-pinned) .mo__pin { height: 100svh; min-height: 520px; overflow: hidden; }
+  :global(.mo.is-pinned) .mo__slide { position: absolute; inset: 0; height: auto; }
+  .mo:not(:global(.is-pinned)) .mo__ui { position: sticky; top: 0; height: 0; }
+  .mo:not(:global(.is-pinned)) .mo__bar { display: none; }
+
   @media (min-width: 1024px) {
-    .tour__meta { top: 112px; }
-    .pol { --w: clamp(360px, min(38vw, 74vh), 760px); top: 50%; left: 52%; padding-bottom: calc(var(--w) * .075); }
-    .pol :global(.pol__ph) { aspect-ratio: 1.24 / 1; }
+    .mo__slide :global(.mo__ph img) { padding: 9vh 0 7vh; }
+    .mo__title { top: 50%; left: max(8px, calc(var(--gutter) - 14px)); writing-mode: vertical-rl; transform: translateY(-50%) rotate(180deg); font-size: clamp(4rem, 13vh, 11rem); line-height: .82; }
+    .mo__meta { top: 112px; }
+    .mo__bar { bottom: 32px; left: 30%; right: 30%; }
   }
 </style>

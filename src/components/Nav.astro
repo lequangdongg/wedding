@@ -52,7 +52,7 @@ import { nav, photos, site } from '../data/wedding';
   .nav.is-hidden { transform: translateY(-100%); }
   .nav.is-solid { background: rgb(247 246 242 / .86); color: var(--c-ink); -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px); border-bottom: 1px solid rgb(185 200 199 / .6); }
   .nav.is-dark { background: rgb(13 13 14 / .72); color: var(--c-porcelain); border-bottom-color: rgb(255 255 255 / .08); }
-  .nav__mono, .menu__mono { font-family: var(--f-display); font-size: 22px; text-decoration: none; letter-spacing: .04em; }
+  .nav__mono, .menu__mono { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-size: 22px; text-decoration: none; letter-spacing: .04em; }
   .nav__mono .it, .menu__mono .it { color: var(--c-blush); }
   .nav.is-solid:not(.is-dark) .nav__mono :global(.mono__stem) { color: var(--c-bordeaux); }
   .nav__links { display: none; }
@@ -84,7 +84,7 @@ import { nav, photos, site } from '../data/wedding';
   .menu__list li { overflow: hidden; border-bottom: 1px solid rgb(234 217 185 / .25); }
   .menu__list a { display: flex; align-items: baseline; gap: 16px; min-height: 76px; padding: 6px 0; text-decoration: none; }
   .menu__list .num { font-size: 12px; color: var(--c-blush); width: 24px; }
-  .menu__label { font-family: var(--f-display); font-size: clamp(2.25rem, 9vw, 3.25rem); line-height: 1.4; }
+  .menu__label { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-size: clamp(2.25rem, 9vw, 3.25rem); line-height: 1.4; }
   .menu__list a:hover .menu__label { font-style: italic; color: var(--c-champagne); }
   .menu__foot { display: grid; grid-template-columns: 96px 1fr; gap: 16px; align-items: end; padding-top: 20px; }
   .menu__foot :global(.menu__img) { height: 128px; border-radius: 48px 48px 0 0; }
@@ -95,6 +95,6 @@ import { nav, photos, site } from '../data/wedding';
   .curtain {
     position: fixed; inset: 0; z-index: 80; pointer-events: none; background: var(--c-oxblood);
     display: grid; place-items: center; visibility: hidden;
-    color: var(--c-champagne); font-family: var(--f-display); font-style: italic; font-size: clamp(2.5rem, 2rem + 3vw, 5rem);
+    color: var(--c-champagne); font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-style: italic; font-size: clamp(2.5rem, 2rem + 3vw, 5rem);
   }
 </style>

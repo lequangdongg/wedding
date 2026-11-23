@@ -1,0 +1,171 @@
+---
+/**
+ * SỔ LỜI CHÚC — thư tay bên trái, bảng lời chúc (giấy ghi chú) bên phải.
+ * Nơi lưu: Google Sheet qua Apps Script (wishes.endpoint). Logic: src/scripts/wishes.ts (chỉ tải khi cuộn gần tới).
+ */
+import Icon from './Icon.astro';
+import { wishes } from '../data/wedding';
+const demo = !wishes.endpoint;
+---
+<section class="ws" id="loi-chuc" data-wishes data-endpoint={wishes.endpoint ?? ''} aria-labelledby="ws-title">
+  <div class="wrap ws__wrap">
+    <header class="ws__head">
+      <div class="ws__hl">
+        <p class="eyebrow" data-fade>04 / 05 — Sổ lưu bút</p>
+        <h2 class="ws__title" id="ws-title">Gửi đôi lời <span class="script">to the couple</span></h2>
+      </div>
+      <p class="ws__lead" data-fade>Vài dòng của bạn sẽ được Đông &amp; Châu đọc lại vào ngày cưới — và giữ mãi trong cuốn sổ lưu bút này.</p>
+    </header>
+
+    <div class="ws__letter" data-fade>
+      <form class="ws__form" data-wish-form novalidate>
+        <div class="ws__stamp" aria-hidden="true"><span>Đà Nẵng</span><b>ĐC</b><span>29·12·2026</span></div>
+        <p class="ws__to hand">Gửi Đông &amp; Châu,</p>
+
+        <label class="ws__field">
+          <span class="ws__lbl">Tên của bạn</span>
+          <input name="name" type="text" required maxlength="60" autocomplete="name" placeholder="Ví dụ: Anh Tuấn & chị Linh" />
+          <em class="ws__err" data-err="name">Bạn điền tên giúp mình nhé</em>
+        </label>
+
+        <fieldset class="ws__field">
+          <legend class="ws__lbl">Bạn là <i>(không bắt buộc)</i></legend>
+          <div class="ws__chips">
+            {wishes.relations.map((r) => (
+              <label class="ws__chip"><input type="radio" name="relation" value={r} /><span>{r}</span></label>
+            ))}
+          </div>
+        </fieldset>
+
+        <label class="ws__field">
+          <span class="ws__lbl">Lời chúc</span>
+          <span class="ws__paper">
+            <textarea name="message" required maxlength={wishes.max} rows="5" placeholder="Viết đôi dòng gửi hai bạn…"></textarea>
+          </span>
+          <span class="ws__meta"><em class="ws__err" data-err="message">Lời chúc còn trống</em><small class="num"><b data-wish-count>0</b>/{wishes.max}</small></span>
+        </label>
+
+        <div class="ws__ideas">
+          <span class="ws__lbl">Chưa biết viết gì? Chạm để chèn:</span>
+          <div class="ws__idea-row">
+            {wishes.ideas.map((t) => <button type="button" class="ws__idea" data-idea={t}>{t}</button>)}
+          </div>
+        </div>
+
+        <input class="ws__hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
+
+        <div class="ws__foot">
+          <p class="ws__note" data-wish-note>{demo ? 'Bản xem thử: lời chúc mới chỉ lưu trên máy này.' : 'Lời chúc sẽ hiện ngay trên bảng.'}</p>
+          <button class="btn btn--wine ws__send" type="submit" data-wish-send><span data-send-label>Gửi lời chúc</span><Icon name="send" /></button>
+        </div>
+      </form>
+
+      <div class="ws__done" data-wish-done hidden>
+        <svg class="ws__env" viewBox="0 0 120 84" aria-hidden="true"><rect x="2" y="2" width="116" height="80" rx="6" /><path d="M4 6l56 42 56-42" /><path class="ws__seal" d="M60 58c-6-4-11-7-11-12a5.5 5.5 0 0 1 11-1 5.5 5.5 0 0 1 11 1c0 5-5 8-11 12z" /></svg>
+        <p class="ws__thanks script">Thank you</p>
+        <p>Lời chúc của <b data-done-name></b> đã đến tay Đông &amp; Châu.</p>
+        <button type="button" class="btn btn--line" data-wish-again><Icon name="plus" /> Viết thêm lời chúc</button>
+      </div>
+    </div>
+
+    <aside class="ws__wall" aria-label="Lời chúc đã gửi">
+      <div class="ws__wall-head"><span class="eyebrow">Bảng lời chúc</span><span class="num ws__total"><b data-wish-total>0</b> lời chúc</span></div>
+      <div class="ws__list" data-wish-list aria-live="polite"></div>
+      <p class="ws__empty hand" data-wish-empty>Chưa có lời chúc nào — hãy là người đầu tiên nhé!</p>
+    </aside>
+  </div>
+</section>
+
+<style>
+  .ws { padding: var(--section-y) 0; background: #ECE8E1; color: var(--c-ink); overflow: clip; }
+  .ws__wrap { display: grid; gap: 36px; }
+  .ws__head, .ws__hl { display: flex; flex-direction: column; gap: 14px; }
+  .ws__title { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 400; font-size: var(--t-h2); line-height: 1; letter-spacing: -.01em; }
+  .ws__title .script { display: block; color: var(--c-bordeaux); font-size: .78em; margin-top: .12em; transform: rotate(-3deg); transform-origin: left; }
+  .ws__lead { max-width: 36ch; color: var(--c-graphite); }
+
+  /* Thư tay */
+  .ws__letter { position: relative; background: #FBF9F4; border-radius: 4px; padding: 28px 20px 24px;
+    box-shadow: 0 30px 60px -30px rgb(59 10 16 / .35), 0 2px 0 rgb(23 24 26 / .04); }
+  .ws__letter::before { content: ''; position: absolute; inset: 8px; border: 1px solid rgb(122 20 32 / .14); border-radius: 2px; pointer-events: none; }
+  .ws__form { display: flex; flex-direction: column; gap: 22px; position: relative; }
+  .ws__stamp { position: absolute; top: -6px; right: -2px; width: 78px; height: 78px; border-radius: 50%; border: 1.5px dashed var(--c-bordeaux); color: var(--c-bordeaux);
+    display: grid; place-items: center; align-content: center; gap: 1px; transform: rotate(12deg); font-size: 8px; letter-spacing: .14em; text-transform: uppercase; opacity: .8; }
+  .ws__stamp b { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 400; font-size: 20px; letter-spacing: .04em; line-height: 1; }
+  .ws__to { font-size: 26px; color: var(--c-bordeaux); padding-right: 84px; }
+  .ws__field { display: flex; flex-direction: column; gap: 8px; border: 0; padding: 0; margin: 0; min-width: 0; }
+  .ws__lbl { font-size: 11px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--c-graphite); }
+  .ws__lbl i { font-style: normal; letter-spacing: .04em; text-transform: none; opacity: .7; }
+  .ws__field input[type=text] { font: 400 18px/1.4 var(--f-text); color: var(--c-ink); background: transparent; border: 0; border-bottom: 1px solid rgb(23 24 26 / .35); padding: 8px 0; border-radius: 0; transition: border-color var(--d-micro); }
+  .ws__field input[type=text]:focus { outline: none; border-color: var(--c-bordeaux); }
+  .ws__chips { display: flex; flex-wrap: wrap; gap: 8px; }
+  .ws__chip { position: relative; }
+  .ws__chip input { position: absolute; opacity: 0; pointer-events: none; }
+  .ws__chip span { display: inline-flex; align-items: center; min-height: 38px; padding: 0 16px; border: 1px solid rgb(23 24 26 / .25); border-radius: 999px; font-size: 14px; cursor: pointer; transition: all var(--d-micro); }
+  .ws__chip input:checked + span { background: var(--c-bordeaux); border-color: var(--c-bordeaux); color: var(--c-porcelain); }
+  .ws__chip input:focus-visible + span { outline: 2px solid var(--c-bordeaux); outline-offset: 2px; }
+  /* giấy kẻ dòng cho chữ viết tay */
+  .ws__paper { display: block; --lh: 34px; background: repeating-linear-gradient(180deg, transparent 0 calc(var(--lh) - 1px), rgb(122 20 32 / .16) calc(var(--lh) - 1px) var(--lh)); background-position: 0 -5px; }
+  .ws__paper textarea { display: block; width: 100%; resize: vertical; min-height: calc(var(--lh) * 5); border: 0; background: transparent; padding: 0 2px;
+    font: 400 22px/var(--lh) var(--f-hand); color: #2A2B2E; }
+  .ws__paper textarea:focus { outline: none; }
+  .ws__paper textarea::placeholder { color: rgb(85 88 90 / .55); }
+  .ws__meta { display: flex; justify-content: space-between; align-items: center; min-height: 18px; font-size: 12px; color: var(--c-graphite); }
+  .ws__meta small { margin-left: auto; }
+  .ws__err { display: none; font-style: normal; font-size: 12px; color: var(--c-rose); }
+  .ws__field.is-invalid .ws__err { display: inline; }
+  .ws__field.is-invalid input, .ws__field.is-invalid .ws__paper { border-color: var(--c-rose); }
+  .ws__ideas { display: flex; flex-direction: column; gap: 10px; }
+  .ws__idea-row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-inline: -20px; padding: 2px 20px; }
+  .ws__idea-row::-webkit-scrollbar { display: none; }
+  .ws__idea { flex: none; font: 400 17px/1.2 var(--f-hand); color: var(--c-ink); background: var(--c-mist); border: 0; border-radius: 6px; padding: 9px 14px; cursor: pointer; transition: transform var(--d-micro), background var(--d-micro); }
+  .ws__idea:hover { background: var(--c-champagne); transform: translateY(-2px); }
+  .ws__hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
+  .ws__foot { display: flex; flex-direction: column-reverse; gap: 12px; align-items: stretch; padding-top: 4px; }
+  .ws__note { font-size: 12px; color: var(--c-graphite); text-align: center; }
+  .ws__send { width: 100%; min-height: 52px; }
+  .ws__send[disabled] { opacity: .6; pointer-events: none; }
+  .ws__done { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 28px 8px; }
+  .ws__done[hidden] { display: none; }
+  .ws__env { width: 120px; fill: #fff; stroke: var(--c-bordeaux); stroke-width: 1.5; }
+  .ws__seal { fill: var(--c-bordeaux); stroke: none; }
+  .ws__thanks { font-size: 56px; color: var(--c-bordeaux); }
+
+  /* Bảng lời chúc */
+  .ws__wall { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+  .ws__wall-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid rgb(23 24 26 / .2); padding-bottom: 10px; }
+  .ws__total { font-size: 13px; color: var(--c-graphite); }
+  .ws__list { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding: 10px var(--gutter) 24px; }
+  .ws__list::-webkit-scrollbar { display: none; }
+  .ws__list:empty { display: none; }
+  .ws__list :global(.note) { flex: none; width: min(78vw, 300px); scroll-snap-align: start; position: relative; padding: 26px 20px 18px; border-radius: 2px; background: var(--bg, #FFF7E0);
+    box-shadow: 0 14px 24px -14px rgb(23 24 26 / .35); rotate: var(--r, 0deg); display: flex; flex-direction: column; gap: 12px; }
+  .ws__list :global(.note::before) { content: ''; position: absolute; top: -9px; left: 50%; width: 64px; height: 20px; translate: -50% 0; rotate: -3deg; background: rgb(247 246 242 / .7); box-shadow: 0 1px 2px rgb(0 0 0 / .08); }
+  .ws__list :global(.note__msg) { font: 400 21px/1.35 var(--f-hand); color: #2A2B2E; white-space: pre-line; overflow-wrap: anywhere; }
+  .ws__list :global(.note__by) { margin-top: auto; font-size: 13px; font-weight: 500; }
+  .ws__list :global(.note__by span) { display: block; font-weight: 400; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--c-graphite); margin-top: 2px; }
+  .ws__list :global(.note--demo) { outline: 1px dashed rgb(23 24 26 / .25); }
+  .ws__empty { font-size: 22px; color: var(--c-graphite); padding: 24px 0; }
+  .ws__empty[hidden] { display: none; }
+
+  @media (min-width: 1024px) {
+    .ws__wrap { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); column-gap: 6vw; row-gap: 48px; align-items: start; }
+    .ws__head { grid-column: 1 / -1; flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 40px; }
+    .ws__lead { max-width: 34ch; text-align: right; }
+    .ws__letter { padding: 48px 48px 40px; }
+    .ws__letter::before { inset: 12px; }
+    .ws__stamp { top: -14px; right: -10px; width: 96px; height: 96px; font-size: 9px; }
+    .ws__stamp b { font-size: 24px; }
+    .ws__to { font-size: 30px; }
+    .ws__idea-row { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
+    .ws__foot { flex-direction: row; align-items: center; justify-content: space-between; }
+    .ws__note { text-align: left; }
+    .ws__send { width: auto; padding: 0 32px; }
+    .ws__wall { position: sticky; top: 96px; }
+    .ws__list { flex-direction: column; overflow-x: visible; overflow-y: auto; scroll-snap-type: none; margin: 0; padding: 14px 10px 40px; max-height: min(72vh, 760px);
+      mask-image: linear-gradient(180deg, transparent 0, #000 24px, #000 calc(100% - 60px), transparent); }
+    .ws__list :global(.note) { width: auto; }
+    .ws__list :global(.note:nth-child(odd)) { margin-right: 10%; }
+    .ws__list :global(.note:nth-child(even)) { margin-left: 10%; }
+  }
+</style>

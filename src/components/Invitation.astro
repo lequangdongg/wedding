@@ -3,7 +3,7 @@ import { families, sides } from '../data/wedding';
 ---
 <section class="inv" id="loi-moi">
   <div class="wrap inv__in">
-    <p class="eyebrow" data-fade>01 / 04 — Trân trọng kính mời</p>
+    <p class="eyebrow" data-fade>01 / 05 — Trân trọng kính mời</p>
     <p class="inv__guest" data-guest hidden>
       <span class="inv__guest-label">Kính gửi</span>
       <span class="inv__guest-name" data-guest-name></span>
@@ -28,22 +28,24 @@ import { families, sides } from '../data/wedding';
 <style>
   .inv { padding: var(--section-y) 0 calc(var(--section-y) * .6); text-align: center; }
   .inv__in { max-width: 920px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
-  .inv .h2 { font-size: clamp(2.5rem, 1.8rem + 3vw, 5rem); }
+  .inv .h2 { font-size: clamp(2.75rem, 2rem + 3.4vw, 5.75rem); line-height: 1.02; }
   .inv__guest { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 4px 0 8px; }
   .inv__guest[hidden] { display: none; }
   .inv__guest-label { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--c-graphite); }
-  .inv__guest-name { font-family: var(--f-display); font-style: italic; font-size: clamp(2rem, 1.6rem + 2vw, 3.25rem); line-height: 1.2; color: var(--c-bordeaux); padding: 0 .4em .15em; border-bottom: 2px dotted var(--c-mist-deep); }
+  .inv__guest-name { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-style: italic; font-size: clamp(2rem, 1.6rem + 2vw, 3.25rem); line-height: 1.2; color: var(--c-bordeaux); padding: 0 .4em .15em; border-bottom: 2px dotted var(--c-mist-deep); }
   .inv__fams { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 8px; }
   :global(html[data-side='nu']) .fam--nu { order: -1; }
   .fam { border-top: 1px solid var(--c-ink); padding-top: 14px; display: flex; flex-direction: column; gap: 6px; }
-  .fam__names { font-size: 13px; font-weight: 500; line-height: 1.55; }
-  .fam__addr { font-size: 12px; line-height: 1.5; }
-  .inv__news { font-size: 12px; letter-spacing: .2em; text-transform: uppercase; line-height: 1.8; }
-  .inv__news strong { font-weight: 600; }
-  .inv__honor { font-family: var(--f-display); font-style: italic; font-size: clamp(1.125rem, 1rem + .6vw, 1.5rem); line-height: 1.5; color: var(--c-graphite); max-width: 30ch; }
+  /* Phần trang trọng nhất: tên cha mẹ, lễ, lời mời -> chữ Cormorant, cỡ lớn */
+  .fam__names { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 600; font-size: 19px; line-height: 1.45; }
+  .fam__addr { font-size: 13px; line-height: 1.55; }
+  .inv__news { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-size: 17px; letter-spacing: .16em; text-transform: uppercase; line-height: 1.7; margin-top: 8px; }
+  .inv__news strong { display: inline-block; font-weight: 600; font-size: 1.75em; letter-spacing: .1em; color: var(--c-bordeaux); margin: .2em 0; }
+  .inv__honor { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-style: italic; font-size: clamp(1.375rem, 1.1rem + 1vw, 2rem); line-height: 1.45; color: var(--c-ink); max-width: 28ch; }
   @media (min-width: 768px) {
-    .inv__fams { gap: 48px; }
-    .fam__names { font-size: 16px; }
-    .fam__addr { font-size: 14px; }
+    .inv__fams { gap: 64px; }
+    .fam__names { font-size: 26px; }
+    .fam__addr { font-size: 15px; }
+    .inv__news { font-size: 20px; }
   }
 </style>
