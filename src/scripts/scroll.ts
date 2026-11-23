@@ -93,14 +93,22 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
     });
   });
 
-  /* Chuyện của tụi mình: từng chữ sáng dần theo cuộn */
-  $$('[data-reveal]').forEach((el) => {
-    const split = SplitText.create(el, { type: 'words', wordsClass: 'w' });
-    gsap.fromTo(split.words, { opacity: 0.14 }, {
-      opacity: 1, ease: 'none', stagger: 0.08,
-      scrollTrigger: { trigger: el, start: 'top 82%', end: 'bottom 48%', scrub: true },
-    });
-  });
+  /* Chuyện của tụi mình: cuộn tới dòng nào, chữ dòng đó trồi lên từ dưới + hiện dần (từng chữ nối nhau) */
+  const story = $$('[data-reveal]');
+  if (story.length) {
+    document.fonts.ready.then(() => story.forEach((el) => {
+      const split = SplitText.create(el, { type: 'lines,words', mask: 'lines', linesClass: 'ln', wordsClass: 'w' });
+      split.lines.forEach((line) => {
+        const words = line.querySelectorAll('.w');
+        gsap.set(words, { yPercent: 115, opacity: 0, rotate: 3 });
+        ScrollTrigger.create({
+          trigger: line, start: 'top 90%', once: true,
+          onEnter: () => gsap.to(words, { yPercent: 0, opacity: 1, rotate: 0, duration: 1.1, ease: 'power4.out', stagger: 0.045 }),
+        });
+      });
+      ScrollTrigger.refresh();
+    }));
+  }
 
   /* Khoảnh khắc: mỗi ảnh một màn hình, ảnh sau kéo màn từ dưới lên, ảnh trước lùi nhẹ ra sau */
   const mo = $('[data-moments]');
