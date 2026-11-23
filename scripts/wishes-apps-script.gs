@@ -1,19 +1,19 @@
 /**
  * NƠI LƯU LỜI CHÚC — Google Sheet + Apps Script (miễn phí, dữ liệu nằm trong Google Drive của bạn)
  *
- * CÀI ĐẶT (~5 phút):
- *  1. Tạo Google Sheet mới (ví dụ "Lời chúc Đông & Châu").
+ * CÀI ĐẶT (~3 phút):
+ *  1. Mở Sheet "Lời chúc cưới — Đông & Châu" (đã tạo sẵn trong Google Drive của lequangdongg@gmail.com)
+ *     https://docs.google.com/spreadsheets/d/1atMzSSasIBqdXkNgM0UTOjq2_3QtRlgArIRmQtYg1xA/edit
  *  2. Menu Tiện ích mở rộng > Apps Script. Xoá code mẫu, dán TOÀN BỘ file này vào, bấm Lưu.
  *  3. Triển khai > Tuỳ chọn triển khai mới > Loại: Ứng dụng web.
  *       Thực thi với tư cách: Tôi   |   Người có quyền truy cập: Bất kỳ ai
  *     Bấm Triển khai, cấp quyền cho tài khoản của bạn, copy "URL ứng dụng web" (đuôi /exec).
  *  4. Dán URL đó vào src/data/wedding.ts -> wishes.endpoint, build + deploy lại site.
  *
- * QUẢN LÝ: mở Sheet, tab "Lời chúc". Cột "Hiện" = FALSE để ẩn một lời chúc khỏi trang (không cần sửa code).
+ * QUẢN LÝ: mở Sheet (tab đầu tiên). Cột "Hiện" bỏ tick để ẩn một lời chúc khỏi trang (không cần sửa code).
  * Muốn duyệt trước rồi mới hiện: đổi AUTO_SHOW = false (mọi lời chúc mới sẽ ẩn cho tới khi bạn tick TRUE).
  * Sửa code này xong phải: Triển khai > Quản lý triển khai > sửa > Phiên bản mới (URL giữ nguyên).
  */
-const SHEET = 'Lời chúc';
 const AUTO_SHOW = true;
 const MAX_NAME = 60, MAX_MSG = 300;
 
@@ -43,17 +43,23 @@ function doGet() {
   return json({ ok: true, wishes: wishes });
 }
 
+// Dùng tab đầu tiên của Sheet; tự thêm dòng tiêu đề + ô tick cột "Hiện" nếu chưa có
 function sheet() {
-  const ss = SpreadsheetApp.getActiveSpreadsheet();
-  let sh = ss.getSheetByName(SHEET);
-  if (!sh) {
-    sh = ss.insertSheet(SHEET);
-    sh.appendRow(['Thời gian', 'Tên', 'Quan hệ', 'Bên', 'Lời chúc', 'Hiện']);
+  const sh = SpreadsheetApp.getActiveSpreadsheet().getSheets()[0];
+  if (sh.getRange('A1').getValue() !== 'Thời gian') {
+    sh.getRange('A1:F1').setValues([['Thời gian', 'Tên', 'Quan hệ', 'Bên', 'Lời chúc', 'Hiện']]);
+  }
+  if (sh.getFrozenRows() !== 1) {
     sh.setFrozenRows(1);
-    sh.getRange('F:F').insertCheckboxes();
+    sh.getRange('A1:F1').setFontWeight('bold');
+    sh.setColumnWidth(5, 420);
+    sh.getRange('F2:F2000').insertCheckboxes();
   }
   return sh;
 }
+
+// (Tuỳ chọn) bấm Chạy hàm này 1 lần trong Apps Script để định dạng Sheet + cấp quyền
+function setup() { sheet(); }
 
 function clean(v, max) { return String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, max); }
 // chặn công thức (=, +, -, @) bị Sheet tự chạy

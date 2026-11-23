@@ -1,14 +1,14 @@
 ---
-/** Dải phim: 2 hàng ảnh chạy ngược chiều nhau, tăng tốc theo vận tốc cuộn (dùng chung cơ chế với Marquee). */
+/** Dải phim: hàng trên chạy trái -> phải, hàng dưới phải -> trái, đều và mượt (data-steady: không đảo chiều khi cuộn ngược). */
 import Photo from './Photo.astro';
 import { strip } from '../data/wedding';
 const half = Math.ceil(strip.length / 2);
 const rows = [strip.slice(0, half), strip.slice(half)];
 ---
-<section class="fs" aria-label="Những khoảnh khắc khác">
+<section class="fs" aria-label="Những khoảnh khắc khác" data-steady>
   {rows.map((row, r) => (<>
     {r === 1 && <p class="fs__line" aria-hidden="true"><span class="script">every moment</span> with you</p>}
-    <div class="fs__row" data-marquee={r ? -1 : 1} data-speed={r ? 90 : 80}>
+    <div class="fs__row" data-marquee={r ? 1 : -1} data-speed={r ? 90 : 80}>
       {/* 4 bản: mỗi nửa (2 bản) luôn rộng hơn màn hình -> vòng lặp -50% không hở */}
       {[0, 1, 2, 3].map((copy) => row.map((p) => (
         <Photo src={p} alt="" widths={[240, 360, 520]} sizes="(min-width: 1024px) 220px, 32vw" quality={68} class="fs__ph" aria-hidden={copy ? 'true' : undefined} />

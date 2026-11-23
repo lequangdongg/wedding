@@ -1,55 +1,111 @@
 ---
 /**
- * KHOẢNH KHẮC — mỗi ảnh một màn hình, cuộn tới đâu xem từng ảnh tới đó (ảnh sau kéo màn từ dưới lên).
- * Ảnh luôn hiện TRỌN (không cắt người), phần trống hai bên/trên dưới là chính ảnh đó làm mờ.
- * Không JS / giảm chuyển động: các ảnh xếp dọc, cuộn bình thường.
+ * KHOẢNH KHẮC — chỉ một tấm ảnh, in trên phim lấy liền (polaroid) CHƯA RỬA.
+ * Khách giữ & lắc tấm ảnh (hoặc giữ yên) để ảnh hiện dần — khác kiểu cào thẻ ở cuối trang.
+ * Rửa xong: đèn flash, chữ viết tay hiện trên viền ảnh, pháo giấy.
+ * Logic: develop() trong src/scripts/scroll.ts. Không JS / giảm chuyển động: ảnh đã rửa sẵn.
  */
 import Photo from './Photo.astro';
-import { moments } from '../data/wedding';
-const total = String(moments.length).padStart(2, '0');
+import { moment } from '../data/wedding';
 ---
-<section class="mo" id="khoanh-khac" data-moments aria-label="Khoảnh khắc">
-  <div class="mo__pin" data-mo-pin>
-    {moments.map((m, i) => (
-      <figure class="mo__slide" data-mo-slide style={`z-index:${i + 1}`}>
-        <Photo src={m.photo} alt={m.alt} widths={[480, 720, 1080, 1440]} sizes="(min-width: 1024px) 60vh, 100vw" pos="50% 50%" quality={74} class="mo__ph" />
+<section class="pd" id="khoanh-khac" data-develop aria-label="Khoảnh khắc">
+  <div class="pd__stars" aria-hidden="true"></div>
+  <div class="wrap pd__in">
+    <header class="pd__head">
+      <p class="eyebrow" data-fade>02 / 05 — Khoảnh khắc</p>
+      <h2 class="pd__title hand" data-fade>Khoảnh khắc</h2>
+      <p class="pd__lead" data-fade>Có một tấm ảnh tụi mình giữ riêng cho bạn — nhưng nó <em>chưa được rửa</em>.</p>
+    </header>
+
+    <div class="pd__stage">
+      <figure class="pd__card" data-dev-card tabindex="0" role="button" aria-label="Giữ và lắc để rửa tấm ảnh">
+        <div class="pd__shot">
+          <Photo src={moment.photo} alt={moment.alt} widths={[480, 720, 964]} sizes="(min-width: 1024px) 34vw, 78vw" pos="50% 40%" quality={80} class="pd__ph" />
+          <div class="pd__film" data-dev-film aria-hidden="true"></div>
+          <div class="pd__flash" data-dev-flash aria-hidden="true"></div>
+        </div>
+        <figcaption class="pd__cap">
+          <span class="pd__ink hand" data-dev-ink>{moment.caption} <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-9.2-9.4C1.6 7.2 3.8 4 7 4c2 0 3.6 1.2 5 3 1.4-1.8 3-3 5-3 3.2 0 5.4 3.2 4.2 6.6C19.5 15.4 12 20 12 20z"/></svg></span>
+        </figcaption>
       </figure>
-    ))}
-    <div class="mo__ui" aria-hidden="true">
-      <h2 class="mo__title hand">Khoảnh khắc</h2>
-      <p class="mo__meta"><span class="eyebrow">02 / 05</span><span class="num"><b data-mo-cur>01</b> / {total}</span></p>
-      <div class="mo__bar"><i data-mo-bar></i></div>
+      <div class="pd__confetti" data-dev-confetti aria-hidden="true"></div>
+    </div>
+
+    <div class="pd__ui">
+      <p class="pd__hint" data-dev-hint><span class="pd__hand" aria-hidden="true">✋</span> <span data-dev-label>Giữ &amp; lắc tấm ảnh để rửa</span></p>
+      <div class="pd__meter" aria-hidden="true"><i data-dev-bar></i></div>
+      <p class="pd__pct num" aria-live="polite"><b data-dev-pct>0</b>%</p>
+      <button type="button" class="pd__skip" data-dev-skip>Rửa ngay</button>
+      <p class="pd__note" data-dev-note>{moment.note}</p>
     </div>
   </div>
 </section>
 
 <style>
-  .mo { background: #0B0B0C; color: var(--c-porcelain); }
-  .mo__pin { position: relative; }
-  .mo__slide { position: relative; margin: 0; height: 100svh; min-height: 520px; overflow: hidden; }
-  .mo__slide :global(.mo__ph) { position: absolute; inset: 0; background: #0B0B0C; }
-  /* nền = chính ảnh đó (bản LQIP) làm mờ + tối */
-  .mo__slide :global(.mo__ph)::before { filter: blur(28px) brightness(.5) saturate(1.1); transform: scale(1.25); }
-  .mo__slide :global(.mo__ph img) { object-fit: contain; padding: calc(64px + env(safe-area-inset-top)) 0 56px; will-change: transform; }
+  .pd { position: relative; overflow: clip; padding: var(--section-y) 0; color: var(--c-porcelain);
+    background: radial-gradient(120% 70% at 50% 0%, #2A1B3D 0%, #120D1C 55%, #0B0910 100%); }
+  .pd__stars { position: absolute; inset: 0; pointer-events: none; opacity: .55;
+    background-image: radial-gradient(1.2px 1.2px at 12% 18%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 78% 12%, #fff 50%, transparent 51%),
+      radial-gradient(1.4px 1.4px at 64% 38%, #E9D9FF 50%, transparent 51%), radial-gradient(1px 1px at 28% 62%, #fff 50%, transparent 51%),
+      radial-gradient(1.3px 1.3px at 88% 70%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 8% 86%, #E9D9FF 50%, transparent 51%),
+      radial-gradient(1.2px 1.2px at 46% 90%, #fff 50%, transparent 51%), radial-gradient(1px 1px at 36% 8%, #fff 50%, transparent 51%);
+    animation: twinkle 4s ease-in-out infinite alternate; }
+  @keyframes twinkle { to { opacity: .2; } }
+  .pd__in { position: relative; display: grid; gap: 28px; justify-items: center; text-align: center; }
+  .pd__head { display: flex; flex-direction: column; align-items: center; gap: 8px; }
+  .pd__head .eyebrow { color: #E8784A; }
+  .pd__title { font-size: clamp(3.25rem, 2.4rem + 4vw, 7rem); line-height: .9; color: #E8784A; text-transform: uppercase; }
+  .pd__lead { max-width: 32ch; color: rgb(247 246 242 / .75); font-size: 15px; }
+  .pd__lead em { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-size: 1.15em; color: var(--c-champagne); }
 
-  .mo__ui { position: absolute; inset: 0; z-index: 50; pointer-events: none; }
-  .mo__title { position: absolute; left: var(--gutter); top: calc(14px + env(safe-area-inset-top)); margin: 0; font-size: 40px; line-height: 1; color: #E8784A; text-transform: uppercase; }
-  .mo__meta { position: absolute; right: var(--gutter); top: calc(26px + env(safe-area-inset-top)); display: flex; gap: 12px; align-items: baseline; font-size: 12px; color: var(--c-champagne); }
-  .mo__meta .eyebrow { color: #E8784A; }
-  .mo__meta b { font-weight: 500; color: var(--c-porcelain); }
-  .mo__bar { position: absolute; left: var(--gutter); right: var(--gutter); bottom: max(22px, env(safe-area-inset-bottom)); height: 2px; background: rgb(247 246 242 / .2); }
-  .mo__bar i { position: absolute; inset: 0; background: var(--c-porcelain); transform-origin: left; transform: scaleX(0); }
+  .pd__stage { position: relative; width: 100%; display: grid; place-items: center; padding: 8px 0; }
+  .pd__card { --w: min(78vw, 420px); position: relative; z-index: 2; margin: 0; width: var(--w); padding: calc(var(--w) * .055) calc(var(--w) * .055) 0; background: #FBFAF6; color: var(--c-ink);
+    border-radius: 3px; box-shadow: 0 50px 90px -40px rgb(0 0 0 / .9), 0 14px 30px -12px rgb(0 0 0 / .6); rotate: -2.5deg; touch-action: none; user-select: none; -webkit-user-select: none; cursor: grab; outline: none; }
+  .pd__card:active { cursor: grabbing; }
+  .pd__card:focus-visible { box-shadow: 0 0 0 3px var(--c-champagne), 0 50px 90px -40px rgb(0 0 0 / .9); }
+  .pd__shot { position: relative; aspect-ratio: 964 / 1180; overflow: hidden; background: #1a1410; }
+  .pd__shot :global(.pd__ph) { position: absolute; inset: 0; }
+  .pd__shot :global(.pd__ph img) { pointer-events: none; -webkit-user-drag: none; filter: blur(9px) brightness(.14) sepia(.9) saturate(.3) contrast(.7); }
+  /* lớp hoá chất của phim chưa rửa */
+  .pd__film { position: absolute; inset: 0; pointer-events: none; background: radial-gradient(90% 70% at 40% 35%, #4A3A2E 0%, #2B211B 60%, #17110D 100%); mix-blend-mode: multiply; opacity: .95; }
+  .pd__film::after { content: ''; position: absolute; inset: -50%; opacity: .25; background-image: repeating-radial-gradient(circle at 30% 40%, rgb(255 255 255 / .05) 0 1px, transparent 1px 3px); animation: grain 1s steps(4) infinite; }
+  @keyframes grain { 25% { transform: translate(3%, -2%); } 50% { transform: translate(-2%, 3%); } 75% { transform: translate(2%, 2%); } }
+  .pd__flash { position: absolute; inset: 0; background: #fff; opacity: 0; pointer-events: none; }
+  .pd__cap { height: calc(var(--w) * .26); display: grid; place-items: center; }
+  .pd__ink { font-size: calc(var(--w) * .075); color: #2B2D33; clip-path: inset(0 100% 0 0); display: inline-flex; align-items: center; gap: .3em; }
+  .pd__ink svg { width: .8em; height: .8em; fill: var(--c-bordeaux); }
+  .pd__confetti { position: absolute; inset: 0; pointer-events: none; z-index: 3; }
+  .pd__confetti :global(i) { position: absolute; left: 50%; top: 45%; width: 9px; height: 14px; border-radius: 2px; }
 
-  /* JS bật: các ảnh chồng đúng chỗ, GSAP lần lượt kéo từng ảnh lên */
-  :global(.mo.is-pinned) .mo__pin { height: 100svh; min-height: 520px; overflow: hidden; }
-  :global(.mo.is-pinned) .mo__slide { position: absolute; inset: 0; height: auto; }
-  .mo:not(:global(.is-pinned)) .mo__ui { position: sticky; top: 0; height: 0; }
-  .mo:not(:global(.is-pinned)) .mo__bar { display: none; }
+  .pd__ui { display: flex; flex-direction: column; align-items: center; gap: 12px; min-height: 120px; }
+  .pd__hint { display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px; border-radius: 999px; background: rgb(247 246 242 / .1); border: 1px solid rgb(247 246 242 / .2); font-size: 13px; letter-spacing: .04em; }
+  .pd__hand { display: inline-block; animation: wave 1.2s ease-in-out infinite; transform-origin: 70% 80%; }
+  @keyframes wave { 0%, 100% { transform: rotate(0); } 25% { transform: rotate(-18deg); } 75% { transform: rotate(14deg); } }
+  .pd__meter { width: min(240px, 60vw); height: 3px; border-radius: 3px; background: rgb(247 246 242 / .15); overflow: hidden; }
+  .pd__meter i { display: block; height: 100%; background: linear-gradient(90deg, #E8784A, var(--c-champagne)); transform-origin: left; transform: scaleX(0); }
+  .pd__pct { font-size: 12px; letter-spacing: .2em; color: rgb(247 246 242 / .6); }
+  .pd__skip { background: none; border: 0; color: rgb(247 246 242 / .55); font-size: 12px; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 6px; }
+  .pd__note { max-width: 34ch; font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-style: italic; font-size: clamp(1.2rem, 1rem + .9vw, 1.75rem); line-height: 1.4; color: var(--c-champagne); opacity: 0; }
+
+  /* đã rửa (cũng là trạng thái mặc định khi không có JS / giảm chuyển động) */
+  :global(.pd.is-done) .pd__shot :global(.pd__ph img), :global(.no-js) .pd__shot :global(.pd__ph img) { filter: none; }
+  :global(.pd.is-done) .pd__film, :global(.no-js) .pd__film { opacity: 0; }
+  :global(.pd.is-done) .pd__ink, :global(.no-js) .pd__ink { clip-path: none; }
+  :global(.pd.is-done) .pd__note, :global(.no-js) .pd__note { opacity: 1; }
+  :global(.pd.is-done) .pd__hint, :global(.pd.is-done) .pd__meter, :global(.pd.is-done) .pd__pct, :global(.pd.is-done) .pd__skip,
+  :global(.no-js) .pd__hint, :global(.no-js) .pd__meter, :global(.no-js) .pd__pct, :global(.no-js) .pd__skip { display: none; }
+  @media (prefers-reduced-motion: reduce) {
+    .pd__shot :global(.pd__ph img) { filter: none; } .pd__film { opacity: 0; } .pd__ink { clip-path: none; } .pd__note { opacity: 1; }
+    .pd__hint, .pd__meter, .pd__pct, .pd__skip { display: none; }
+  }
 
   @media (min-width: 1024px) {
-    .mo__slide :global(.mo__ph img) { padding: 9vh 0 7vh; }
-    .mo__title { top: 50%; left: max(8px, calc(var(--gutter) - 14px)); writing-mode: vertical-rl; transform: translateY(-50%) rotate(180deg); font-size: clamp(4rem, 13vh, 11rem); line-height: .82; }
-    .mo__meta { top: 112px; }
-    .mo__bar { bottom: 32px; left: 30%; right: 30%; }
+    .pd__in { grid-template-columns: 1fr auto 1fr; align-items: center; text-align: left; column-gap: 5vw; }
+    .pd__head { align-items: flex-start; grid-column: 1; }
+    .pd__title { writing-mode: initial; }
+    .pd__stage { grid-column: 2; }
+    .pd__card { --w: min(34vw, 62vh * .8, 480px); }
+    .pd__ui { grid-column: 3; align-items: flex-start; }
+    .pd__note { text-align: left; }
   }
 </style>

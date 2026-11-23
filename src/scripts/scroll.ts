@@ -79,6 +79,22 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
     groups.set(g, [...(groups.get(g) || []), tw]);
   });
   groups.forEach((loops, g) => {
+    if (g.hasAttribute('data-steady')) {
+      // chạy đều, chỉ nhanh lên nhẹ khi cuộn (không giật, không đảo chiều); tải sẵn ảnh để không bị "nháy" khi ảnh chạy vào khung
+      g.querySelectorAll('img').forEach((im) => ((im as HTMLImageElement).loading = 'eager'));
+      const speed = { v: 1 };
+      ScrollTrigger.create({
+        trigger: g, start: 'top bottom', end: 'bottom top',
+        onToggle: (s) => loops.forEach((l) => (s.isActive ? l.play() : l.pause())),
+        onUpdate: (s) => {
+          const target = 1 + Math.min(Math.abs(s.getVelocity()) / 1200, 1.2);
+          gsap.to(speed, { v: target, duration: 0.6, ease: 'power2.out', overwrite: true,
+            onUpdate: () => loops.forEach((l) => l.timeScale(speed.v)),
+            onComplete: () => gsap.to(speed, { v: 1, duration: 1.6, ease: 'sine.out', onUpdate: () => loops.forEach((l) => l.timeScale(speed.v)) }) });
+        },
+      });
+      return;
+    }
     let sign = 1;
     ScrollTrigger.create({
       trigger: g, start: 'top bottom', end: 'bottom top',
@@ -93,53 +109,21 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
     });
   });
 
-  /* Chuyện của tụi mình: cuộn tới dòng nào, chữ dòng đó trồi lên từ dưới + hiện dần (từng chữ nối nhau) */
+  /* Chuyện của tụi mình: chữ hiện ra theo đúng nhịp cuộn — cuộn tới đâu, từng chữ trồi lên + rõ dần tới đó */
   const story = $$('[data-reveal]');
   if (story.length) {
-    document.fonts.ready.then(() => story.forEach((el) => {
-      const split = SplitText.create(el, { type: 'lines,words', mask: 'lines', linesClass: 'ln', wordsClass: 'w' });
-      split.lines.forEach((line) => {
-        const words = line.querySelectorAll('.w');
-        gsap.set(words, { yPercent: 115, opacity: 0, rotate: 3 });
-        ScrollTrigger.create({
-          trigger: line, start: 'top 90%', once: true,
-          onEnter: () => gsap.to(words, { yPercent: 0, opacity: 1, rotate: 0, duration: 1.1, ease: 'power4.out', stagger: 0.045 }),
+    document.fonts.ready.then(() => {
+      story.forEach((el) => {
+        const split = SplitText.create(el, { type: 'lines,words', mask: 'lines', linesClass: 'ln', wordsClass: 'w' });
+        split.lines.forEach((line) => {
+          gsap.fromTo(line.querySelectorAll('.w'), { yPercent: 110, opacity: 0, rotate: 4 }, {
+            yPercent: 0, opacity: 1, rotate: 0, ease: 'power2.out', stagger: 0.12,
+            scrollTrigger: { trigger: line, start: 'top 94%', end: 'top 62%', scrub: 0.5 },
+          });
         });
       });
       ScrollTrigger.refresh();
-    }));
-  }
-
-  /* Khoảnh khắc: mỗi ảnh một màn hình, ảnh sau kéo màn từ dưới lên, ảnh trước lùi nhẹ ra sau */
-  const mo = $('[data-moments]');
-  if (mo) {
-    const slides = $$('[data-mo-slide]', mo);
-    const imgs = slides.map((sl) => $('img', sl));
-    const n = slides.length;
-    const cur = $('[data-mo-cur]', mo);
-    const bar = $('[data-mo-bar]', mo);
-    mo.classList.add('is-pinned');
-    imgs.forEach((im) => { if (im) (im as HTMLImageElement).loading = 'eager'; }); // xếp chồng 1 chỗ -> tải sẵn để lật tới là có ảnh
-    gsap.set(slides.slice(1), { clipPath: 'inset(100% 0% 0% 0%)' });
-    const tl = gsap.timeline({
-      defaults: { ease: 'none', duration: 1 },
-      scrollTrigger: {
-        trigger: mo, pin: '[data-mo-pin]', start: 'top top', end: () => `+=${(n - 1) * window.innerHeight * 0.85}`,
-        scrub: 0.6, invalidateOnRefresh: true, anticipatePin: 1,
-        snap: { snapTo: 1 / (n - 1), inertia: false, duration: { min: 0.2, max: 0.5 }, ease: 'power2.inOut', delay: 0.08 },
-        onUpdate: (st) => {
-          if (cur) cur.textContent = pad(Math.min(n, 1 + Math.round(st.progress * (n - 1))));
-          if (bar) bar.style.transform = `scaleX(${(1 + st.progress * (n - 1)) / n})`;
-        },
-      },
     });
-    for (let k = 1; k < n; k++) {
-      const at = k - 1;
-      tl.to(slides[k], { clipPath: 'inset(0% 0% 0% 0%)', ease: 'power2.inOut' }, at)
-        .fromTo(imgs[k], { scale: 1.12, yPercent: 6 }, { scale: 1, yPercent: 0, ease: 'power2.out' }, at)
-        .to(imgs[k - 1], { scale: 0.9, yPercent: -4, autoAlpha: 0.35, ease: 'power2.in' }, at);
-    }
-    if (bar) bar.style.transform = `scaleX(${1 / n})`;
   }
 
   /* THE LOVE BOOK: ghim section, cuộn dọc -> sách trượt ngang; trang mở ra khi vào khung */
@@ -183,6 +167,101 @@ if (!reduced) {
 }
 
 /* ================= Giữ & lau để hé lộ (như thẻ cào — "drag to reveal" của trang mẫu) ================= */
+/* ================= Khoảnh khắc: rửa ảnh polaroid (giữ & lắc) ================= */
+(function develop() {
+  const sec = $('[data-develop]');
+  if (!sec) return;
+  if (reduced) { sec.classList.add('is-done'); return; }
+  const card = $('[data-dev-card]', sec)!;
+  const img = $('.pd__ph img', sec) as HTMLImageElement | null;
+  const film = $('[data-dev-film]', sec)!;
+  const flash = $('[data-dev-flash]', sec)!;
+  const ink = $('[data-dev-ink]', sec)!;
+  const bar = $('[data-dev-bar]', sec)!;
+  const pct = $('[data-dev-pct]', sec)!;
+  const label = $('[data-dev-label]', sec)!;
+  const note = $('[data-dev-note]', sec)!;
+  const conf = $('[data-dev-confetti]', sec)!;
+  const fine = matchMedia('(pointer: fine)').matches;
+  label.textContent = fine ? 'Giữ chuột & lắc tấm ảnh để rửa' : 'Chạm giữ & lắc tấm ảnh để rửa';
+
+  let p = 0, done = false, holding = false, lastX = 0, lastY = 0, sx = 0, sy = 0, raf = 0, last = 0;
+  const NEED = fine ? 4200 : 3000; // quãng đường lắc (px) để rửa xong
+  const paint = () => {
+    const e = p;
+    if (img) img.style.filter = `blur(${(1 - e) * 9}px) brightness(${0.14 + 0.86 * e}) sepia(${(1 - e) * 0.9}) saturate(${0.3 + 0.7 * e}) contrast(${0.7 + 0.3 * e})`;
+    film.style.opacity = String(0.95 * (1 - e));
+    bar.style.transform = `scaleX(${e})`;
+    pct.textContent = String(Math.round(e * 100));
+  };
+  const add = (d: number) => { if (done) return; p = Math.min(1, p + d); paint(); if (p >= 1) finish(); };
+
+  // giữ yên cũng rửa từ từ (người không muốn lắc)
+  const tick = (t: number) => {
+    if (!holding || done) { raf = 0; return; }
+    const dt = last ? (t - last) / 1000 : 0; last = t;
+    add(dt * 0.12);
+    raf = requestAnimationFrame(tick);
+  };
+
+  const down = (e: PointerEvent) => {
+    if (done) return;
+    holding = true; card.setPointerCapture(e.pointerId);
+    lastX = sx = e.clientX; lastY = sy = e.clientY; last = 0;
+    gsap.to(card, { scale: 1.03, duration: 0.25 });
+    if (!raf) raf = requestAnimationFrame(tick);
+  };
+  const move = (e: PointerEvent) => {
+    if (!holding || done) return;
+    const dx = e.clientX - lastX, dy = e.clientY - lastY;
+    lastX = e.clientX; lastY = e.clientY;
+    add(Math.hypot(dx, dy) / NEED);
+    if (done) return; // vừa rửa xong -> để hiệu ứng kết thúc đưa ảnh về giữa
+    // tấm ảnh lắc theo tay
+    const ox = gsap.utils.clamp(-70, 70, (e.clientX - sx) * 0.5), oy = gsap.utils.clamp(-50, 50, (e.clientY - sy) * 0.4);
+    gsap.to(card, { x: ox, y: oy, rotation: gsap.utils.clamp(-14, 14, dx * 0.6) - 2.5, duration: 0.3, ease: 'power2.out', overwrite: 'auto' });
+  };
+  const up = () => {
+    if (!holding) return;
+    holding = false;
+    if (!done) gsap.to(card, { x: 0, y: 0, rotation: -2.5, scale: 1, duration: 1, ease: 'elastic.out(1, .45)' });
+  };
+  card.addEventListener('pointerdown', down);
+  card.addEventListener('pointermove', move);
+  card.addEventListener('pointerup', up);
+  card.addEventListener('pointercancel', up);
+  card.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); add(0.2); gsap.fromTo(card, { rotation: -8 }, { rotation: -2.5, duration: 0.6, ease: 'elastic.out(1, .4)' }); } });
+  $('[data-dev-skip]', sec)?.addEventListener('click', () => gsap.to({ v: p }, { v: 1, duration: 1.4, ease: 'power2.inOut', onUpdate() { p = this.targets()[0].v; paint(); }, onComplete: finish }));
+
+  // gợi ý: tấm ảnh tự rung nhẹ khi vào khung
+  ScrollTrigger.create({ trigger: card, start: 'top 75%', once: true, onEnter: () => { if (!done) gsap.fromTo(card, { rotation: -2.5 }, { keyframes: [{ rotation: 4 }, { rotation: -7 }, { rotation: 3 }, { rotation: -2.5 }], duration: 0.9, ease: 'power1.inOut' }); } });
+
+  function finish() {
+    if (done) return; done = true; holding = false; p = 1; paint();
+    sec.classList.add('is-done');
+    if (img) img.style.filter = '';
+    const tl = gsap.timeline();
+    gsap.killTweensOf(card);
+    tl.to(card, { x: 0, y: 0, rotation: -2.5, duration: 1, ease: 'elastic.out(1, .5)' })
+      .fromTo(flash, { opacity: 0.95 }, { opacity: 0, duration: 1.1, ease: 'power2.out' }, 0)
+      .fromTo(card, { scale: 1.08 }, { scale: 1, duration: 0.9, ease: 'back.out(2)' }, 0)
+      .fromTo(ink, { clipPath: 'inset(0 100% 0 0)' }, { clipPath: 'inset(0 0% 0 0)', duration: 1.6, ease: 'power1.inOut' }, 0.4)
+      .fromTo(note, { opacity: 0, y: 16 }, { opacity: 1, y: 0, duration: 0.9 }, 0.9);
+    // pháo giấy
+    const colors = ['#E8784A', '#EAD9B9', '#E3A397', '#F7F6F2', '#B9A4E0'];
+    for (let i = 0; i < 46; i++) {
+      const c = document.createElement('i');
+      c.style.background = colors[i % colors.length];
+      conf.appendChild(c);
+      const a = Math.random() * Math.PI * 2, d = 180 + Math.random() * 260;
+      gsap.fromTo(c, { x: 0, y: 0, rotation: 0, opacity: 1 }, {
+        x: Math.cos(a) * d, y: Math.sin(a) * d * 0.8 + 140, rotation: Math.random() * 720 - 360, opacity: 0,
+        duration: 1.6 + Math.random() * 0.8, ease: 'power3.out', onComplete: () => c.remove(),
+      });
+    }
+  }
+})();
+
 (function scratchReveal() {
   const stage = $('[data-scratch-stage]');
   const canvas = $<HTMLCanvasElement>('[data-scratch-canvas]');
@@ -296,7 +375,7 @@ if (navEl) {
   // nền sáng sau hero, tối khi đang ở section nền tối
   ScrollTrigger.create({ trigger: '.hero', start: 'bottom 80px', onToggle: (s) => navEl.classList.toggle('is-solid', s.isActive), end: 'max' });
   let darkCount = 0;
-  $$('.mq, .mo, .fs, .ev, .cd, .ft').forEach((sec) => ScrollTrigger.create({
+  $$('.mq, .pd, .fs, .ev, .cd, .ft').forEach((sec) => ScrollTrigger.create({
     trigger: sec, start: 'top 64px', end: 'bottom 64px',
     onToggle: (s) => { darkCount += s.isActive ? 1 : -1; navEl.classList.toggle('is-dark', darkCount > 0); },
   }));
@@ -308,6 +387,7 @@ if (navEl) {
 }
 
 
+ScrollTrigger.sort(); // trigger tạo không theo thứ tự trang (pin ở giữa) -> sắp lại để tính đúng vị trí
 ScrollTrigger.refresh();
 window.addEventListener('load', () => ScrollTrigger.refresh());
 }

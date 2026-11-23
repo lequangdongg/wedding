@@ -24,7 +24,6 @@ const spreads = [[book[0]], ...Array.from({ length: Math.ceil((book.length - 1) 
           ))}
         </div>
       ))}
-      <div class="bk__end" aria-hidden="true"><span class="script">to be continued…</span></div>
     </div>
     <p class="bk__hint" aria-hidden="true">Cuộn để lật trang <i>→</i></p>
   </div>
@@ -47,7 +46,6 @@ const spreads = [[book[0]], ...Array.from({ length: Math.ceil((book.length - 1) 
   .bk__page::after { content: ''; position: absolute; inset: 0; pointer-events: none; }
   .bk__page--l::after { background: linear-gradient(270deg, rgb(0 0 0 / .14), rgb(0 0 0 / 0) 9%); }
   .bk__page--r::after { background: linear-gradient(90deg, rgb(0 0 0 / .16), rgb(0 0 0 / 0) 10%); }
-  .bk__end { flex: none; width: 52vw; display: grid; place-items: center; font-size: clamp(2rem, 1.5rem + 2vw, 3.5rem); color: var(--c-oxblood); }
   .bk__hint { padding: 0 var(--gutter); font-size: 11px; letter-spacing: .28em; text-transform: uppercase; color: rgb(23 24 26 / .55); }
   .bk__hint i { font-style: normal; display: inline-block; animation: nudge 1.6s ease-in-out infinite; }
   @keyframes nudge { 50% { transform: translateX(6px); } }
@@ -63,6 +61,5 @@ const spreads = [[book[0]], ...Array.from({ length: Math.ceil((book.length - 1) 
     .bk__spread { display: flex; perspective: 2200px; }
     .bk__page { height: min(64vh, 34vw); }
     .bk__page--r { transform-origin: left center; }
-    .bk__end { width: 30vw; }
   }
 </style>

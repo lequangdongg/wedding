@@ -18,6 +18,7 @@ import facing from '../assets/photos/facing.jpg';
 import bridePortrait from '../assets/photos/bride-portrait.jpg';
 import veilLift from '../assets/photos/veil-lift.jpg';
 import groomSit from '../assets/photos/groom-sit.jpg';
+import gala from '../assets/photos/gala.jpg';
 
 export const site = {
   title: 'Quang Đông & Trang Châu — 29.12.2026',
@@ -155,19 +156,13 @@ export const sides: Record<SideKey, {
 export const defaultSide: SideKey = 'nam';
 
 /** Khoảnh khắc — xấp polaroid bay vào xoè quạt khi cuộn (như "Tour dates"). Thứ tự = thứ tự xuất hiện. */
-export const moments = [
-  { photo: studioCouple, pos: '50% 30%', alt: 'Hai bạn trong studio ngập nắng' },
-  { photo: walk, pos: '50% 40%', alt: 'Nắm tay nhau bước đi' },
-  { photo: dance, pos: '50% 38%', alt: 'Khiêu vũ trong studio' },
-  { photo: gardenSofa, pos: '50% 45%', alt: 'Trên sofa trắng giữa vườn' },
-  { photo: facing, pos: '45% 40%', alt: 'Nhìn nhau mỉm cười' },
-  { photo: gardenClose, pos: '60% 35%', alt: 'Chú rể nhìn cô dâu giữa khu vườn' },
-  { photo: veilLift, pos: '45% 35%', alt: 'Chú rể nâng khăn voan' },
-  { photo: studioVeil, pos: '50% 35%', alt: 'Nắm tay, khăn voan dài' },
-  { photo: arm, pos: '45% 35%', alt: 'Khoác tay nhau' },
-  { photo: garden, pos: '50% 35%', alt: 'Hai bạn vẫy tay khoe nhẫn cưới' },
-  { photo: bridePortrait, pos: '45% 30%', alt: 'Cô dâu Trang Châu cầm bó đồng tiền hồng' },
-];
+/** KHOẢNH KHẮC — một tấm ảnh duy nhất, khách phải "rửa ảnh" (giữ & lắc tấm polaroid) mới thấy. */
+export const moment = {
+  photo: gala,
+  alt: 'Quang Đông và Trang Châu tại Gala Dinner của Hodfords',
+  caption: 'Hodfords · Gala Dinner',
+  note: 'Nơi những con người thiện lành đã bồi đắp cho tình cảm của tụi mình.',
+};
 
 /** THE LOVE BOOK — trang album cưới (bìa + 5 trang đôi, mỗi trang đôi cắt làm 2 trang lẻ). */
 const bookFiles = import.meta.glob<{ default: ImageMetadata }>('../assets/book/p*.jpg', { eager: true });
