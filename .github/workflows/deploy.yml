@@ -6,47 +6,34 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: github-pages
+  group: cloudflare-deploy
   cancel-in-progress: false
 
 jobs:
-  build:
+  deploy:
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pages: read
-    environment: github-pages
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-node@v6
         with:
           node-version: 24
           cache: npm
-      - uses: actions/configure-pages@v5
-        id: pages
       - run: npm ci
       - name: Build with the wishes endpoint
         env:
-          ASTRO_SITE: ${{ steps.pages.outputs.origin }}
-          ASTRO_BASE: ${{ steps.pages.outputs.base_path }}
+          ASTRO_SITE: ${{ vars.SITE_URL }}
+          ASTRO_BASE: /
           PUBLIC_WISHES_ENDPOINT: ${{ vars.PUBLIC_WISHES_ENDPOINT }}
         run: |
+          test -n "${ASTRO_SITE}"
           test -n "${PUBLIC_WISHES_ENDPOINT}"
           npm run build
           grep -Fq -- "${PUBLIC_WISHES_ENDPOINT}" dist/index.html
-      - uses: actions/upload-pages-artifact@v4
+      - uses: cloudflare/wrangler-action@v3
         with:
-          path: dist
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      pages: write
-      id-token: write
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
-    steps:
-      - uses: actions/deploy-pages@v4
-        id: deployment
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: '4.118.0'
+          command: deploy

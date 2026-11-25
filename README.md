@@ -39,7 +39,15 @@ Xem trước giao diện sau đám cưới: thêm `?now=2026-12-30T10:00` vào l
 - **Thêm vào lịch**: mỗi sự kiện có file `/lich/<id>.ics` (iPhone, Outlook, Android) có nhắc trước 1 ngày và 2 giờ, kèm link Google Calendar.
 
 ## Deploy
-Thư mục `dist/` là site tĩnh — kéo thả lên **Netlify Drop**, hoặc kết nối repo với **Vercel / Cloudflare Pages / Netlify** (build: `npm run build`, output: `dist`).
+Mỗi lần push lên `main`, workflow **Deploy wedding site** (`.github/workflows/deploy.yml`) build site rồi chạy `wrangler deploy` lên Cloudflare Worker `wedding` (cấu hình ở `wrangler.jsonc`, phục vụ `dist/` dưới dạng static assets).
+
+Cần có trong GitHub repo (Settings → Secrets and variables → Actions):
+| Loại | Tên | Giá trị |
+|---|---|---|
+| Secret | `CLOUDFLARE_API_TOKEN` | API token, template **Edit Cloudflare Workers** |
+| Secret | `CLOUDFLARE_ACCOUNT_ID` | Account ID trong dashboard Cloudflare |
+| Variable | `SITE_URL` | Tên miền của Worker, ví dụ `https://wedding.<subdomain>.workers.dev` (dùng cho OG/canonical) |
+| Variable | `PUBLIC_WISHES_ENDPOINT` | URL `/exec` của Apps Script sổ lời chúc |
 
 ## Chuyển động (GSAP)
 | Hiệu ứng | File |
@@ -58,7 +66,7 @@ Tắt màn chờ: `site.preloader = false` trong `wedding.ts`. Tất cả tôn t
 
 ### Sổ lời chúc
 
-GitHub Pages build từ nhánh `main`. Đặt URL web app Apps Script (đuôi `/exec`) trong biến `PUBLIC_WISHES_ENDPOINT` ở môi trường GitHub Actions `github-pages`. Sau khi đổi biến, chạy lại workflow **Deploy wedding site**. Khi build cục bộ với biến này để trống, sổ lời chúc chạy ở chế độ xem thử.
+Đặt URL web app Apps Script (đuôi `/exec`) trong biến repo `PUBLIC_WISHES_ENDPOINT` của GitHub Actions. Sau khi đổi biến, chạy lại workflow **Deploy wedding site**. Khi build cục bộ với biến này để trống, sổ lời chúc chạy ở chế độ xem thử.
 
 Mã API nằm trong `apps-script/`. Chạy `setup` trong trình soạn thảo Apps Script để gắn API với tab có sáu cột của sổ lời chúc. Web app chạy với quyền chủ sở hữu và mở đúng tab đã lưu trong Script Properties. Bỏ tick **Hiện** để ẩn lời chúc khỏi trang.
 
