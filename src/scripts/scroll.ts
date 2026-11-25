@@ -65,6 +65,13 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
     gsap.to('[data-hero-bottom]', { yPercent: -18, autoAlpha: 0.2, ease: 'none', scrollTrigger: { ...st, start: 'top top', end: '70% top' } });
   }
 
+  /* Ảnh chú rể trượt ra từ từ bên trái, cô dâu từ bên phải — chạy theo nhịp cuộn */
+  $$<HTMLElement>('[data-slide]').forEach((el) => {
+    const left = el.dataset.slide === 'left';
+    gsap.fromTo(el, { xPercent: left ? -115 : 115, rotate: left ? -4 : 4, autoAlpha: 0 },
+      { xPercent: 0, rotate: 0, autoAlpha: 1, ease: 'power2.out', scrollTrigger: { trigger: el.closest('.cp__grid') ?? el, start: 'top 95%', end: desktop ? 'top 30%' : 'top 40%', scrub: 1.2 } });
+  });
+
   /* Parallax nhẹ cho ảnh cô dâu chú rể */
   $$('.cp__arch .ph').forEach((ph) => {
     gsap.fromTo(ph, { yPercent: -6 }, { yPercent: 6, ease: 'none', scrollTrigger: { trigger: ph.parentElement, start: 'top bottom', end: 'bottom top', scrub: true } });

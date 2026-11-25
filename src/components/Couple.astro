@@ -13,7 +13,7 @@ const people = [
   <div class="wrap cp__grid">
     {people.map((p, i) => (
       <figure class={`cp__fig cp__fig--${i}`}>
-        <div class="cp__arch" data-clip>
+        <div class="cp__arch" data-slide={i === 0 ? 'left' : 'right'}>
           <Photo src={p.photo} alt={`${p.label} ${p.full}`} widths={[360, 540, 720, 1000]} sizes="(min-width: 1024px) 30vw, 46vw" pos={p.pos} class="cp__ph" />
         </div>
         <figcaption data-fade>
