@@ -1,29 +1,58 @@
 ---
-/** Nút nhạc nền nổi góc phải dưới. Chỉ hiện khi media.music có đường dẫn. Nhạc chỉ phát khi khách bấm (trình duyệt chặn tự phát). */
-import Icon from './Icon.astro';
+/**
+ * Nhạc nền: đĩa than nổi ở góc phải dưới, QUAY khi đang phát (chậm dần rồi dừng khi tắt).
+ * Trình duyệt không cho tự phát có tiếng -> nhạc bắt đầu ở lần chạm/bấm đầu tiên của khách (trừ khi khách đã tắt).
+ * Đổi bài: chép mp3 vào public/music/ rồi sửa media.music + media.musicTitle trong src/data/wedding.ts.
+ */
 import { media } from '../data/wedding';
 ---
 {media.music && (
-  <div class="music">
-    {media.musicTitle && <span class="music__title" data-music-title>{media.musicTitle}</span>}
-    <button type="button" class="music__btn" id="music-btn" aria-label="Bật / tắt nhạc nền" aria-pressed="false">
-      <span class="music__icon"><Icon name="music" size={18} /></span>
-      <span class="music__eq" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+  <div class="vinyl" data-music>
+    {media.musicTitle && <span class="vinyl__title" data-music-title><span class="vinyl__note" aria-hidden="true">♪</span> {media.musicTitle}</span>}
+    <button type="button" class="vinyl__btn" data-music-btn aria-label="Bật / tắt nhạc nền" aria-pressed="false">
+      <span class="vinyl__pulse" aria-hidden="true"></span>
+      <span class="vinyl__disc" data-music-disc aria-hidden="true">
+        <span class="vinyl__label"><span>Đ</span><svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-9.2-9.4C1.6 7.2 3.8 4 7 4c2 0 3.6 1.2 5 3 1.4-1.8 3-3 5-3 3.2 0 5.4 3.2 4.2 6.6C19.5 15.4 12 20 12 20z"/></svg><span>C</span></span>
+      </span>
+      <span class="vinyl__state" aria-hidden="true">
+        <svg class="vinyl__play" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg>
+        <svg class="vinyl__pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
+      </span>
     </button>
-    <audio id="music" src={media.music} loop preload="none"></audio>
+    <audio data-music-audio src={media.music} loop preload="none"></audio>
   </div>
 )}
 <style>
-  .music { position: fixed; right: var(--gutter); bottom: max(20px, env(safe-area-inset-bottom)); z-index: 60; display: flex; align-items: center; gap: 10px; }
-  .music__title { font-size: 11px; letter-spacing: .12em; color: var(--c-champagne); background: rgb(13 13 14 / .7); padding: 6px 12px; border-radius: 999px; opacity: 0; transform: translateX(8px); transition: opacity .4s, transform .4s var(--ease-silk); pointer-events: none; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
-  .music:has([aria-pressed='true']) .music__title { opacity: 1; transform: none; }
-  .music__btn { width: 48px; height: 48px; border-radius: 999px; border: 1px solid rgb(234 217 185 / .6); background: rgb(13 13 14 / .7); color: var(--c-champagne); display: grid; place-items: center; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
-  .music__btn > * { grid-area: 1 / 1; }
-  .music__eq { display: none; gap: 3px; align-items: flex-end; height: 16px; }
-  .music__eq i { width: 3px; height: 100%; background: currentColor; border-radius: 2px; animation: eq 1s ease-in-out infinite; transform-origin: bottom; }
-  .music__eq i:nth-child(2) { animation-delay: -.3s; } .music__eq i:nth-child(3) { animation-delay: -.6s; } .music__eq i:nth-child(4) { animation-delay: -.15s; }
-  @keyframes eq { 0%, 100% { transform: scaleY(.3); } 50% { transform: scaleY(1); } }
-  .music__btn[aria-pressed='true'] { background: var(--c-champagne); color: var(--c-oxblood); }
-  .music__btn[aria-pressed='true'] .music__icon { display: none; }
-  .music__btn[aria-pressed='true'] .music__eq { display: flex; }
+  .vinyl { position: fixed; right: 16px; bottom: max(16px, env(safe-area-inset-bottom)); z-index: 60; display: flex; align-items: center; gap: 10px; pointer-events: none; }
+  .vinyl > * { pointer-events: auto; }
+  .vinyl__title { max-width: 52vw; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: 12px; letter-spacing: .04em; color: var(--c-champagne);
+    background: rgb(13 13 14 / .72); padding: 8px 14px; border-radius: 999px; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    opacity: 0; transform: translateX(10px); transition: opacity .5s, transform .5s var(--ease-silk); pointer-events: none; }
+  .vinyl.is-playing .vinyl__title.is-shown { opacity: 1; transform: none; }
+  .vinyl__note { color: var(--c-blush); }
+  .vinyl__btn { position: relative; width: 60px; height: 60px; padding: 0; border: 0; border-radius: 50%; background: none; cursor: pointer; display: grid; place-items: center; }
+  .vinyl__btn > * { grid-area: 1 / 1; }
+  /* đĩa than: rãnh + vệt sáng + nhãn giữa */
+  .vinyl__disc { width: 60px; height: 60px; border-radius: 50%; position: relative; box-shadow: 0 10px 24px -8px rgb(0 0 0 / .6), 0 0 0 1px rgb(234 217 185 / .35);
+    background:
+      conic-gradient(from 30deg, rgb(255 255 255 / 0) 0 12%, rgb(255 255 255 / .16) 16%, rgb(255 255 255 / 0) 22% 62%, rgb(255 255 255 / .12) 66%, rgb(255 255 255 / 0) 72%),
+      repeating-radial-gradient(circle, #141416 0 1.4px, #1E1F22 1.4px 2.6px);
+    display: grid; place-items: center; will-change: transform; }
+  .vinyl__label { width: 24px; height: 24px; border-radius: 50%; background: var(--c-bordeaux); color: var(--c-champagne); display: flex; align-items: center; justify-content: center; gap: 0;
+    font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-size: 8px; line-height: 1; box-shadow: inset 0 0 0 1.5px rgb(234 217 185 / .5); position: relative; }
+  .vinyl__label::after { content: ''; position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #0d0d0e; }
+  .vinyl__label svg { width: 7px; height: 7px; fill: var(--c-blush); margin: 0 .5px; }
+  .vinyl__label span { position: relative; top: -.5px; }
+  .vinyl__state { width: 22px; height: 22px; border-radius: 50%; place-self: end end; margin: -2px; background: var(--c-champagne); color: var(--c-oxblood); display: grid; place-items: center; box-shadow: 0 2px 8px rgb(0 0 0 / .35); }
+  .vinyl__state svg { width: 11px; height: 11px; fill: currentColor; grid-area: 1 / 1; }
+  .vinyl__pause { display: none; }
+  .vinyl.is-playing .vinyl__play { display: none; }
+  .vinyl.is-playing .vinyl__pause { display: block; }
+  /* gợi ý bật nhạc khi chưa phát */
+  .vinyl__pulse { width: 60px; height: 60px; border-radius: 50%; border: 1.5px solid var(--c-champagne); animation: vpulse 2s ease-out infinite; pointer-events: none; }
+  .vinyl.is-playing .vinyl__pulse, .vinyl.was-played .vinyl__pulse { display: none; }
+  @keyframes vpulse { from { transform: scale(1); opacity: .8; } to { transform: scale(1.6); opacity: 0; } }
+  .vinyl__btn:focus-visible { outline: 2px solid var(--c-champagne); outline-offset: 3px; }
+  @media (min-width: 1024px) { .vinyl { right: 24px; bottom: 24px; } .vinyl__btn, .vinyl__disc, .vinyl__pulse { width: 68px; height: 68px; } .vinyl__label { width: 28px; height: 28px; font-size: 9px; } }
+  @media (prefers-reduced-motion: reduce) { .vinyl__pulse { animation: none; display: none; } }
 </style>

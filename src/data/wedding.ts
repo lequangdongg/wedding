@@ -39,9 +39,14 @@ export const media = {
     mobile: { mp4: '/video/hero-m.mp4' as string | null, webm: '/video/hero-m.webm' as string | null },
     desktop: { mp4: '/video/hero-d.mp4' as string | null, webm: '/video/hero-d.webm' as string | null },
   },
-  /** Nhạc nền (mp3, ~128kbps). Ví dụ '/audio/song.mp3'. Chỉ phát khi khách bấm nút nhạc. */
-  music: null as string | null,
-  musicTitle: '' as string, // tên bài hiển thị nhỏ cạnh nút (tuỳ chọn)
+  /**
+   * Nhạc nền (mp3 ~128kbps, nên cắt 1–2 phút đoạn hay nhất, file < 3 MB). Đĩa than góc phải dưới quay theo nhạc.
+   * Đang dùng nhạc hộp nhạc TẠM tự sáng tác (scripts/musicbox.py). Bài gợi ý (2026, hot TikTok, hợp thiệp cưới):
+   * "Váy cưới" – Erik; "Thiên đường với người thương" – Phương Mỹ Chi. Bài có bản quyền: chỉ dùng khi đã có quyền/giấy phép.
+   * Đổi: chép file vào public/music/ rồi sửa 2 dòng dưới, ví dụ music: '/music/vay-cuoi.mp3', musicTitle: 'Váy cưới — Erik'.
+   */
+  music: '/music/hop-nhac.mp3' as string | null,
+  musicTitle: '' as string, // tên bài hiện cạnh đĩa khi đang phát (để trống thì ẩn)
 };
 
 /** LOGO — đặt file vào /public (svg hoặc png nền trong) rồi điền, ví dụ '/logo.svg'. null = monogram chữ Đ | C. */

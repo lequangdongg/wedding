@@ -221,22 +221,61 @@ $$<HTMLAnchorElement>('a[data-goto]').forEach((a) => a.addEventListener('click',
     .set(curtain, { visibility: 'hidden' });
 }));
 
-/* ================= Nhạc nền (nếu có) ================= */
-const musicBtn = $('#music-btn');
-const audio = $<HTMLAudioElement>('#music');
-musicBtn?.addEventListener('click', () => {
-  if (!audio) return;
-  if (audio.paused) {
+/* ================= Nhạc nền: đĩa than quay theo bài hát ================= */
+(function music() {
+  const box = $('[data-music]');
+  const btn = $('[data-music-btn]');
+  const disc = $('[data-music-disc]');
+  const audio = $<HTMLAudioElement>('[data-music-audio]');
+  const title = $('[data-music-title]');
+  if (!box || !btn || !disc || !audio) return;
+  const KEY = 'dc-music';
+  const spin = gsap.to(disc, { rotation: '+=360', duration: 3.6, ease: 'none', repeat: -1, paused: true });
+  let titleT = 0;
+  const showTitle = () => {
+    if (!title) return;
+    title.classList.add('is-shown');
+    clearTimeout(titleT); titleT = window.setTimeout(() => title.classList.remove('is-shown'), 4200);
+  };
+  const play = () => {
+    if (!audio.paused) return;
     audio.volume = 0;
     audio.play().then(() => {
-      musicBtn.setAttribute('aria-pressed', 'true');
-      gsap.to(audio, { volume: 0.6, duration: 1.6, ease: 'power1.out' });
+      box.classList.add('is-playing', 'was-played');
+      btn.setAttribute('aria-pressed', 'true');
+      spin.timeScale(0).play();
+      gsap.to(spin, { timeScale: 1, duration: 1.2, ease: 'power2.out' }); // đĩa tăng tốc dần
+      gsap.to(audio, { volume: 0.55, duration: 2, ease: 'power1.out' });
+      showTitle();
+      try { sessionStorage.setItem(KEY, 'on'); } catch {}
     }).catch(() => {});
-  } else {
-    musicBtn.setAttribute('aria-pressed', 'false');
-    gsap.to(audio, { volume: 0, duration: 0.6, ease: 'power1.in', onComplete: () => audio.pause() });
+  };
+  const stop = () => {
+    box.classList.remove('is-playing');
+    btn.setAttribute('aria-pressed', 'false');
+    gsap.to(spin, { timeScale: 0, duration: 1.4, ease: 'power2.out', onComplete: () => spin.pause() }); // chậm dần rồi dừng
+    gsap.to(audio, { volume: 0, duration: 0.7, ease: 'power1.in', onComplete: () => audio.pause() });
+    try { sessionStorage.setItem(KEY, 'off'); } catch {}
+  };
+  btn.addEventListener('click', () => (audio.paused ? play() : stop()));
+  btn.addEventListener('mouseenter', () => { if (!audio.paused) showTitle(); });
+  // tự bật ở lần tương tác đầu tiên (trình duyệt không cho tự phát khi chưa chạm)
+  let off = false;
+  try { off = sessionStorage.getItem(KEY) === 'off'; } catch {}
+  if (!off) {
+    const first = (e: Event) => {
+      if (btn.contains(e.target as Node)) return; // bấm chính nút -> để click xử lý
+      ['pointerdown', 'keydown', 'touchend'].forEach((ev) => window.removeEventListener(ev, first, true));
+      play();
+    };
+    ['pointerdown', 'keydown', 'touchend'].forEach((ev) => window.addEventListener(ev, first, { capture: true, passive: true }));
   }
-});
+  // tab ẩn thì tạm dừng, quay lại thì phát tiếp (nếu đang bật)
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && !audio.paused) { audio.pause(); spin.pause(); box.dataset.resume = '1'; }
+    else if (!document.hidden && box.dataset.resume) { delete box.dataset.resume; audio.play().then(() => spin.play()).catch(() => {}); }
+  });
+})();
 
 
 /* Phần chuyển động theo cuộn được tải sau (không chặn lần hiển thị đầu tiên) */
