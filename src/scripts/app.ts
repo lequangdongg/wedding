@@ -1,21 +1,9 @@
 import gsap from 'gsap';
 import { S, $, $$, pad, reduced, isDesktop, root, body } from './shared';
-import handLatin from '@fontsource/patrick-hand/files/patrick-hand-latin-400-normal.woff2?url';
-import handVi from '@fontsource/patrick-hand/files/patrick-hand-vietnamese-400-normal.woff2?url';
+import { loadFonts } from './fonts';
 
-/* Chữ viết tay (Patrick Hand) chỉ dùng phía dưới trang -> nạp sau khi trang tải xong, không tranh băng thông lúc mở */
-(function lateFonts() {
-  if (!('FontFace' in window)) return;
-  const VI = 'U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB';
-  const LA = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD';
-  const go = () => [[handVi, VI], [handLatin, LA]].forEach(([url, range]) => {
-    const f = new FontFace('Patrick Hand', `url(${url}) format('woff2')`, { display: 'swap', unicodeRange: range });
-    document.fonts.add(f); f.load().catch(() => {});
-  });
-  if (document.readyState === 'complete') setTimeout(go, 300);
-  else window.addEventListener('load', () => setTimeout(go, 300), { once: true });
-})();
-
+/* Font: nạp sau lần vẽ đầu tiên (2 khung hình) -> chữ hiện ngay bằng font hệ thống, font đẹp về ngay sau đó */
+const fontsReady = new Promise<void>((r) => requestAnimationFrame(() => requestAnimationFrame(() => loadFonts().then(r))));
 
 /* ================= Ảnh: placeholder -> ảnh thật ================= */
 $$<HTMLImageElement>('.ph img').forEach((img) => {
@@ -138,7 +126,7 @@ function heroIntro() {
   const upd = () => (ready = (Number(parts.img) + Number(parts.fonts)) / 2);
   heroImg?.addEventListener('load', () => { parts.img = true; upd(); }, { once: true });
   heroImg?.addEventListener('error', () => { parts.img = true; upd(); }, { once: true });
-  document.fonts?.ready.then(() => { parts.fonts = true; upd(); });
+  fontsReady.then(() => { parts.fonts = true; upd(); });
   upd();
 
 

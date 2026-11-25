@@ -460,7 +460,7 @@ if ('ResizeObserver' in window) {
     if (first) { first = false; return; } // lần gọi đầu khi bắt đầu quan sát
     clearTimeout(t); t = window.setTimeout(() => ScrollTrigger.refresh(), 150);
   });
-  document.querySelectorAll('#su-kien, .fs, .cd, #loi-chuc, #mung-cuoi, body > footer').forEach((el) => ro.observe(el));
+  document.querySelectorAll('#khoanh-khac, #su-kien, .fs, .cd, #loi-chuc, #mung-cuoi, body > footer').forEach((el) => ro.observe(el));
 }
 // sắp xếp + tính vị trí ở tác vụ sau (tách khỏi phần tạo trigger)
 await nextTask();

@@ -1,8 +1,6 @@
 ---
 import '../styles/global.css';
 import { site } from '../data/wedding';
-import displayFont from '@fontsource/cormorant-garamond/files/cormorant-garamond-latin-500-normal.woff2?url';
-import displayFontVi from '@fontsource/cormorant-garamond/files/cormorant-garamond-vietnamese-500-normal.woff2?url';
 
 interface Props { side?: 'nam' | 'nu'; title?: string; description?: string; ogImage?: string; noindex?: boolean }
 const { side, title = site.title, description = site.description, ogImage = '/og.jpg', noindex = false } = Astro.props;
@@ -29,8 +27,6 @@ const og = new URL(`${publicPath}${ogImage}`, Astro.site);
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
     <meta name="twitter:card" content="summary_large_image" />
-    <link rel="preload" href={displayFont} as="font" type="font/woff2" crossorigin />
-    <link rel="preload" href={displayFontVi} as="font" type="font/woff2" crossorigin />
     <link rel="icon" href={`${publicPath}/favicon.svg`} type="image/svg+xml" />
     <link rel="apple-touch-icon" href={`${publicPath}/apple-touch-icon.png`} />
     <script is:inline>
@@ -42,7 +38,8 @@ const og = new URL(`${publicPath}${ogImage}`, Astro.site);
   <body class="is-locked">
     <slot />
     <script>
-      import '../scripts/app.ts';
+      // JS chính (GSAP, màn chờ, hiệu ứng) tải SAU lần vẽ đầu tiên -> trang hiện ngay, không chờ ~30KB script
+      requestAnimationFrame(() => setTimeout(() => import('../scripts/app.ts'), 0));
     </script>
   </body>
 </html>
