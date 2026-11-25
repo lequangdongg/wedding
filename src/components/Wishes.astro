@@ -24,6 +24,7 @@ const L = wishes.limits;
       <form class="wf" aria-label="Gửi lời chúc" novalidate>
         <p class="wf__to hand" aria-hidden="true">Gửi Đông &amp; Châu,</p>
 
+        <div class="wf__col">
         <div class="wf__field">
           <label class="wf__label" for="wish-name">Tên của bạn <abbr title="bắt buộc" aria-hidden="true">*</abbr></label>
           <input class="wf__input" id="wish-name" name="name" autocomplete="name" required maxlength={L.name} placeholder="Ví dụ: Anh Tuấn &amp; chị Linh" data-ui-name />
@@ -46,7 +47,9 @@ const L = wishes.limits;
             </div>
           </fieldset>
         </div>
+        </div>
 
+        <div class="wf__col">
         <div class="wf__field">
           <div class="wf__labelrow">
             <label class="wf__label" for="wish-message">Lời chúc <abbr title="bắt buộc" aria-hidden="true">*</abbr></label>
@@ -60,6 +63,7 @@ const L = wishes.limits;
             {wishes.ideas.map((t) => <button type="button" class="wf__idea" data-ui-idea={t}>{t}</button>)}
           </div>
         </div>
+        </div>
 
         <div class="wf__submit">
           <button class="wf__send" type="submit" aria-describedby="wish-hint" disabled>
@@ -67,15 +71,16 @@ const L = wishes.limits;
             <span class="wf__send-label">Gửi lời chúc</span>
             <svg class="wf__send-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z" /></svg>
           </button>
-          <p class="wf__hint" id="wish-hint">{wishes.endpoint ? 'Lời chúc sẽ hiện ngay trên bảng.' : 'Bản xem thử. Lời chúc chỉ hiện trên trang này.'}</p>
+          <p class="wf__hint" id="wish-hint">{wishes.endpoint ? 'Lời chúc được gửi thẳng tới Đông & Châu.' : 'Bản xem thử: lời chúc chưa được lưu.'}</p>
           <p class="wf__status" data-wish-status role="status"></p>
           <noscript><p class="wf__status">Bật JavaScript để gửi và xem lời chúc.</p></noscript>
         </div>
       </form>
     </div>
 
-    <!-- ============ BẢNG LỜI CHÚC ============ -->
-    <div class="wb" aria-labelledby="wish-board-heading">
+    <!-- ============ BẢNG LỜI CHÚC — đang ẨN theo yêu cầu (cô dâu chú rể đọc trong Google Sheet).
+         Giữ nguyên markup vì wishes.ts cần các hook này; bỏ thuộc tính hidden để hiện lại. ============ -->
+    <div class="wb" aria-labelledby="wish-board-heading" hidden>
       <div class="wb__head">
         <h3 class="wb__title" id="wish-board-heading">Lời chúc đã gửi</h3>
         <span class="wb__count num" data-ui-total aria-hidden="true"></span>
@@ -174,6 +179,7 @@ const L = wishes.limits;
   .ws__stamp b { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 600; font-size: 17px; letter-spacing: .02em; line-height: 1; }
 
   .wf { position: relative; display: grid; gap: 22px; }
+  .wf__col { display: grid; gap: 22px; align-content: start; min-width: 0; }
   .wf__to { font-size: 26px; line-height: 1.2; color: var(--c-bordeaux); padding-right: 80px; }
   .wf__field { display: grid; gap: 8px; min-width: 0; margin: 0; padding: 0; border: 0; }
   .wf__row { display: grid; gap: 22px; }
@@ -231,6 +237,7 @@ const L = wishes.limits;
   .ws[data-state='send-error'] .wf__status, .ws[data-state='invalid'] .wf__status { background: #F6E3E0; color: #8A1C1C; }
 
   /* ---------- Bảng lời chúc ---------- */
+  .wb[hidden] { display: none !important; }
   .wb { display: grid; gap: 14px; min-width: 0; align-content: start; }
   .wb__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-bottom: 1px solid rgb(23 24 26 / .25); padding-bottom: 10px; }
   .wb__title { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 500; font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem); line-height: 1.2; }
@@ -291,7 +298,12 @@ const L = wishes.limits;
 
   /* ---------- Máy tính: form trái, bảng phải (bảng dính khi cuộn) ---------- */
   @media (min-width: 1024px) {
-    .ws__wrap { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: 5vw; row-gap: 56px; align-items: start; }
+    .ws__wrap { row-gap: 48px; }
+    .ws__paper { padding: 56px 64px 44px; }
+    .wf { grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); column-gap: 64px; row-gap: 28px; }
+    .wf__to, .wf__submit { grid-column: 1 / -1; }
+    .wf__row { grid-template-columns: 1fr; }
+    .wf__area { min-height: calc(var(--lh) * 7); }
     .ws__head { grid-column: 1 / -1; grid-template-columns: 1fr auto; align-items: end; column-gap: 48px; }
     .ws__head .eyebrow { grid-column: 1 / -1; }
     .ws__lead { text-align: right; max-width: 34ch; }
