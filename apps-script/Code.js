@@ -66,7 +66,7 @@ function doPost(event) {
   try {
     lock.waitLock(10000);
     const sheet = wishesSheet_();
-    const row = sheet.getLastRow() + 1;
+    const row = lastDataRow_(sheet) + 1;
     if (row > sheet.getMaxRows()) sheet.insertRowsAfter(sheet.getMaxRows(), 100);
     sheet.getRange(row, 6).setDataValidation(checkboxRule_());
     sheet.getRange(row, 1).setNumberFormat('dd/MM/yyyy HH:mm:ss');
@@ -88,6 +88,15 @@ function wishesSheet_() {
   const sheet = SpreadsheetApp.openById(spreadsheetId).getSheetById(Number(sheetId));
   if (!sheet) throw new Error('Không tìm thấy trang tính lời chúc.');
   return sheet;
+}
+
+function lastDataRow_(sheet) {
+  // Ô tick trống có thể được Sheets tính là dữ liệu. Chỉ xét các cột nội dung.
+  const rows = sheet.getRange(1, 1, sheet.getLastRow(), HEADERS.length - 1).getValues();
+  for (let index = rows.length - 1; index >= 0; index--) {
+    if (rows[index].some((value) => value !== '')) return index + 1;
+  }
+  return 1;
 }
 
 function checkboxRule_() {
