@@ -1,5 +1,20 @@
 import gsap from 'gsap';
 import { S, $, $$, pad, reduced, isDesktop, root, body } from './shared';
+import handLatin from '@fontsource/patrick-hand/files/patrick-hand-latin-400-normal.woff2?url';
+import handVi from '@fontsource/patrick-hand/files/patrick-hand-vietnamese-400-normal.woff2?url';
+
+/* Chữ viết tay (Patrick Hand) chỉ dùng phía dưới trang -> nạp sau khi trang tải xong, không tranh băng thông lúc mở */
+(function lateFonts() {
+  if (!('FontFace' in window)) return;
+  const VI = 'U+0102-0103,U+0110-0111,U+0128-0129,U+0168-0169,U+01A0-01A1,U+01AF-01B0,U+0300-0301,U+0303-0304,U+0308-0309,U+0323,U+0329,U+1EA0-1EF9,U+20AB';
+  const LA = 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD';
+  const go = () => [[handVi, VI], [handLatin, LA]].forEach(([url, range]) => {
+    const f = new FontFace('Patrick Hand', `url(${url}) format('woff2')`, { display: 'swap', unicodeRange: range });
+    document.fonts.add(f); f.load().catch(() => {});
+  });
+  if (document.readyState === 'complete') setTimeout(go, 300);
+  else window.addEventListener('load', () => setTimeout(go, 300), { once: true });
+})();
 
 
 /* ================= Ảnh: placeholder -> ảnh thật ================= */
@@ -44,7 +59,7 @@ const urlSide = new URLSearchParams(location.search).get('ben');
 let side: Side =
   urlSide === 'nha-gai' || urlSide === 'nu' ? 'nu'
   : urlSide === 'nha-trai' || urlSide === 'nam' ? 'nam'
-  : root.dataset.side === 'nu' ? 'nu' : 'nam'; // trang /nha-gai/ đặt sẵn data-side
+  : root.dataset.side === 'nu' ? 'nu' : 'nam'; // ?ben=nha-gai -> nhà gái, mặc định nhà trai
 const cd = $('[data-countdown]');
 // ?now=2026-12-30T10:00 để xem thử giao diện sau ngày cưới
 const nowOverride = Date.parse(new URLSearchParams(location.search).get('now') || '');
@@ -100,13 +115,13 @@ function heroIntro() {
   if (isDesktop()) tl.fromTo(frame, { clipPath: 'inset(42% 42% 42% 42%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1.6, ease: 'expo.inOut' }, 0);
   tl.fromTo(media, { scale: 1.3 }, { scale: 1, duration: 2.4 }, 0)
     .from(chars, { yPercent: 115, duration: 1.3, stagger: 0.035 }, 0.35)
-    .from('[data-hero-script]', { autoAlpha: 0, x: -40, rotation: -10, duration: 1.4 }, 0.9)
+    .from('[data-hero-script]', { x: -60, yPercent: 40, rotation: -12, duration: 1.4 }, 0.9) // không ẩn (opacity/clip): chữ này là LCP, phải vẽ ngay từ đầu
     .from('[data-hero-fade]', { autoAlpha: 0, y: 16, duration: 1, stagger: 0.08 }, 1);
 }
 
 (function preloader() {
   const el = $('#loader');
-  if (!el || root.classList.contains('skip-loader') || getComputedStyle(el).display === 'none') {
+  if (!el || root.classList.contains('skip-loader') || root.classList.contains('no-js')) {
     el?.remove();
     heroIntro();
     return;
@@ -147,7 +162,8 @@ function heroIntro() {
       // nhịp tim: thình thịch 2 lần
       .to(fill, { keyframes: [{ scale: 1.14, duration: 0.14 }, { scale: 1, duration: 0.18 }, { scale: 1.2, duration: 0.14 }, { scale: 1, duration: 0.3 }], ease: 'power1.inOut' }, 0.15)
       .to('[data-loader-heart]', { scale: 1.06, duration: 0.3, yoyo: true, repeat: 1, ease: 'power1.inOut' }, 0.15)
-      .to('[data-loader-heart], [data-loader-names] > *, .loader__top, .loader__bottom', { yPercent: -40, autoAlpha: 0, duration: 0.6, stagger: 0.04, ease: 'power3.in' }, '+=.1')
+      .to('[data-loader-heart]', { yPercent: -40, autoAlpha: 0, duration: 0.6, ease: 'power3.in' }, '+=.1')
+      .to('[data-loader-names] > *, .loader__top, .loader__bottom', { yPercent: -60, duration: 0.6, stagger: 0.04, ease: 'power3.in' }, '<')
       .to(el, { yPercent: -100, duration: 1.2, ease: 'expo.inOut' }, '-=.15')
       .add(heroIntro, '-=.75')
       .add(() => el.remove());
@@ -269,7 +285,8 @@ $$<HTMLAnchorElement>('a[data-goto]').forEach((a) => a.addEventListener('click',
       play();
     };
     ['pointerdown', 'keydown', 'touchend'].forEach((ev) => window.addEventListener(ev, first, { capture: true, passive: true }));
-    play(); // thử tự phát ngay; bị chặn thì chờ lần tương tác đầu tiên ở trên
+    // thử tự phát sau màn chờ (không tải mp3 cùng lúc với trang); bị chặn thì chờ lần tương tác đầu tiên ở trên
+    window.addEventListener('dc:intro-done', () => play(), { once: true });
   }
   // tab ẩn thì tạm dừng, quay lại thì phát tiếp (nếu đang bật)
   document.addEventListener('visibilitychange', () => {

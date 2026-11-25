@@ -14,10 +14,10 @@ const hasVideo = Boolean(v.mobile.mp4 || v.desktop.mp4);
         src={photos.studioCouple}
         alt="Quang Đông và Trang Châu trong bộ ảnh cưới"
         widths={[480, 720, 1080, 1440]}
-        sizes="100vw"
+        sizes="(min-aspect-ratio: 1987/2400) 83vh, 100vw"
         eager
         pos="50% 30%"
-        quality={72}
+        quality={58}
         class="hero__ph"
       />
       {hasVideo && (

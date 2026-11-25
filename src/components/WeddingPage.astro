@@ -1,5 +1,5 @@
 ---
-/** Toàn bộ trang cưới. Dùng chung cho / (mặc định nhà trai), /nha-trai/ và /nha-gai/. */
+/** Toàn bộ trang cưới (chỉ có trang /). Bên mời: ?ben=nha-gai (mặc định nhà trai). */
 import Base from '../layouts/Base.astro';
 import Preloader from './Preloader.astro';
 import Nav from './Nav.astro';
@@ -16,6 +16,7 @@ import Wishes from './Wishes.astro';
 import Gift from './Gift.astro';
 import Footer from './Footer.astro';
 import MusicToggle from './MusicToggle.astro';
+import Toast from './Toast.astro';
 import { sides, type SideKey } from '../data/wedding';
 
 interface Props { side: SideKey }
@@ -39,5 +40,6 @@ const s = sides[side];
     <Gift />
   </main>
   <Footer />
+  <Toast />
   <MusicToggle />
 </Base>
