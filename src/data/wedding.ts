@@ -190,12 +190,12 @@ export const nav = [
  * SỔ LỜI CHÚC — trang tĩnh không tự lưu được, cần một nơi lưu bên ngoài.
  * Khuyên dùng: Google Sheet + Apps Script (miễn phí, dữ liệu nằm trong Drive của bạn, sửa/ẩn lời chúc ngay trên Sheet).
  * Cách cài tự động: docs/CODEX_TASK_wishes.md (clasp + Apps Script API). Tay: scripts/wishes-apps-script.gs.
- * endpoint = null: chế độ XEM THỬ — lời chúc chỉ lưu trên máy đang xem, có ghi chú rõ cho khách.
+ * endpoint rỗng: chế độ XEM THỬ — lời chúc chỉ hiện trên trang đang xem.
  */
 export const wishes = {
-  // URL web app Apps Script (…/exec). Ưu tiên biến môi trường PUBLIC_WISHES_ENDPOINT (file .env hoặc cài trên Vercel/Netlify/Cloudflare)
-  endpoint: (import.meta.env.PUBLIC_WISHES_ENDPOINT || null) as string | null,
-  max: 300,
+  // URL web app Apps Script (…/exec) từ biến môi trường PUBLIC_WISHES_ENDPOINT (GitHub Actions: môi trường github-pages). Trống = xem thử.
+  endpoint: import.meta.env.PUBLIC_WISHES_ENDPOINT?.trim() ?? '',
+  limits: { name: 80, message: 1000, relation: 80 },
   relations: ['Gia đình', 'Bạn bè', 'Đồng nghiệp', 'Hàng xóm'],
   ideas: [
     'Trăm năm hạnh phúc, đầu bạc răng long!',
@@ -212,11 +212,14 @@ export const gifts = [
 
 
 // ---- helpers ----
+/** Tiền tố đường dẫn khi site chạy trong thư mục con (GitHub Pages: /wedding). Mọi file trong public/ phải đi qua pub(). */
+export const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+export const pub = <T extends string | null>(p: T): T => (p && p.startsWith('/') ? (BASE + p) as T : p);
 /** Giữ 2 chữ cuối của tên dính nhau (không bị rớt dòng giữa tên): 'Nguyễn Thị Trang Châu' -> '…Trang\u00a0Châu' */
 export const keep = (name: string) => name.replace(/\s+(\S+)\s+(\S+)$/, ' $1\u00a0$2');
 const toGcal = (iso: string) => new Date(iso).toISOString().replace(/[-:]/g, '').replace(/\.\d{3}/, '');
 export const mapsUrl = (q: string) => 'https://www.google.com/maps/search/?api=1&query=' + encodeURIComponent(q);
-export const icsUrl = (e: WeddingEvent) => `/lich/${e.id}.ics`;
+export const icsUrl = (e: WeddingEvent) => pub(`/lich/${e.id}.ics`);
 export const calendarUrl = (e: WeddingEvent) =>
   'https://calendar.google.com/calendar/render?action=TEMPLATE' +
   '&text=' + encodeURIComponent(`${e.kind} · Quang Đông & Trang Châu`) +

@@ -1,6 +1,6 @@
 ---
 import Photo from './Photo.astro';
-import { photos, media, site } from '../data/wedding';
+import { photos, media, site, pub } from '../data/wedding';
 // Tách chữ sẵn lúc build (không cần SplitText ở trình duyệt) -> intro nhẹ hơn
 // Mỗi tên là một cụm KHÔNG BAO GIỜ xuống dòng giữa chừng; cỡ chữ tự co theo bề ngang màn hình
 const groups = [['Quang', 'Đông'], ['&'], ['Trang', 'Châu']];
@@ -22,7 +22,7 @@ const hasVideo = Boolean(v.mobile.mp4 || v.desktop.mp4);
       />
       {hasVideo && (
         <video class="hero__video" data-hero-video muted loop playsinline preload="none" aria-hidden="true"
-          data-m-mp4={v.mobile.mp4} data-m-webm={v.mobile.webm} data-d-mp4={v.desktop.mp4 ?? v.mobile.mp4} data-d-webm={v.desktop.webm ?? v.mobile.webm}></video>
+          data-m-mp4={pub(v.mobile.mp4)} data-m-webm={pub(v.mobile.webm)} data-d-mp4={pub(v.desktop.mp4 ?? v.mobile.mp4)} data-d-webm={pub(v.desktop.webm ?? v.mobile.webm)}></video>
       )}
     </div>
   </div>

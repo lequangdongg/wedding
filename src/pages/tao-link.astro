@@ -4,6 +4,7 @@
  * Mở: <tên-miền>/tao-link/
  */
 import '../styles/global.css';
+import { BASE } from '../data/wedding';
 ---
 <!doctype html>
 <html lang="vi">
@@ -12,10 +13,10 @@ import '../styles/global.css';
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="robots" content="noindex, nofollow" />
     <title>Tạo link thiệp mời · Đông & Châu</title>
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href={`${BASE}/favicon.svg`} type="image/svg+xml" />
   </head>
   <body>
-    <main class="tl">
+    <main class="tl" data-base={BASE}>
       <header class="tl__head">
         <p class="eyebrow">Công cụ nội bộ</p>
         <h1 class="h2">Tạo link thiệp mời</h1>
@@ -70,7 +71,8 @@ import '../styles/global.css';
       baseEl.value = location.origin;
       const side = () => (document.querySelector('input[name=side]:checked') as HTMLInputElement).value;
       const build = (name: string, s: string) => {
-        const u = new URL(`/${s}/`, baseEl.value || location.origin);
+        const base = (document.querySelector('[data-base]') as HTMLElement).dataset.base || '';
+        const u = new URL(`${base}/${s}/`, baseEl.value || location.origin);
         if (name.trim()) u.searchParams.set('ten', name.trim());
         return u.toString();
       };

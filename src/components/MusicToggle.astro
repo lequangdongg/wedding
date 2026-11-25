@@ -4,7 +4,7 @@
  * Trình duyệt không cho tự phát có tiếng -> nhạc bắt đầu ở lần chạm/bấm đầu tiên của khách (trừ khi khách đã tắt).
  * Đổi bài: chép mp3 vào public/music/ rồi sửa media.music + media.musicTitle trong src/data/wedding.ts.
  */
-import { media } from '../data/wedding';
+import { media, pub } from '../data/wedding';
 ---
 {media.music && (
   <div class="vinyl" data-music>
@@ -19,7 +19,7 @@ import { media } from '../data/wedding';
         <svg class="vinyl__pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
       </span>
     </button>
-    <audio data-music-audio src={media.music} loop preload="none"></audio>
+    <audio data-music-audio src={pub(media.music)} loop preload="none"></audio>
   </div>
 )}
 <style>

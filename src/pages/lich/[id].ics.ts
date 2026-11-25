@@ -20,7 +20,7 @@ const fold = (line: string) => {
 export const GET: APIRoute = ({ props, site }) => {
   const e = (props as { e: WeddingEvent }).e;
   const where = `${e.venue}${e.hall ? ', ' + e.hall : ''}, ${e.addr}`;
-  const url = new URL('/', site).toString();
+  const url = new URL(import.meta.env.BASE_URL, site).toString();
   const lines = [
     'BEGIN:VCALENDAR', 'VERSION:2.0', 'PRODID:-//dong-chau-wedding//VI', 'CALSCALE:GREGORIAN', 'METHOD:PUBLISH',
     'BEGIN:VEVENT',

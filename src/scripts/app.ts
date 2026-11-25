@@ -279,23 +279,23 @@ $$<HTMLAnchorElement>('a[data-goto]').forEach((a) => a.addEventListener('click',
 
 
 /* Phần chuyển động theo cuộn được tải sau (không chặn lần hiển thị đầu tiên) */
-let scrollLoaded = false;
-const loadScroll = () => { if (scrollLoaded) return; scrollLoaded = true; import('./scroll').then((m) => m.init()); };
+let scrollReady: Promise<void> | undefined;
+const loadScroll = () => scrollReady ??= import('./scroll').then((m) => m.init());
+const initialHash = location.hash;
+const initialAnchor = document.getElementById(initialHash.slice(1));
 const idle = (fn: () => void) => ('requestIdleCallback' in window ? (window as any).requestIdleCallback(fn, { timeout: 1200 }) : setTimeout(fn, 200));
 // chỉ tải khi intro xong hoặc người dùng bắt đầu tương tác
-window.addEventListener('dc:intro-done', () => idle(loadScroll), { once: true });
+window.addEventListener('dc:intro-done', () => {
+  if (!initialAnchor) {
+    idle(loadScroll);
+    return;
+  }
+  // Các section ghim làm thay đổi vị trí đích của liên kết sau khi trang tải.
+  void Promise.all([loadScroll(), document.fonts.ready]).then(() => {
+    if (location.hash === initialHash) initialAnchor.scrollIntoView();
+  });
+}, { once: true });
 ['pointerdown', 'keydown', 'wheel', 'touchstart'].forEach((ev) => window.addEventListener(ev, () => idle(loadScroll), { once: true, passive: true }));
 setTimeout(() => idle(loadScroll), 6000);
 // trình duyệt khôi phục vị trí cuộn giữa trang -> tải ngay để bố cục (pin) đúng từ đầu
-if (window.scrollY > 50) loadScroll();
-
-/* ================= Sổ lời chúc: chỉ tải code khi khách cuộn gần tới ================= */
-const wishesEl = $('[data-wishes]');
-if (wishesEl) {
-  const io = new IntersectionObserver((es) => {
-    if (!es.some((e) => e.isIntersecting)) return;
-    io.disconnect();
-    import('./wishes').then((m) => m.init(wishesEl));
-  }, { rootMargin: '900px 0px' });
-  io.observe(wishesEl);
-}
+if (initialAnchor || window.scrollY > 50) void loadScroll();

@@ -1,171 +1,307 @@
 ---
 /**
- * SỔ LỜI CHÚC — thư tay bên trái, bảng lời chúc (giấy ghi chú) bên phải.
- * Nơi lưu: Google Sheet qua Apps Script (wishes.endpoint). Logic: src/scripts/wishes.ts (chỉ tải khi cuộn gần tới).
+ * SỔ LƯU BÚT (Sổ lời chúc) — chỉ là GIAO DIỆN. Luồng gửi/tải nằm ở src/scripts/wishes.ts (không đổi).
+ * Hook bắt buộc giữ nguyên: id="loi-chuc", data-wishes-endpoint, form (name/relation/side/message),
+ * [data-wish-status], [data-wish-board-status], [data-wish-list], <template data-wish-entry> với [data-entry-name|time|details|message].
+ * Trạng thái để tạo kiểu: section[data-state] = loading | ready | empty | error | sending | sent | send-error | preview.
+ * Phần script cuối file chỉ lo trang trí (đếm ký tự, gợi ý, điền tên từ ?ten=, Xem thêm…), không đụng tới việc gửi.
  */
-import Icon from './Icon.astro';
 import { wishes } from '../data/wedding';
-const demo = !wishes.endpoint;
+const L = wishes.limits;
 ---
-<section class="ws" id="loi-chuc" data-wishes data-endpoint={wishes.endpoint ?? ''} aria-labelledby="ws-title">
+<section class="ws" id="loi-chuc" aria-labelledby="wishes-heading" data-wishes-endpoint={wishes.endpoint}
+  data-state={wishes.endpoint ? 'loading' : 'preview'}>
   <div class="wrap ws__wrap">
     <header class="ws__head">
-      <div class="ws__hl">
-        <p class="eyebrow" data-fade>04 / 05 — Sổ lưu bút</p>
-        <h2 class="ws__title" id="ws-title">Gửi đôi lời <span class="script">to the couple</span></h2>
-      </div>
-      <p class="ws__lead" data-fade>Vài dòng của bạn sẽ được Đông &amp; Châu đọc lại vào ngày cưới — và giữ mãi trong cuốn sổ lưu bút này.</p>
+      <p class="eyebrow">04 / 05 — Sổ lưu bút</p>
+      <h2 class="ws__title" id="wishes-heading">Gửi đôi lời <span class="script" aria-hidden="true">to the couple</span></h2>
+      <p class="ws__lead">Vài dòng của bạn sẽ được Đông &amp; Châu đọc lại vào ngày cưới — và giữ mãi trong cuốn sổ này.</p>
     </header>
 
-    <div class="ws__letter" data-fade>
-      <form class="ws__form" data-wish-form novalidate>
-        <div class="ws__stamp" aria-hidden="true"><span>Đà Nẵng</span><b>ĐC</b><span>29·12·2026</span></div>
-        <p class="ws__to hand">Gửi Đông &amp; Châu,</p>
+    <!-- ============ FORM: trang sổ lưu bút ============ -->
+    <div class="ws__paper">
+      <div class="ws__stamp" aria-hidden="true"><span>Đà Nẵng</span><b>Đ♥C</b><span>29·12·2026</span></div>
+      <form class="wf" aria-label="Gửi lời chúc" novalidate>
+        <p class="wf__to hand" aria-hidden="true">Gửi Đông &amp; Châu,</p>
 
-        <label class="ws__field">
-          <span class="ws__lbl">Tên của bạn</span>
-          <input name="name" type="text" required maxlength="60" autocomplete="name" placeholder="Ví dụ: Anh Tuấn & chị Linh" />
-          <em class="ws__err" data-err="name">Bạn điền tên giúp mình nhé</em>
-        </label>
+        <div class="wf__field">
+          <label class="wf__label" for="wish-name">Tên của bạn <abbr title="bắt buộc" aria-hidden="true">*</abbr></label>
+          <input class="wf__input" id="wish-name" name="name" autocomplete="name" required maxlength={L.name} placeholder="Ví dụ: Anh Tuấn &amp; chị Linh" data-ui-name />
+        </div>
 
-        <fieldset class="ws__field">
-          <legend class="ws__lbl">Bạn là <i>(không bắt buộc)</i></legend>
-          <div class="ws__chips">
-            {wishes.relations.map((r) => (
-              <label class="ws__chip"><input type="radio" name="relation" value={r} /><span>{r}</span></label>
-            ))}
+        <div class="wf__row">
+          <div class="wf__field">
+            <label class="wf__label" for="wish-relation">Quan hệ <span class="wf__opt">(tùy chọn)</span></label>
+            <input class="wf__input" id="wish-relation" name="relation" maxlength={L.relation} placeholder="Bạn bè, đồng nghiệp…" data-ui-relation />
+            <div class="wf__chips" role="group" aria-label="Chọn nhanh quan hệ">
+              {wishes.relations.map((r) => <button type="button" class="wf__chip" data-ui-pick={r}>{r}</button>)}
+            </div>
           </div>
-        </fieldset>
+          <fieldset class="wf__field wf__side">
+            <legend class="wf__label">Bên <span class="wf__opt">(tùy chọn)</span></legend>
+            <div class="wf__seg">
+              <label><input type="radio" name="side" value="" checked /><span>Không chọn</span></label>
+              <label><input type="radio" name="side" value="nha-trai" /><span>Nhà trai</span></label>
+              <label><input type="radio" name="side" value="nha-gai" /><span>Nhà gái</span></label>
+            </div>
+          </fieldset>
+        </div>
 
-        <label class="ws__field">
-          <span class="ws__lbl">Lời chúc</span>
-          <span class="ws__paper">
-            <textarea name="message" required maxlength={wishes.max} rows="5" placeholder="Viết đôi dòng gửi hai bạn…"></textarea>
-          </span>
-          <span class="ws__meta"><em class="ws__err" data-err="message">Lời chúc còn trống</em><small class="num"><b data-wish-count>0</b>/{wishes.max}</small></span>
-        </label>
-
-        <div class="ws__ideas">
-          <span class="ws__lbl">Chưa biết viết gì? Chạm để chèn:</span>
-          <div class="ws__idea-row">
-            {wishes.ideas.map((t) => <button type="button" class="ws__idea" data-idea={t}>{t}</button>)}
+        <div class="wf__field">
+          <div class="wf__labelrow">
+            <label class="wf__label" for="wish-message">Lời chúc <abbr title="bắt buộc" aria-hidden="true">*</abbr></label>
+            <span class="wf__count num" aria-hidden="true"><b data-ui-count>0</b>/{L.message}</span>
+          </div>
+          <div class="wf__lined">
+            <textarea class="wf__area" id="wish-message" name="message" rows="5" required maxlength={L.message} placeholder="Viết đôi dòng gửi hai bạn…" aria-describedby="wish-ideas-label" data-ui-message></textarea>
+          </div>
+          <p class="wf__ideas-label" id="wish-ideas-label">Chưa biết viết gì? Chạm để chèn gợi ý:</p>
+          <div class="wf__ideas">
+            {wishes.ideas.map((t) => <button type="button" class="wf__idea" data-ui-idea={t}>{t}</button>)}
           </div>
         </div>
 
-        <input class="ws__hp" type="text" name="website" tabindex="-1" autocomplete="off" aria-hidden="true" />
-
-        <div class="ws__foot">
-          <p class="ws__note" data-wish-note>{demo ? 'Bản xem thử: lời chúc mới chỉ lưu trên máy này.' : 'Lời chúc sẽ hiện ngay trên bảng.'}</p>
-          <button class="btn btn--wine ws__send" type="submit" data-wish-send><span data-send-label>Gửi lời chúc</span><Icon name="send" /></button>
+        <div class="wf__submit">
+          <button class="wf__send" type="submit" aria-describedby="wish-hint" disabled>
+            <span class="wf__spinner" aria-hidden="true"></span>
+            <span class="wf__send-label">Gửi lời chúc</span>
+            <svg class="wf__send-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M21 3L10 14M21 3l-7 18-4-7-7-4z" /></svg>
+          </button>
+          <p class="wf__hint" id="wish-hint">{wishes.endpoint ? 'Lời chúc sẽ hiện ngay trên bảng.' : 'Bản xem thử. Lời chúc chỉ hiện trên trang này.'}</p>
+          <p class="wf__status" data-wish-status role="status"></p>
+          <noscript><p class="wf__status">Bật JavaScript để gửi và xem lời chúc.</p></noscript>
         </div>
       </form>
-
-      <div class="ws__done" data-wish-done hidden>
-        <svg class="ws__env" viewBox="0 0 120 84" aria-hidden="true"><rect x="2" y="2" width="116" height="80" rx="6" /><path d="M4 6l56 42 56-42" /><path class="ws__seal" d="M60 58c-6-4-11-7-11-12a5.5 5.5 0 0 1 11-1 5.5 5.5 0 0 1 11 1c0 5-5 8-11 12z" /></svg>
-        <p class="ws__thanks script">Thank you</p>
-        <p>Lời chúc của <b data-done-name></b> đã đến tay Đông &amp; Châu.</p>
-        <button type="button" class="btn btn--line" data-wish-again><Icon name="plus" /> Viết thêm lời chúc</button>
-      </div>
     </div>
 
-    <aside class="ws__wall" aria-label="Lời chúc đã gửi">
-      <div class="ws__wall-head"><span class="eyebrow">Bảng lời chúc</span><span class="num ws__total"><b data-wish-total>0</b> lời chúc</span></div>
-      <div class="ws__list" data-wish-list aria-live="polite"></div>
-      <p class="ws__empty hand" data-wish-empty>Chưa có lời chúc nào — hãy là người đầu tiên nhé!</p>
-    </aside>
+    <!-- ============ BẢNG LỜI CHÚC ============ -->
+    <div class="wb" aria-labelledby="wish-board-heading">
+      <div class="wb__head">
+        <h3 class="wb__title" id="wish-board-heading">Lời chúc đã gửi</h3>
+        <span class="wb__count num" data-ui-total aria-hidden="true"></span>
+      </div>
+      <p class="wb__status" data-wish-board-status role="status">
+        {wishes.endpoint ? 'Đang tải lời chúc…' : 'Chưa có lời chúc.'}
+      </p>
+      <div class="wb__empty" aria-hidden="true">
+        <svg viewBox="0 0 64 48"><rect x="2" y="2" width="60" height="44" rx="4" /><path d="M4 6l28 22L60 6" /><path class="wb__heart" d="M32 36c-4-2.6-7.5-4.8-7.5-8a3.7 3.7 0 0 1 7.5-.8 3.7 3.7 0 0 1 7.5.8c0 3.2-3.5 5.4-7.5 8z" /></svg>
+      </div>
+      <div class="wb__skeleton" aria-hidden="true"><i></i><i></i><i></i></div>
+      <ul class="wb__list" data-wish-list aria-label="Danh sách lời chúc"></ul>
+      <button type="button" class="wb__more" data-ui-more hidden>Xem thêm lời chúc</button>
+      <button type="button" class="wb__retry" data-ui-retry>Tải lại trang</button>
+      <template data-wish-entry>
+        <li class="we">
+          <p class="we__message" data-entry-message></p>
+          <div class="we__meta">
+            <strong class="we__name" data-entry-name></strong>
+            <p class="we__details" data-entry-details></p>
+            <time class="we__time" data-entry-time></time>
+          </div>
+        </li>
+      </template>
+    </div>
   </div>
 </section>
 
+<script>
+  import '../scripts/wishes';
+</script>
+
+<script>
+  /* Chỉ trang trí — không gửi, không tải dữ liệu */
+  const sec = document.getElementById('loi-chuc');
+  if (sec) {
+    const q = <T extends HTMLElement>(s: string) => sec.querySelector<T>(s);
+    const name = q<HTMLInputElement>('[data-ui-name]');
+    const rel = q<HTMLInputElement>('[data-ui-relation]');
+    const msg = q<HTMLTextAreaElement>('[data-ui-message]');
+    const count = q('[data-ui-count]');
+    const list = q('[data-wish-list]');
+    const total = q('[data-ui-total]');
+    const more = q<HTMLButtonElement>('[data-ui-more]');
+    // tên khách từ link mời ?ten=
+    const guest = (new URLSearchParams(location.search).get('ten') || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+    if (guest && name && !name.value) { name.defaultValue = guest; name.value = guest; }
+    const upd = () => { if (count && msg) count.textContent = String(msg.value.length); };
+    msg?.addEventListener('input', upd);
+    sec.querySelector('form')?.addEventListener('reset', () => setTimeout(upd));
+    sec.querySelectorAll<HTMLButtonElement>('[data-ui-pick]').forEach((b) => b.addEventListener('click', () => {
+      if (!rel) return; rel.value = b.dataset.uiPick || ''; rel.focus();
+    }));
+    sec.querySelectorAll<HTMLButtonElement>('[data-ui-idea]').forEach((b) => b.addEventListener('click', () => {
+      if (!msg) return;
+      const t = b.dataset.uiIdea || '';
+      msg.value = ((msg.value.trim() ? msg.value.trim() + ' ' : '') + t).slice(0, msg.maxLength);
+      upd(); msg.focus();
+    }));
+    q('[data-ui-retry]')?.addEventListener('click', () => location.reload());
+    // đếm số lời chúc + "Xem thêm" trên điện thoại + làm nổi lời chúc vừa gửi
+    const LIMIT = 6;
+    const sync = () => {
+      if (!list) return;
+      const n = list.children.length;
+      if (total) total.textContent = n ? `${n} lời chúc` : '';
+      if (more) more.hidden = n <= LIMIT || sec.classList.contains('is-all');
+      if (fresh && list.firstElementChild) {
+        fresh = false;
+        list.firstElementChild.classList.add('is-new');
+        list.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+    let fresh = false;
+    sec.querySelector('form')?.addEventListener('submit', () => { fresh = true; });
+    if (list) new MutationObserver(sync).observe(list, { childList: true });
+    more?.addEventListener('click', () => { sec.classList.add('is-all'); more.hidden = true; });
+  }
+</script>
+
 <style>
-  .ws { padding: var(--section-y) 0; background: #ECE8E1; color: var(--c-ink); overflow: clip; }
-  .ws__wrap { display: grid; gap: 36px; }
-  .ws__head, .ws__hl { display: flex; flex-direction: column; gap: 14px; }
+  /* ---------- Khung section ---------- */
+  .ws { padding: var(--section-y) 0; background: #ECE8E1; color: var(--c-ink); scroll-margin-top: 70px; overflow: clip; }
+  .ws__wrap { display: grid; gap: 32px; }
+  .ws__head { display: grid; gap: 12px; }
   .ws__title { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 400; font-size: var(--t-h2); line-height: 1; letter-spacing: -.01em; }
-  .ws__title .script { display: block; color: var(--c-bordeaux); font-size: .78em; margin-top: .12em; transform: rotate(-3deg); transform-origin: left; }
-  .ws__lead { max-width: 36ch; color: var(--c-graphite); }
+  .ws__title .script { display: block; margin-top: .14em; font-size: .78em; color: var(--c-bordeaux); transform: rotate(-3deg); transform-origin: left; }
+  .ws__lead { max-width: 38ch; color: var(--c-graphite); }
 
-  /* Thư tay */
-  .ws__letter { position: relative; background: #FBF9F4; border-radius: 4px; padding: 28px 20px 24px;
-    box-shadow: 0 30px 60px -30px rgb(59 10 16 / .35), 0 2px 0 rgb(23 24 26 / .04); }
-  .ws__letter::before { content: ''; position: absolute; inset: 8px; border: 1px solid rgb(122 20 32 / .14); border-radius: 2px; pointer-events: none; }
-  .ws__form { display: flex; flex-direction: column; gap: 22px; position: relative; }
-  .ws__stamp { position: absolute; top: -6px; right: -2px; width: 78px; height: 78px; border-radius: 50%; border: 1.5px dashed var(--c-bordeaux); color: var(--c-bordeaux);
-    display: grid; place-items: center; align-content: center; gap: 1px; transform: rotate(12deg); font-size: 8px; letter-spacing: .14em; text-transform: uppercase; opacity: .8; }
-  .ws__stamp b { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 400; font-size: 20px; letter-spacing: .04em; line-height: 1; }
-  .ws__to { font-size: 26px; color: var(--c-bordeaux); padding-right: 84px; }
-  .ws__field { display: flex; flex-direction: column; gap: 8px; border: 0; padding: 0; margin: 0; min-width: 0; }
-  .ws__lbl { font-size: 11px; font-weight: 500; letter-spacing: .2em; text-transform: uppercase; color: var(--c-graphite); }
-  .ws__lbl i { font-style: normal; letter-spacing: .04em; text-transform: none; opacity: .7; }
-  .ws__field input[type=text] { font: 400 18px/1.4 var(--f-text); color: var(--c-ink); background: transparent; border: 0; border-bottom: 1px solid rgb(23 24 26 / .35); padding: 8px 0; border-radius: 0; transition: border-color var(--d-micro); }
-  .ws__field input[type=text]:focus { outline: none; border-color: var(--c-bordeaux); }
-  .ws__chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .ws__chip { position: relative; }
-  .ws__chip input { position: absolute; opacity: 0; pointer-events: none; }
-  .ws__chip span { display: inline-flex; align-items: center; min-height: 38px; padding: 0 16px; border: 1px solid rgb(23 24 26 / .25); border-radius: 999px; font-size: 14px; cursor: pointer; transition: all var(--d-micro); }
-  .ws__chip input:checked + span { background: var(--c-bordeaux); border-color: var(--c-bordeaux); color: var(--c-porcelain); }
-  .ws__chip input:focus-visible + span { outline: 2px solid var(--c-bordeaux); outline-offset: 2px; }
-  /* giấy kẻ dòng cho chữ viết tay */
-  .ws__paper { display: block; --lh: 34px; background: repeating-linear-gradient(180deg, transparent 0 calc(var(--lh) - 1px), rgb(122 20 32 / .16) calc(var(--lh) - 1px) var(--lh)); background-position: 0 -5px; }
-  .ws__paper textarea { display: block; width: 100%; resize: vertical; min-height: calc(var(--lh) * 5); border: 0; background: transparent; padding: 0 2px;
-    font: 400 22px/var(--lh) var(--f-hand); color: #2A2B2E; }
-  .ws__paper textarea:focus { outline: none; }
-  .ws__paper textarea::placeholder { color: rgb(85 88 90 / .55); }
-  .ws__meta { display: flex; justify-content: space-between; align-items: center; min-height: 18px; font-size: 12px; color: var(--c-graphite); }
-  .ws__meta small { margin-left: auto; }
-  .ws__err { display: none; font-style: normal; font-size: 12px; color: var(--c-rose); }
-  .ws__field.is-invalid .ws__err { display: inline; }
-  .ws__field.is-invalid input, .ws__field.is-invalid .ws__paper { border-color: var(--c-rose); }
-  .ws__ideas { display: flex; flex-direction: column; gap: 10px; }
-  .ws__idea-row { display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none; margin-inline: -20px; padding: 2px 20px; }
-  .ws__idea-row::-webkit-scrollbar { display: none; }
-  .ws__idea { flex: none; font: 400 17px/1.2 var(--f-hand); color: var(--c-ink); background: var(--c-mist); border: 0; border-radius: 6px; padding: 9px 14px; cursor: pointer; transition: transform var(--d-micro), background var(--d-micro); }
-  .ws__idea:hover { background: var(--c-champagne); transform: translateY(-2px); }
-  .ws__hp { position: absolute; left: -9999px; width: 1px; height: 1px; opacity: 0; }
-  .ws__foot { display: flex; flex-direction: column-reverse; gap: 12px; align-items: stretch; padding-top: 4px; }
-  .ws__note { font-size: 12px; color: var(--c-graphite); text-align: center; }
-  .ws__send { width: 100%; min-height: 52px; }
-  .ws__send[disabled] { opacity: .6; pointer-events: none; }
-  .ws__done { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 12px; padding: 28px 8px; }
-  .ws__done[hidden] { display: none; }
-  .ws__env { width: 120px; fill: #fff; stroke: var(--c-bordeaux); stroke-width: 1.5; }
-  .ws__seal { fill: var(--c-bordeaux); stroke: none; }
-  .ws__thanks { font-size: 56px; color: var(--c-bordeaux); }
+  /* ---------- Trang giấy chứa form ---------- */
+  .ws__paper { position: relative; background: #FBF9F4; border-radius: 4px; padding: 28px 20px 24px;
+    box-shadow: 0 30px 60px -32px rgb(59 10 16 / .38), 0 1px 0 rgb(23 24 26 / .04); }
+  .ws__paper::before { content: ''; position: absolute; inset: 8px; border: 1px solid rgb(122 20 32 / .16); border-radius: 2px; pointer-events: none; }
+  .ws__stamp { position: absolute; top: -10px; right: 6px; width: 76px; height: 76px; border-radius: 50%; border: 1.5px dashed var(--c-bordeaux); color: var(--c-bordeaux);
+    display: grid; place-items: center; align-content: center; gap: 1px; transform: rotate(12deg); font-size: 8px; letter-spacing: .14em; text-transform: uppercase; background: #FBF9F4; }
+  .ws__stamp b { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 600; font-size: 17px; letter-spacing: .02em; line-height: 1; }
 
-  /* Bảng lời chúc */
-  .ws__wall { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
-  .ws__wall-head { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid rgb(23 24 26 / .2); padding-bottom: 10px; }
-  .ws__total { font-size: 13px; color: var(--c-graphite); }
-  .ws__list { display: flex; gap: 14px; overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding: 10px var(--gutter) 24px; }
-  .ws__list::-webkit-scrollbar { display: none; }
-  .ws__list:empty { display: none; }
-  .ws__list :global(.note) { flex: none; width: min(78vw, 300px); scroll-snap-align: start; position: relative; padding: 26px 20px 18px; border-radius: 2px; background: var(--bg, #FFF7E0);
-    box-shadow: 0 14px 24px -14px rgb(23 24 26 / .35); rotate: var(--r, 0deg); display: flex; flex-direction: column; gap: 12px; }
-  .ws__list :global(.note::before) { content: ''; position: absolute; top: -9px; left: 50%; width: 64px; height: 20px; translate: -50% 0; rotate: -3deg; background: rgb(247 246 242 / .7); box-shadow: 0 1px 2px rgb(0 0 0 / .08); }
-  .ws__list :global(.note__msg) { font: 400 21px/1.35 var(--f-hand); color: #2A2B2E; white-space: pre-line; overflow-wrap: anywhere; }
-  .ws__list :global(.note__by) { margin-top: auto; font-size: 13px; font-weight: 500; }
-  .ws__list :global(.note__by span) { display: block; font-weight: 400; font-size: 11px; letter-spacing: .12em; text-transform: uppercase; color: var(--c-graphite); margin-top: 2px; }
-  .ws__list :global(.note--demo) { outline: 1px dashed rgb(23 24 26 / .25); }
-  .ws__empty { font-size: 22px; color: var(--c-graphite); padding: 24px 0; }
-  .ws__empty[hidden] { display: none; }
+  .wf { position: relative; display: grid; gap: 22px; }
+  .wf__to { font-size: 26px; line-height: 1.2; color: var(--c-bordeaux); padding-right: 80px; }
+  .wf__field { display: grid; gap: 8px; min-width: 0; margin: 0; padding: 0; border: 0; }
+  .wf__row { display: grid; gap: 22px; }
+  .wf__label { font-size: 12px; font-weight: 600; letter-spacing: .16em; text-transform: uppercase; color: var(--c-ink); padding: 0; }
+  .wf__label abbr { color: var(--c-bordeaux); text-decoration: none; }
+  .wf__opt { font-weight: 400; letter-spacing: .02em; text-transform: none; color: var(--c-graphite); }
+  .wf__labelrow { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .wf__count { font-size: 12px; color: var(--c-graphite); }
+  .wf__input { width: 100%; min-height: 48px; padding: 10px 2px; border: 0; border-bottom: 1.5px solid rgb(23 24 26 / .4); border-radius: 0; background: transparent;
+    font: 400 17px/1.4 var(--f-text); color: var(--c-ink); transition: border-color var(--d-micro); }
+  .wf__input::placeholder, .wf__area::placeholder { color: #8A8C8E; }
+  .wf__input:focus-visible { outline: none; border-color: var(--c-bordeaux); box-shadow: 0 2px 0 var(--c-bordeaux); }
 
+  .wf__chips, .wf__ideas { display: flex; flex-wrap: wrap; gap: 8px; }
+  .wf__chip { min-height: 40px; padding: 0 14px; border-radius: 999px; border: 1px solid rgb(23 24 26 / .28); background: transparent; color: var(--c-ink); font: 500 13px var(--f-text); cursor: pointer; transition: background var(--d-micro), border-color var(--d-micro); }
+  .wf__chip:hover { border-color: var(--c-bordeaux); }
+  .wf__chip:focus-visible, .wf__idea:focus-visible, .wf__send:focus-visible, .wb__more:focus-visible, .wb__retry:focus-visible { outline: 2px solid var(--c-bordeaux); outline-offset: 2px; }
+
+  /* nút chọn bên: 3 ô dính nhau */
+  .wf__seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid rgb(23 24 26 / .28); border-radius: 999px; padding: 3px; }
+  .wf__seg label { position: relative; }
+  .wf__seg input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+  .wf__seg span { display: grid; place-items: center; min-height: 42px; padding: 0 6px; border-radius: 999px; font-size: 13px; font-weight: 500; text-align: center; transition: background var(--d-micro), color var(--d-micro); }
+  .wf__seg input:checked + span { background: var(--c-bordeaux); color: var(--c-porcelain); }
+  .wf__seg input:focus-visible + span { outline: 2px solid var(--c-bordeaux); outline-offset: 2px; }
+
+  /* lời chúc: giấy kẻ dòng, chữ viết tay */
+  .wf__lined { --lh: 34px; background: repeating-linear-gradient(180deg, transparent 0 calc(var(--lh) - 1px), rgb(122 20 32 / .18) calc(var(--lh) - 1px) var(--lh)); background-position: 0 -5px; border-bottom: 1.5px solid rgb(23 24 26 / .4); }
+  .wf__lined:focus-within { border-color: var(--c-bordeaux); box-shadow: 0 2px 0 var(--c-bordeaux); }
+  .wf__area { display: block; width: 100%; min-height: calc(var(--lh) * 5); resize: vertical; border: 0; background: transparent; padding: 0 2px; font: 400 21px/var(--lh) var(--f-hand); color: #2A2B2E; }
+  .wf__area:focus { outline: none; }
+  .wf__ideas-label { font-size: 13px; color: var(--c-graphite); margin-top: 4px; }
+  .wf__ideas { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: -20px; padding: 2px 20px 4px; }
+  .wf__ideas::-webkit-scrollbar { display: none; }
+  .wf__idea { flex: none; min-height: 44px; padding: 8px 14px; border: 0; border-radius: 8px; background: var(--c-mist); color: var(--c-ink); font: 400 18px/1.2 var(--f-hand); cursor: pointer; transition: background var(--d-micro), transform var(--d-micro); }
+  .wf__idea:hover { background: var(--c-champagne); transform: translateY(-1px); }
+
+  .wf__submit { display: grid; gap: 10px; }
+  .wf__send { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 54px; padding: 0 28px; border: 0; border-radius: 999px;
+    background: var(--c-bordeaux); color: var(--c-porcelain); font: 600 15px var(--f-text); letter-spacing: .04em; cursor: pointer; transition: background var(--d-micro), transform var(--d-micro); }
+  .wf__send:hover { background: var(--c-oxblood); }
+  .wf__send:active { transform: scale(.98); }
+  .wf__send:disabled { cursor: default; opacity: .72; }
+  .wf__send-icon { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+  .wf__spinner { display: none; width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgb(247 246 242 / .4); border-top-color: var(--c-porcelain); animation: wspin .8s linear infinite; }
+  .ws[data-state='sending'] .wf__spinner { display: block; }
+  .ws[data-state='sending'] .wf__send-icon { display: none; }
+  @keyframes wspin { to { transform: rotate(360deg); } }
+  .wf__hint { font-size: 13px; color: var(--c-graphite); text-align: center; }
+  .wf__status { font-size: 14px; line-height: 1.5; text-align: center; border-radius: 10px; padding: 10px 14px; }
+  .wf__status:empty { display: none; }
+  .ws[data-state='sending'] .wf__status { background: var(--c-mist); color: var(--c-ink); }
+  .ws[data-state='sent'] .wf__status { background: #E4EEE6; color: #1E4D2B; }
+  .ws[data-state='sent'] .wf__status::before { content: '✓  '; font-weight: 700; }
+  .ws[data-state='send-error'] .wf__status, .ws[data-state='invalid'] .wf__status { background: #F6E3E0; color: #8A1C1C; }
+
+  /* ---------- Bảng lời chúc ---------- */
+  .wb { display: grid; gap: 14px; min-width: 0; align-content: start; }
+  .wb__head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; border-bottom: 1px solid rgb(23 24 26 / .25); padding-bottom: 10px; }
+  .wb__title { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 500; font-size: clamp(1.5rem, 1.2rem + 1vw, 2rem); line-height: 1.2; }
+  .wb__count { font-size: 13px; color: var(--c-graphite); }
+  .wb__status { font-size: 15px; color: var(--c-graphite); }
+  .wb__status[hidden] { display: none; }
+  .ws[data-state='error'] .wb__status { color: #8A1C1C; }
+  .wb__empty, .wb__skeleton, .wb__retry { display: none; }
+  .ws[data-state='empty'] .wb__empty, .ws[data-state='preview']:not(:has(.we)) .wb__empty { display: grid; justify-items: start; }
+  .ws[data-state='empty'] .wb__status::after, .ws[data-state='preview'] .wb__status:not([hidden])::after { content: ' Hãy là người đầu tiên gửi lời chúc nhé!'; }
+  .wb__empty svg { width: 72px; fill: #FBF9F4; stroke: var(--c-bordeaux); stroke-width: 1.4; }
+  .wb__empty .wb__heart { fill: var(--c-blush); stroke: none; }
+  .ws[data-state='loading'] .wb__skeleton { display: grid; gap: 12px; }
+  .wb__skeleton i { display: block; height: 110px; border-radius: 4px; background: linear-gradient(100deg, #F3EFE8 30%, #FBF9F4 50%, #F3EFE8 70%) 0 0 / 300% 100%; animation: wshim 1.4s linear infinite; }
+  @keyframes wshim { to { background-position: -150% 0; } }
+  .ws[data-state='error'] .wb__retry { display: inline-flex; }
+  .wb__retry, .wb__more { justify-self: start; align-items: center; min-height: 44px; padding: 0 20px; border-radius: 999px; border: 1px solid var(--c-ink); background: transparent; color: var(--c-ink); font: 500 14px var(--f-text); cursor: pointer; }
+  .wb__more:hover, .wb__retry:hover { background: var(--c-ink); color: var(--c-porcelain); }
+  .wb__more[hidden] { display: none; }
+
+  .wb__list { list-style: none; margin: 0; padding: 0; display: grid; gap: 14px; }
+  .wb__list :global(.we) { position: relative; display: grid; gap: 12px; padding: 22px 18px 16px; border-radius: 3px; background: #FFF8E6; box-shadow: 0 14px 24px -16px rgb(23 24 26 / .4); overflow-wrap: anywhere; }
+  .wb__list :global(.we:nth-child(4n+2)) { background: #F7E6E2; }
+  .wb__list :global(.we:nth-child(4n+3)) { background: #E6EFEB; }
+  .wb__list :global(.we:nth-child(4n+4)) { background: #F2EDE3; }
+  .wb__list :global(.we::before) { content: ''; position: absolute; top: -8px; left: 50%; width: 60px; height: 18px; translate: -50% 0; rotate: -3deg; background: rgb(247 246 242 / .75); box-shadow: 0 1px 2px rgb(0 0 0 / .08); }
+  .wb__list :global(.we__message) { font: 400 20px/1.4 var(--f-hand); color: #2A2B2E; white-space: pre-wrap; }
+  .wb__list :global(.we__meta) { display: grid; grid-template-columns: 1fr auto; gap: 2px 12px; align-items: baseline; border-top: 1px dashed rgb(23 24 26 / .2); padding-top: 10px; }
+  .wb__list :global(.we__name) { font-weight: 600; font-size: 14px; }
+  .wb__list :global(.we__name::before) { content: '— '; color: var(--c-bordeaux); }
+  .wb__list :global(.we__time) { grid-column: 2; grid-row: 1; font-size: 12px; color: var(--c-graphite); }
+  .wb__list :global(.we__details) { grid-column: 1 / -1; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--c-graphite); }
+  .wb__list :global(.we__details:empty) { display: none; }
+  .wb__list :global(.we.is-new) { animation: wnew 1s var(--ease-silk) both; outline: 2px solid var(--c-bordeaux); outline-offset: 3px; }
+  @keyframes wnew { from { transform: translateY(-14px) scale(.96); opacity: 0; } }
+  /* điện thoại: chỉ hiện 6 lời chúc, bấm Xem thêm để mở hết */
+  .ws:not(.is-all) .wb__list :global(.we:nth-child(n+7)) { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .wb__skeleton i, .wf__spinner { animation: none; }
+    .wb__list :global(.we.is-new) { animation: none; }
+  }
+
+  /* ---------- Máy tính bảng ---------- */
+  @media (min-width: 700px) {
+    .ws__paper { padding: 44px 44px 36px; }
+    .ws__paper::before { inset: 12px; }
+    .ws__stamp { top: -16px; right: -8px; width: 92px; height: 92px; font-size: 9px; }
+    .ws__stamp b { font-size: 20px; }
+    .wf__row { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+    .wf__ideas { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
+    .wf__submit { grid-template-columns: auto 1fr; align-items: center; column-gap: 18px; }
+    .wf__send { width: auto; }
+    .wf__hint { text-align: left; }
+    .wf__status { grid-column: 1 / -1; text-align: left; }
+    .wb__list { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+  }
+
+  /* ---------- Máy tính: form trái, bảng phải (bảng dính khi cuộn) ---------- */
   @media (min-width: 1024px) {
-    .ws__wrap { grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); column-gap: 6vw; row-gap: 48px; align-items: start; }
-    .ws__head { grid-column: 1 / -1; flex-direction: row; align-items: flex-end; justify-content: space-between; gap: 40px; }
-    .ws__lead { max-width: 34ch; text-align: right; }
-    .ws__letter { padding: 48px 48px 40px; }
-    .ws__letter::before { inset: 12px; }
-    .ws__stamp { top: -14px; right: -10px; width: 96px; height: 96px; font-size: 9px; }
-    .ws__stamp b { font-size: 24px; }
-    .ws__to { font-size: 30px; }
-    .ws__idea-row { flex-wrap: wrap; overflow: visible; margin: 0; padding: 0; }
-    .ws__foot { flex-direction: row; align-items: center; justify-content: space-between; }
-    .ws__note { text-align: left; }
-    .ws__send { width: auto; padding: 0 32px; }
-    .ws__wall { position: sticky; top: 96px; }
-    .ws__list { flex-direction: column; overflow-x: visible; overflow-y: auto; scroll-snap-type: none; margin: 0; padding: 14px 10px 40px; max-height: min(72vh, 760px);
-      mask-image: linear-gradient(180deg, transparent 0, #000 24px, #000 calc(100% - 60px), transparent); }
-    .ws__list :global(.note) { width: auto; }
-    .ws__list :global(.note:nth-child(odd)) { margin-right: 10%; }
-    .ws__list :global(.note:nth-child(even)) { margin-left: 10%; }
+    .ws__wrap { grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); column-gap: 5vw; row-gap: 56px; align-items: start; }
+    .ws__head { grid-column: 1 / -1; grid-template-columns: 1fr auto; align-items: end; column-gap: 48px; }
+    .ws__head .eyebrow { grid-column: 1 / -1; }
+    .ws__lead { text-align: right; max-width: 34ch; }
+    .wf__to { font-size: 30px; }
+    .wb { position: sticky; top: 96px; }
+    .wb__list { grid-template-columns: 1fr; max-height: min(68vh, 720px); overflow-y: auto; padding: 12px 10px 28px 4px; overscroll-behavior: contain;
+      mask-image: linear-gradient(180deg, transparent 0, #000 16px, #000 calc(100% - 40px), transparent); }
+    .wb__list :global(.we:nth-child(odd)) { margin-right: 8%; rotate: -.6deg; }
+    .wb__list :global(.we:nth-child(even)) { margin-left: 8%; rotate: .6deg; }
+    .ws:not(.is-all) .wb__list :global(.we:nth-child(n+7)) { display: grid; } /* máy tính cuộn trong bảng, không cần Xem thêm */
+    .wb__more { display: none; }
   }
 </style>
