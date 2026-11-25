@@ -1,0 +1,98 @@
+---
+import { wishes } from '../data/wedding';
+---
+<section class="wishes" id="loi-chuc" aria-labelledby="wishes-heading" data-wishes-endpoint={wishes.endpoint}>
+  <div class="wrap wishes__wrap">
+    <h2 class="h2 wishes__heading" id="wishes-heading">Sổ <em class="it accent">lời chúc</em></h2>
+    <div class="wishes__layout">
+      <form class="wish-form" aria-label="Gửi lời chúc">
+        <div class="wish-form__field">
+          <label for="wish-name">Tên của bạn</label>
+          <input id="wish-name" name="name" autocomplete="name" required maxlength="80" />
+        </div>
+        <div class="wish-form__details">
+          <div class="wish-form__field">
+            <label for="wish-relation">Quan hệ <span>(tùy chọn)</span></label>
+            <input id="wish-relation" name="relation" maxlength="80" />
+          </div>
+          <div class="wish-form__field">
+            <label for="wish-side">Bên <span>(tùy chọn)</span></label>
+            <select id="wish-side" name="side">
+              <option value="">Chọn bên</option>
+              <option value="nha-trai">Nhà trai</option>
+              <option value="nha-gai">Nhà gái</option>
+            </select>
+          </div>
+        </div>
+        <div class="wish-form__field">
+          <label for="wish-message">Lời chúc</label>
+          <textarea id="wish-message" name="message" rows="4" required maxlength="1000"></textarea>
+        </div>
+        <div class="wish-form__submit">
+          <button class="btn btn--wine" type="submit" aria-describedby="wish-hint" disabled>Gửi lời chúc</button>
+          <p id="wish-hint">{wishes.endpoint ? 'Lời chúc sẽ hiện ngay trên bảng.' : 'Bản xem thử. Lời chúc chỉ hiện trên trang này.'}</p>
+          <p data-wish-status role="status"></p>
+          <noscript><p>Bật JavaScript để gửi và xem lời chúc.</p></noscript>
+        </div>
+      </form>
+      <div class="wish-board" aria-labelledby="wish-board-heading">
+        <h3 id="wish-board-heading">Lời chúc đã gửi</h3>
+        <p class="wish-board__notice" data-wish-board-status role="status">
+          {wishes.endpoint ? 'Đang tải lời chúc…' : 'Chưa có lời chúc.'}
+        </p>
+        <ul class="wish-board__list" data-wish-list aria-label="Danh sách lời chúc"></ul>
+        <template data-wish-entry>
+          <li class="wish-entry">
+            <div class="wish-entry__header">
+              <strong data-entry-name></strong>
+              <time data-entry-time></time>
+            </div>
+            <p class="wish-entry__details" data-entry-details></p>
+            <p class="wish-entry__message" data-entry-message></p>
+          </li>
+        </template>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import '../scripts/wishes';
+</script>
+
+<style>
+  .wishes { padding: var(--section-y) 0; background: var(--c-mist); scroll-margin-top: 70px; }
+  .wishes__wrap { max-width: 1160px; }
+  .wishes__heading { margin-bottom: clamp(28px, 5vw, 52px); }
+  .wishes__layout, .wish-form, .wish-form__details, .wish-form__field { display: grid; }
+  .wishes__layout { gap: clamp(32px, 6vw, 76px); }
+  .wish-form { min-width: 0; gap: 16px; }
+  .wish-form__details { grid-template-columns: repeat(auto-fit, minmax(min(100%, 160px), 1fr)); gap: 16px; }
+  .wish-form__field { gap: 5px; min-width: 0; }
+  .wish-form label { font-size: 14px; font-weight: 500; }
+  .wish-form label span, .wish-form__submit p, .wish-board__notice, .wish-entry__details, time { font-size: 13px; color: var(--c-graphite); }
+  .wish-form input, .wish-form textarea, .wish-form select {
+    width: 100%;
+    min-height: 46px;
+    padding: 10px 12px;
+    border: 1px solid var(--c-graphite);
+    border-radius: 4px;
+    background: var(--c-porcelain);
+    color: var(--c-ink);
+    font: inherit;
+    font-size: 16px;
+  }
+  .wish-form textarea { resize: vertical; }
+  .wish-form__submit { display: grid; justify-items: start; gap: 8px; }
+  .wish-form button:disabled { opacity: .68; cursor: default; }
+  [data-wish-status]:empty, [data-entry-details]:empty { display: none; }
+  .wish-board { min-width: 0; }
+  .wish-board h3 { font: 400 clamp(22px, 3vw, 30px)/1.3 var(--f-display); margin-bottom: 12px; }
+  .wish-board__list { list-style: none; margin: 0; padding: 0; }
+  .wish-entry { padding: 14px 0; border-top: 1px solid var(--c-mist-deep); overflow-wrap: anywhere; }
+  .wish-entry__header { display: flex; align-items: baseline; flex-wrap: wrap; justify-content: space-between; gap: 0 12px; }
+  .wish-entry__message { margin-top: 5px; white-space: pre-wrap; }
+  @media (min-width: 780px) {
+    .wishes__layout { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); align-items: start; }
+  }
+</style>

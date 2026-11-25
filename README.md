@@ -39,3 +39,11 @@ Thư mục `dist/` là site tĩnh — kéo thả lên **Netlify Drop**, hoặc k
 | Kéo để mở (Draggable): kéo lớp phủ chữ khổng lồ xuống để lộ ảnh + lời cảm ơn | `Footer.astro` |
 
 Tắt màn chờ: `site.preloader = false` trong `wedding.ts`. Tất cả tôn trọng `prefers-reduced-motion`.
+
+### Sổ lời chúc
+
+GitHub Pages build từ nhánh `main`. Đặt URL web app Apps Script (đuôi `/exec`) trong biến `PUBLIC_WISHES_ENDPOINT` ở môi trường GitHub Actions `github-pages`. Sau khi đổi biến, chạy lại workflow **Deploy wedding site**. Khi build cục bộ với biến này để trống, sổ lời chúc chạy ở chế độ xem thử.
+
+Mã API nằm trong `apps-script/`. Chạy `setup` trong trình soạn thảo Apps Script để gắn API với tab có sáu cột của sổ lời chúc. Web app chạy với quyền chủ sở hữu và mở đúng tab đã lưu trong Script Properties. Bỏ tick **Hiện** để ẩn lời chúc khỏi trang.
+
+Khi cập nhật API, dùng `clasp push`, rồi `clasp update-deployment --description "wishes update" <DEPLOYMENT_ID>` trong `apps-script/` để giữ nguyên URL.

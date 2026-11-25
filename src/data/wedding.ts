@@ -130,7 +130,12 @@ export const nav = [
   { id: 'khoanh-khac', label: 'Khoảnh khắc' },
   { id: 'su-kien', label: 'Sự kiện' },
   { id: 'mung-cuoi', label: 'Mừng cưới' },
+  { id: 'loi-chuc', label: 'Lời chúc' },
 ];
+
+export const wishes = {
+  endpoint: import.meta.env.PUBLIC_WISHES_ENDPOINT?.trim() ?? '',
+};
 
 export const gifts = [
   { who: 'Chú rể', name: '[TÊN CHỦ TÀI KHOẢN]', bank: '[NGÂN HÀNG]', account: '[SỐ TÀI KHOẢN]', qr: null as string | null },
