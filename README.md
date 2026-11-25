@@ -32,8 +32,9 @@ Mọi chữ, giờ, địa điểm, ảnh nằm trong **`src/data/wedding.ts`**.
 Xem trước giao diện sau đám cưới: thêm `?now=2026-12-30T10:00` vào link.
 
 ## Link riêng cho từng bên & từng khách
-- Khách nhà trai: `https://ten-mien/nha-trai/` (trang chủ `/` cũng là nhà trai).
-- Khách nhà gái: `https://ten-mien/nha-gai/` → Tiệc 27/12 (Nguyệt Hà) + Lễ Vu Quy, đếm ngược đến 27/12, thứ tự gia đình như thiệp nhà gái, ảnh chia sẻ riêng. (`?ben=nha-gai` vẫn dùng được.)
+- Chỉ có một trang `/`. Khách nhà trai: `https://ten-mien/` (mặc định).
+- Khách nhà gái: `https://ten-mien/?ben=nha-gai` → Tiệc 27/12 (Nguyệt Hà) + Lễ Vu Quy, đếm ngược đến 27/12, thứ tự gia đình như thiệp nhà gái.
+- **Đường dẫn sai** (vd. `/abc`): `404.html` tự chuyển về `/` (giữ `?ten=`; link cũ `/nha-gai/` được đổi thành `?ben=nha-gai`).
 - **Tên khách**: thêm `?ten=Anh Tuấn & chị Linh` → hiện "Kính gửi …" ở màn chờ, lời mời và lời cảm ơn cuối trang.
 - **Trang tạo link + mã QR**: `https://ten-mien/tao-link/` (không index Google). Nhập tên, chọn bên → sao chép link, tải QR (PNG 1024px để in lên thiệp). Dán cả danh sách khách → xuất CSV.
 - **Thêm vào lịch**: mỗi sự kiện có file `/lich/<id>.ics` (iPhone, Outlook, Android) có nhắc trước 1 ngày và 2 giờ, kèm link Google Calendar.

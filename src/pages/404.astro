@@ -1,0 +1,32 @@
+---
+/**
+ * GitHub Pages trả trang này (404.html) cho MỌI đường dẫn sai -> chuyển ngay về trang chủ (/).
+ * Giữ ?ten=...; link cũ dạng /nha-gai/ hoặc /nha-trai/ được đổi sang ?ben=... để không mất bên mời.
+ */
+const BASE = import.meta.env.BASE_URL.replace(/\/$/, '');
+const home = `${BASE}/`;
+---
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Đang chuyển về trang chủ…</title>
+    <script is:inline define:vars={{ home }}>
+      (function () {
+        var u = new URL(home, location.origin);
+        var q = new URLSearchParams(location.search);
+        var m = location.pathname.match(/nha-(gai|trai)/);
+        if (m && !q.get('ben')) q.set('ben', 'nha-' + m[1]);
+        q.forEach(function (v, k) { u.searchParams.set(k, v); });
+        u.hash = location.hash;
+        location.replace(u.toString());
+      })();
+    </script>
+    <meta http-equiv="refresh" content={`0; url=${home}`} />
+  </head>
+  <body style="background:#3B0A10;color:#EAD9B9;font:16px/1.5 system-ui,sans-serif;display:grid;place-items:center;min-height:100vh;margin:0">
+    <p>Đang chuyển về <a href={home} style="color:inherit">trang thiệp cưới</a>…</p>
+  </body>
+</html>

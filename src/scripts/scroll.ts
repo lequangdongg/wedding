@@ -4,7 +4,10 @@ import { SplitText } from 'gsap/SplitText';
 import { ScrambleTextPlugin } from 'gsap/ScrambleTextPlugin';
 import { S, $, $$, pad, reduced, isDesktop, body } from './shared';
 
-export function init() {
+// nhường luồng chính giữa các phần khởi tạo -> không có tác vụ dài làm khựng trang
+const nextTask = () => new Promise<void>((r) => setTimeout(r, 0));
+
+export async function init(): Promise<void> {
 gsap.registerPlugin(ScrollTrigger, SplitText, ScrambleTextPlugin);
 ScrollTrigger.config({ ignoreMobileResize: true });
 S.refresh = () => ScrollTrigger.refresh();
@@ -24,7 +27,8 @@ if (isDesktop() && matchMedia('(pointer: fine)').matches && !reduced) {
 /* ================= Chuyển động theo cuộn ================= */
 const mm = gsap.matchMedia();
 
-document.fonts.ready.then(() => {
+// (chạy ở tác vụ riêng -> không dồn thành 1 tác vụ dài lúc khởi tạo)
+document.fonts.ready.then(() => setTimeout(() => {
   // Tiêu đề: chữ trượt lên theo dòng
   $$('[data-split]').forEach((el) => {
     SplitText.create(el, {
@@ -34,8 +38,7 @@ document.fonts.ready.then(() => {
         : gsap.from(self.lines, { yPercent: 110, duration: 1.15, stagger: 0.09, ease: 'expo.out', scrollTrigger: { trigger: el, start: 'top 88%', once: true } }),
     });
   });
-  ScrollTrigger.refresh();
-});
+}, 60));
 
 // Hiện dần theo nhóm
 gsap.set('[data-fade]', { autoAlpha: 0, y: reduced ? 0 : 32 });
@@ -44,6 +47,7 @@ ScrollTrigger.batch('[data-fade]', {
   onEnter: (els) => gsap.to(els, { autoAlpha: 1, y: 0, duration: 1, stagger: 0.1, ease: 'expo.out', overwrite: true }),
 });
 
+await nextTask();
 // Ảnh lộ từ dưới lên + ảnh trong thu từ 1.3 -> 1
 $$('[data-clip]').forEach((el) => {
   if (reduced) return;
@@ -80,6 +84,12 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
   /* Marquee + dải ảnh: chạy vô hạn, tăng tốc + đổi chiều theo vận tốc cuộn (mỗi nhóm hàng có trigger riêng) */
   const groups = new Map<HTMLElement, gsap.core.Tween[]>();
   $$('[data-marquee]').forEach((r) => {
+    if (r.closest('[data-steady]') && !r.dataset.cloned) {
+      // dải ảnh: HTML chỉ có 1 bản -> nhân thành 4 bản (bản sao ẩn với trình đọc màn hình)
+      r.dataset.cloned = '1';
+      const items = [...r.children];
+      for (let k = 0; k < 3; k++) items.forEach((n) => { const c = n.cloneNode(true) as HTMLElement; c.setAttribute('aria-hidden', 'true'); r.append(c); });
+    }
     const dir = Number(r.dataset.marquee) || 1;
     const dur = Number(r.dataset.speed) || (dir > 0 ? 18 : 28);
     const tw = gsap.fromTo(r, { xPercent: dir > 0 ? 0 : -50 }, { xPercent: dir > 0 ? -50 : 0, duration: dur, ease: 'none', repeat: -1, paused: true });
@@ -122,8 +132,9 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
      2) chữ nhấn (**...**) lật lên thành bản đỏ đô nghiêng (2 bản xếp chồng), số thì xáo chữ */
   const story = $$('[data-reveal]');
   if (story.length) {
-    document.fonts.ready.then(() => {
-      story.forEach((el) => {
+    // Tách chữ (nặng) chỉ khi đoạn văn sắp vào màn hình -> không làm khựng lúc mở trang
+    const build = (el: HTMLElement) => {
+      {
         const split = SplitText.create(el, { type: 'lines,words', mask: 'lines', linesClass: 'ln', wordsClass: 'w' });
         const rolls: HTMLElement[][] = [];
         const nums: HTMLElement[] = [];
@@ -159,11 +170,24 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
         });
         nums.forEach((n) => tl.to(n, { duration: 1.1, scrambleText: { text: n.textContent || '', chars: '0123456789', speed: 0.5 } }, 0.55));
         ScrollTrigger.create({ trigger: el, start: 'top 85%', once: true, onEnter: () => tl.play() });
-      });
-      ScrollTrigger.refresh();
+      }
+    };
+    document.fonts.ready.then(() => {
+      const io = new IntersectionObserver((entries) => entries.forEach((e) => {
+        if (!e.isIntersecting) return;
+        io.unobserve(e.target);
+        setTimeout(() => build(e.target as HTMLElement), 0);
+      }), { rootMargin: '0px 0px 120% 0px' });
+      story.forEach((el) => io.observe(el));
     });
   }
 
+});
+
+await nextTask();
+mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: '(prefers-reduced-motion: no-preference)' }, (ctx) => {
+  const { desktop, motion } = ctx.conditions as Record<string, boolean>;
+  if (!motion) return;
   /* THE LOVE BOOK: ghim section, cuộn dọc -> sách trượt ngang; trang mở ra khi vào khung */
   const bk = $('[data-book]');
   if (bk) {
@@ -195,6 +219,7 @@ mm.add({ desktop: '(min-width: 1024px)', mobile: '(max-width: 1023px)', motion: 
 
 });
 
+await nextTask();
 /* Thẻ sự kiện + đếm ngược */
 if (!reduced) {
   ScrollTrigger.batch('.only-nam [data-card], .only-nu [data-card]', {
@@ -407,6 +432,7 @@ if (!reduced) {
   }
 })();
 
+await nextTask();
 /* ================= Thanh điều hướng + Menu + rèm chuyển cảnh ================= */
 const navEl = $('#nav');
 if (navEl) {
@@ -425,7 +451,19 @@ if (navEl) {
 }
 
 
+window.addEventListener('load', () => ScrollTrigger.refresh());
+
+// Các mục dùng content-visibility: auto đổi chiều cao khi được dựng thật -> làm mới vị trí các trigger
+if ('ResizeObserver' in window) {
+  let t = 0, first = true;
+  const ro = new ResizeObserver(() => {
+    if (first) { first = false; return; } // lần gọi đầu khi bắt đầu quan sát
+    clearTimeout(t); t = window.setTimeout(() => ScrollTrigger.refresh(), 150);
+  });
+  document.querySelectorAll('#su-kien, .fs, .cd, #loi-chuc, #mung-cuoi, body > footer').forEach((el) => ro.observe(el));
+}
+// sắp xếp + tính vị trí ở tác vụ sau (tách khỏi phần tạo trigger)
+await nextTask();
 ScrollTrigger.sort(); // trigger tạo không theo thứ tự trang (pin ở giữa) -> sắp lại để tính đúng vị trí
 ScrollTrigger.refresh();
-window.addEventListener('load', () => ScrollTrigger.refresh());
 }

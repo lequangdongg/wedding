@@ -72,7 +72,9 @@ import { BASE } from '../data/wedding';
       const side = () => (document.querySelector('input[name=side]:checked') as HTMLInputElement).value;
       const build = (name: string, s: string) => {
         const base = (document.querySelector('[data-base]') as HTMLElement).dataset.base || '';
-        const u = new URL(`${base}/${s}/`, baseEl.value || location.origin);
+        // chỉ có 1 trang (/); bên mời truyền bằng ?ben=nha-gai (mặc định nhà trai)
+        const u = new URL(`${base}/`, baseEl.value || location.origin);
+        if (s === 'nha-gai') u.searchParams.set('ben', s);
         if (name.trim()) u.searchParams.set('ten', name.trim());
         return u.toString();
       };

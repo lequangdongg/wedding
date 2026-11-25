@@ -18,7 +18,7 @@ import { moment } from '../data/wedding';
     </header>
 
     <div class="pd__stage">
-      <figure class="pd__card" data-dev-card tabindex="0" role="button" aria-label="Giữ và lắc để rửa tấm ảnh">
+      <figure class="pd__card" data-dev-card tabindex="0" aria-describedby="pd-how">
         <div class="pd__shot">
           <Photo src={moment.photo} alt={moment.alt} widths={[480, 720, 964]} sizes="(min-width: 1024px) 34vw, 78vw" pos="50% 40%" quality={80} class="pd__ph" />
           <div class="pd__film" data-dev-film aria-hidden="true"></div>
@@ -32,7 +32,7 @@ import { moment } from '../data/wedding';
     </div>
 
     <div class="pd__ui">
-      <p class="pd__hint" data-dev-hint><span class="pd__hand" aria-hidden="true">✋</span> <span data-dev-label>Giữ &amp; lắc tấm ảnh để rửa</span></p>
+      <p class="pd__hint" id="pd-how" data-dev-hint><span class="pd__hand" aria-hidden="true">✋</span> <span data-dev-label>Giữ &amp; lắc tấm ảnh để rửa</span></p>
       <div class="pd__meter" aria-hidden="true"><i data-dev-bar></i></div>
       <p class="pd__pct num" aria-live="polite"><b data-dev-pct>0</b>%</p>
       <button type="button" class="pd__skip" data-dev-skip>Rửa ngay</button>

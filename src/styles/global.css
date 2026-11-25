@@ -1,4 +1,6 @@
-/* Fonts: chỉ nạp subset latin + vietnamese, font-display: swap (fontsource mặc định) */
+/* Fonts: subset latin + vietnamese của fontsource, font-display: swap.
+   Patrick Hand (chữ viết tay, chỉ ở phía dưới trang) nạp sau bằng JS (app.ts) để không tranh băng thông lúc mở trang.
+   Great Vibes: bản cắt gọn chỉ còn chữ Latin cơ bản (src/assets/fonts/great-vibes-sub.woff2, ~22KB thay vì 42KB). */
 @import '@fontsource/be-vietnam-pro/latin-300.css';
 @import '@fontsource/be-vietnam-pro/vietnamese-300.css';
 @import '@fontsource/be-vietnam-pro/latin-400.css';
@@ -14,10 +16,8 @@
 @import '@fontsource/cormorant-garamond/vietnamese-500-italic.css';
 @import '@fontsource/cormorant-garamond/latin-600.css';
 @import '@fontsource/cormorant-garamond/vietnamese-600.css';
-@import '@fontsource/patrick-hand/latin-400.css';
-@import '@fontsource/patrick-hand/vietnamese-400.css';
 /* Great Vibes không có dấu tiếng Việt -> CHỈ dùng cho chữ tiếng Anh */
-@import '@fontsource/great-vibes/latin-400.css';
+@font-face { font-family: 'Great Vibes'; font-style: normal; font-display: swap; font-weight: 400; src: url('../assets/fonts/great-vibes-sub.woff2') format('woff2'); }
 
 :root {
   --c-porcelain: #F7F6F2; --c-mist: #DFE7E5; --c-mist-deep: #B9C8C7;
@@ -57,6 +57,9 @@ body {
   overflow-x: clip;
 }
 body.is-locked { overflow: hidden; }
+/* Các mục cuối trang (sau Love Book, không có pin) chỉ dựng khi gần tới -> mở trang nhẹ hơn nhiều.
+   scroll.ts làm mới ScrollTrigger khi kích thước thật của chúng thay đổi. Không đặt position: fixed bên trong các mục này. */
+#su-kien, .fs, .cd, #loi-chuc, #mung-cuoi, body > footer { content-visibility: auto; contain-intrinsic-size: auto 900px; }
 img, video, svg { display: block; max-width: 100%; }
 img { height: auto; }
 a { color: inherit; }

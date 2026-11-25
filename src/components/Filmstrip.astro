@@ -9,10 +9,10 @@ const rows = [strip.slice(0, half), strip.slice(half)];
   {rows.map((row, r) => (<>
     {r === 1 && <p class="fs__line" aria-hidden="true"><span class="script">every moment</span> with you</p>}
     <div class="fs__row" data-marquee={r ? 1 : -1} data-speed={r ? 90 : 80}>
-      {/* 4 bản: mỗi nửa (2 bản) luôn rộng hơn màn hình -> vòng lặp -50% không hở */}
-      {[0, 1, 2, 3].map((copy) => row.map((p) => (
-        <Photo src={p} alt="" widths={[240, 360, 520]} sizes="(min-width: 1024px) 220px, 32vw" quality={68} class="fs__ph" style={`aspect-ratio:${p.width}/${p.height}`} aria-hidden={copy ? 'true' : undefined} />
-      )))}
+      {/* HTML chỉ có 1 bản (DOM nhẹ); scroll.ts nhân thành 4 bản khi chạy marquee -> vòng lặp -50% không hở */}
+      {row.map((p) => (
+        <Photo src={p} alt="" widths={[240, 360, 520]} sizes="(min-width: 1024px) 220px, 32vw" quality={68} class="fs__ph" style={`aspect-ratio:${p.width}/${p.height}`} />
+      ))}
     </div>
   </>))}
 </section>
