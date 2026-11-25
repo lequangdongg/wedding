@@ -269,6 +269,7 @@ $$<HTMLAnchorElement>('a[data-goto]').forEach((a) => a.addEventListener('click',
       play();
     };
     ['pointerdown', 'keydown', 'touchend'].forEach((ev) => window.addEventListener(ev, first, { capture: true, passive: true }));
+    play(); // thử tự phát ngay; bị chặn thì chờ lần tương tác đầu tiên ở trên
   }
   // tab ẩn thì tạm dừng, quay lại thì phát tiếp (nếu đang bật)
   document.addEventListener('visibilitychange', () => {

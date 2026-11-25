@@ -1,7 +1,7 @@
 ---
 /**
  * Nhạc nền: đĩa than nổi ở góc phải dưới, QUAY khi đang phát (chậm dần rồi dừng khi tắt).
- * Trình duyệt không cho tự phát có tiếng -> nhạc bắt đầu ở lần chạm/bấm đầu tiên của khách (trừ khi khách đã tắt).
+ * Tự phát khi vào trang (nếu trình duyệt chặn thì phát ở lần chạm/bấm đầu tiên). Bấm vào đĩa để tắt / bật.
  * Đổi bài: chép mp3 vào public/music/ rồi sửa media.music + media.musicTitle trong src/data/wedding.ts.
  */
 import { media, pub } from '../data/wedding';
@@ -14,12 +14,8 @@ import { media, pub } from '../data/wedding';
       <span class="vinyl__disc" data-music-disc aria-hidden="true">
         <span class="vinyl__label"><span>Đ</span><svg viewBox="0 0 24 24"><path d="M12 20s-7.5-4.6-9.2-9.4C1.6 7.2 3.8 4 7 4c2 0 3.6 1.2 5 3 1.4-1.8 3-3 5-3 3.2 0 5.4 3.2 4.2 6.6C19.5 15.4 12 20 12 20z"/></svg><span>C</span></span>
       </span>
-      <span class="vinyl__state" aria-hidden="true">
-        <svg class="vinyl__play" viewBox="0 0 24 24"><path d="M8 5l11 7-11 7z"/></svg>
-        <svg class="vinyl__pause" viewBox="0 0 24 24"><path d="M7 5h3.5v14H7zM13.5 5H17v14h-3.5z"/></svg>
-      </span>
     </button>
-    <audio data-music-audio src={pub(media.music)} loop preload="none"></audio>
+    <audio data-music-audio src={pub(media.music)} loop preload="auto"></audio>
   </div>
 )}
 <style>
@@ -43,11 +39,6 @@ import { media, pub } from '../data/wedding';
   .vinyl__label::after { content: ''; position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #0d0d0e; }
   .vinyl__label svg { width: 7px; height: 7px; fill: var(--c-blush); margin: 0 .5px; }
   .vinyl__label span { position: relative; top: -.5px; }
-  .vinyl__state { width: 22px; height: 22px; border-radius: 50%; place-self: end end; margin: -2px; background: var(--c-champagne); color: var(--c-oxblood); display: grid; place-items: center; box-shadow: 0 2px 8px rgb(0 0 0 / .35); }
-  .vinyl__state svg { width: 11px; height: 11px; fill: currentColor; grid-area: 1 / 1; }
-  .vinyl__pause { display: none; }
-  .vinyl.is-playing .vinyl__play { display: none; }
-  .vinyl.is-playing .vinyl__pause { display: block; }
   /* gợi ý bật nhạc khi chưa phát */
   .vinyl__pulse { width: 60px; height: 60px; border-radius: 50%; border: 1.5px solid var(--c-champagne); animation: vpulse 2s ease-out infinite; pointer-events: none; }
   .vinyl.is-playing .vinyl__pulse, .vinyl.was-played .vinyl__pulse { display: none; }
