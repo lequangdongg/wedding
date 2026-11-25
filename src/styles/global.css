@@ -97,6 +97,8 @@ h1, h2, h3, p, figure, blockquote { margin: 0; }
    Mọi chuyển động chạy bằng GSAP (src/scripts/app.ts). CSS không ẩn sẵn gì -> không JS vẫn đọc được.
    SplitText bọc dòng trong .split-mask để chữ trượt lên từ mặt nạ. */
 .split-mask { overflow: clip; padding-bottom: .08em; margin-bottom: -.08em; }
+/* mặt nạ dòng của [data-split] (SplitText không gắn class): chừa chỗ cho dấu nặng/dấu hỏi tiếng Việt */
+[data-split] > div[aria-hidden] { padding-bottom: .16em; margin-bottom: -.16em; }
 .hand { font-family: var(--f-hand); font-weight: 400; }
 
 @media (prefers-reduced-motion: reduce) {

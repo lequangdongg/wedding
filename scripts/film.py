@@ -13,17 +13,17 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 A = os.path.join(ROOT, 'src', 'assets')
 OUT = os.path.join(ROOT, 'public', 'video')
 
-HERO = [  # điện thoại: ảnh giữ nguyên cả khung (fit), zoom rất nhẹ
-    ('photos/garden-close.jpg', .5, .5, 1.00, 1.04),
-    ('photos/walk.jpg', .5, .5, 1.04, 1.00),
-    ('photos/bride-portrait.jpg', .5, .5, 1.00, 1.04),
-    ('photos/dance.jpg', .5, .5, 1.04, 1.00),
-    ('photos/veil-lift.jpg', .5, .5, 1.00, 1.04),
-    ('photos/facing.jpg', .5, .5, 1.04, 1.00),
-    ('photos/garden-sofa.jpg', .5, .5, 1.00, 1.04),
-    ('photos/arm.jpg', .5, .5, 1.04, 1.00),
-    ('photos/veil.jpg', .5, .5, 1.00, 1.04),
-    ('photos/groom-sit.jpg', .5, .5, 1.04, 1.00),
+HERO = [  # điện thoại: ảnh giữ nguyên cả khung (fit), zoom rất nhẹ — chỉ dùng ảnh ĐỦ NGƯỜI, không dùng ảnh gala
+    ('photos/studio-couple.jpg', .5, .5, 1.00, 1.03),
+    ('photos/walk.jpg', .5, .5, 1.03, 1.00),
+    ('photos/bride-portrait.jpg', .5, .5, 1.00, 1.03),
+    ('photos/dance.jpg', .5, .5, 1.03, 1.00),
+    ('photos/veil-lift.jpg', .5, .5, 1.00, 1.03),
+    ('photos/facing.jpg', .5, .5, 1.03, 1.00),
+    ('photos/garden-sofa.jpg', .5, .5, 1.00, 1.03),
+    ('photos/arm.jpg', .5, .5, 1.03, 1.00),
+    ('photos/veil.jpg', .5, .5, 1.00, 1.03),
+    ('photos/groom-sit.jpg', .5, .5, 1.03, 1.00),
 ]
 
 
@@ -104,13 +104,10 @@ def encode(seq, W, H, name, fps=25, P=2.0, X=0.7, fit=False):
 
 
 # ---------- Máy tính: tràn màn hình 16:9, 3 cột ảnh dọc, mỗi cột đổi ảnh lệch nhịp (ảnh mới đẩy từ dưới lên) ----------
-TRI = [  # máy tính: mỗi cột giữ TRỌN ảnh (phần thừa là ảnh làm mờ); zoom tối đa 4%
-    [('photos/garden-close.jpg', .45, 0, 1.00, 1.04), ('photos/dance.jpg', .5, 0, 1.04, 1.00), ('photos/veil-lift.jpg', .5, 0, 1.00, 1.04),
-     ('photos/arm.jpg', .45, 0, 1.04, 1.00), ('photos/groom.jpg', .5, 0, 1.00, 1.04)],
-    [('photos/walk.jpg', .5, 0, 1.04, 1.00), ('photos/bride-portrait.jpg', .45, 0, 1.00, 1.04), ('photos/studio-couple.jpg', .5, 0, 1.04, 1.00),
-     ('photos/garden-sofa.jpg', .5, 0, 1.00, 1.04), ('photos/veil.jpg', .5, 0, 1.04, 1.00)],
-    [('photos/bride.jpg', .5, 0, 1.00, 1.04), ('photos/facing.jpg', .45, 0, 1.04, 1.00), ('photos/groom-sit.jpg', .45, 0, 1.00, 1.04),
-     ('photos/studio-veil.jpg', .5, 0, 1.04, 1.00), ('photos/gala.jpg', .5, 0, 1.00, 1.04)],
+TRI = [  # máy tính: mỗi cột giữ TRỌN ảnh (phần thừa là ảnh làm mờ); zoom tối đa 3%. KHÔNG dùng ảnh gala (dành cho mục Khoảnh khắc)
+    [('photos/garden.jpg', .5, 0, 1.00, 1.03), ('photos/dance.jpg', .5, 0, 1.03, 1.00), ('photos/veil-lift.jpg', .5, 0, 1.00, 1.03), ('photos/groom.jpg', .5, 0, 1.03, 1.00)],
+    [('photos/walk.jpg', .5, 0, 1.03, 1.00), ('photos/bride-portrait.jpg', .45, 0, 1.00, 1.03), ('photos/studio-couple.jpg', .5, 0, 1.03, 1.00), ('photos/veil.jpg', .5, 0, 1.00, 1.03)],
+    [('photos/bride.jpg', .5, 0, 1.00, 1.03), ('photos/facing.jpg', .45, 0, 1.03, 1.00), ('photos/groom-sit.jpg', .45, 0, 1.00, 1.03), ('photos/studio-veil.jpg', .5, 0, 1.03, 1.00)],
 ]
 
 

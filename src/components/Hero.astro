@@ -11,12 +11,12 @@ const hasVideo = Boolean(v.mobile.mp4 || v.desktop.mp4);
   <div class="hero__frame" data-hero-frame>
     <div class="hero__media" data-hero-media>
       <Photo
-        src={photos.gardenClose}
-        alt="Quang Đông nhìn Trang Châu giữa khu vườn"
+        src={photos.studioCouple}
+        alt="Quang Đông và Trang Châu trong bộ ảnh cưới"
         widths={[480, 720, 1080, 1440]}
         sizes="100vw"
         eager
-        pos="62% 30%"
+        pos="50% 30%"
         quality={72}
         class="hero__ph"
       />
@@ -61,6 +61,10 @@ const hasVideo = Boolean(v.mobile.mp4 || v.desktop.mp4);
   @media (max-width: 1023px) {
     .hero__media :global(.hero__ph)::before { filter: blur(26px) brightness(.62); transform: scale(1.25); }
   }
+  /* màn hình điện thoại thấp / máy tính bảng (rộng hơn 3:5): video hiện TRỌN khung, không cắt người; viền là ảnh mờ phía sau */
+  @media (max-width: 1023px) and (min-aspect-ratio: 3/5) {
+    .hero__video { object-fit: contain; }
+  }
   .hero__scrim { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(23 24 26 / .45) 0%, rgb(23 24 26 / 0) 26%, rgb(23 24 26 / 0) 46%, rgb(23 24 26 / .78) 100%); pointer-events: none; }
 
   .hero__side { position: absolute; top: calc(88px + env(safe-area-inset-top)); font-size: 11px; letter-spacing: .24em; text-transform: uppercase; line-height: 1.6; }
@@ -86,7 +90,6 @@ const hasVideo = Boolean(v.mobile.mp4 || v.desktop.mp4);
   @media (min-width: 1024px) {
     .hero { min-height: 600px; }
     /* Máy tính: video ghép ảnh tràn toàn màn hình (3 cột ảnh) */
-    .hero__media :global(.hero__ph) { --pos: 60% 28% !important; }
     .hero__video { object-position: 50% 0%; } /* màn hình thấp hơn 16:9 thì cắt phía dưới, không cắt đầu */
     .hero__scrim { background: linear-gradient(180deg, rgb(23 24 26 / .5) 0%, rgb(23 24 26 / .08) 26%, rgb(23 24 26 / .1) 48%, rgb(23 24 26 / .72) 100%); }
     .hero__side { top: 140px; font-size: 13px; }
