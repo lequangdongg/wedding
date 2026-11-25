@@ -104,20 +104,20 @@ def encode(seq, W, H, name, fps=25, P=2.0, X=0.7, fit=False):
 
 
 # ---------- Máy tính: tràn màn hình 16:9, 3 cột ảnh dọc, mỗi cột đổi ảnh lệch nhịp (ảnh mới đẩy từ dưới lên) ----------
-TRI = [  # máy tính: tâm y = 0 -> luôn giữ mép trên ảnh (không cắt đầu); zoom tối đa 4%
+TRI = [  # máy tính: mỗi cột giữ TRỌN ảnh (phần thừa là ảnh làm mờ); zoom tối đa 4%
     [('photos/garden-close.jpg', .45, 0, 1.00, 1.04), ('photos/dance.jpg', .5, 0, 1.04, 1.00), ('photos/veil-lift.jpg', .5, 0, 1.00, 1.04),
      ('photos/arm.jpg', .45, 0, 1.04, 1.00), ('photos/groom.jpg', .5, 0, 1.00, 1.04)],
     [('photos/walk.jpg', .5, 0, 1.04, 1.00), ('photos/bride-portrait.jpg', .45, 0, 1.00, 1.04), ('photos/studio-couple.jpg', .5, 0, 1.04, 1.00),
      ('photos/garden-sofa.jpg', .5, 0, 1.00, 1.04), ('photos/veil.jpg', .5, 0, 1.04, 1.00)],
     [('photos/bride.jpg', .5, 0, 1.00, 1.04), ('photos/facing.jpg', .45, 0, 1.04, 1.00), ('photos/groom-sit.jpg', .45, 0, 1.00, 1.04),
-     ('photos/studio-veil.jpg', .5, 0, 1.04, 1.00), ('photos/garden.jpg', .5, 0, 1.00, 1.04)],
+     ('photos/studio-veil.jpg', .5, 0, 1.04, 1.00), ('photos/gala.jpg', .5, 0, 1.00, 1.04)],
 ]
 
 
 def encode_tri(name='hero-d', W=1920, H=1080, gap=6, fps=25, P=3.0, X=0.9, stagger=0.45):
     n = len(TRI)
     pw = (W - gap * (n - 1)) // n
-    cols = [[Shot(*s, pw, H) for s in col] for col in TRI]
+    cols = [[Shot(*s, pw, H, True) for s in col] for col in TRI]  # fit: giữ trọn ảnh, không cắt người
     N = len(TRI[0])
     T = N * P  # cả 3 cột cùng chu kỳ -> vòng lặp liền mạch
 

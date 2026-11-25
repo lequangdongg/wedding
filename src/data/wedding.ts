@@ -184,11 +184,12 @@ export const nav = [
 /**
  * SỔ LỜI CHÚC — trang tĩnh không tự lưu được, cần một nơi lưu bên ngoài.
  * Khuyên dùng: Google Sheet + Apps Script (miễn phí, dữ liệu nằm trong Drive của bạn, sửa/ẩn lời chúc ngay trên Sheet).
- * Cách cài: xem scripts/wishes-apps-script.gs (5 phút) -> dán URL web app (…/exec) vào `endpoint`.
+ * Cách cài tự động: docs/CODEX_TASK_wishes.md (clasp + Apps Script API). Tay: scripts/wishes-apps-script.gs.
  * endpoint = null: chế độ XEM THỬ — lời chúc chỉ lưu trên máy đang xem, có ghi chú rõ cho khách.
  */
 export const wishes = {
-  endpoint: null as string | null,
+  // URL web app Apps Script (…/exec). Ưu tiên biến môi trường PUBLIC_WISHES_ENDPOINT (file .env hoặc cài trên Vercel/Netlify/Cloudflare)
+  endpoint: (import.meta.env.PUBLIC_WISHES_ENDPOINT || null) as string | null,
   max: 300,
   relations: ['Gia đình', 'Bạn bè', 'Đồng nghiệp', 'Hàng xóm'],
   ideas: [

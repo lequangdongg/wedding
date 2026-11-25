@@ -15,16 +15,18 @@ interface Props {
   sizes?: string;
   eager?: boolean;
   pos?: string;
+  /** 'contain' (mặc định) = luôn thấy trọn ảnh, không cắt người; phần trống là chính ảnh làm mờ */
+  fit?: 'contain' | 'cover';
   quality?: number;
   class?: string;
   style?: string;
   [key: string]: unknown;
 }
-const { src, alt, widths = [400, 640, 960, 1400], sizes = '100vw', eager = false, pos = '50% 50%', quality = 70, class: cls = '', style = '', ...rest } = Astro.props;
+const { src, alt, widths = [400, 640, 960, 1400], sizes = '100vw', eager = false, pos = '50% 50%', quality = 70, fit = 'contain', class: cls = '', style = '', ...rest } = Astro.props;
 const key = (src.src.split('/').pop() || '').split('?')[0].split('.')[0];
 const placeholder = (lqip as Record<string, string>)[key];
 ---
-<div class:list={['ph', cls]} style={`--pos:${pos};${placeholder ? `--lqip:url(${placeholder});` : ''}${style}`} {...rest}>
+<div class:list={['ph', cls]} style={`--pos:${pos};--fit:${fit};${placeholder ? `--lqip:url(${placeholder});` : ''}${style}`} {...rest}>
   <Picture
     src={src}
     alt={alt}
@@ -53,7 +55,7 @@ const placeholder = (lqip as Record<string, string>)[key];
   .ph.is-loaded::after { animation: none; opacity: 0; }
   .ph :global(picture) { display: contents; }
   .ph :global(img) {
-    position: relative; z-index: 1; display: block; width: 100%; height: 100%; object-fit: cover; object-position: var(--pos);
+    position: relative; z-index: 1; display: block; width: 100%; height: 100%; object-fit: var(--fit, contain); object-position: var(--pos);
     opacity: 0; transition: opacity .9s cubic-bezier(.33, 1, .68, 1);
   }
   .ph.is-loaded :global(img), :global(.no-js) .ph :global(img) { opacity: 1; }
