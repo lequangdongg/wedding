@@ -115,6 +115,7 @@ const L = wishes.limits;
 
 <script>
   /* Chỉ trang trí — không gửi, không tải dữ liệu */
+  import { guestName } from '../scripts/shared';
   const sec = document.getElementById('loi-chuc');
   if (sec) {
     const q = <T extends HTMLElement>(s: string) => sec.querySelector<T>(s);
@@ -126,7 +127,7 @@ const L = wishes.limits;
     const total = q('[data-ui-total]');
     const more = q<HTMLButtonElement>('[data-ui-more]');
     // tên khách từ link mời ?ten=
-    const guest = (new URLSearchParams(location.search).get('ten') || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+    const guest = guestName();
     if (guest && name && !name.value) { name.defaultValue = guest; name.value = guest; }
     const upd = () => { if (count && msg) count.textContent = String(msg.value.length); };
     msg?.addEventListener('input', upd);

@@ -1,5 +1,5 @@
 import gsap from 'gsap';
-import { S, $, $$, pad, reduced, isDesktop, root, body } from './shared';
+import { S, $, $$, pad, reduced, isDesktop, root, body, guestName } from './shared';
 import { loadFonts } from './fonts';
 
 /* Font: nạp sau lần vẽ đầu tiên (2 khung hình) -> chữ hiện ngay bằng font hệ thống, font đẹp về ngay sau đó */
@@ -34,7 +34,7 @@ if (heroVideo && !reduced && !(navigator as any).connection?.saveData) {
 }
 
 /* ================= Tên khách mời (?ten=...) ================= */
-const guest = (new URLSearchParams(location.search).get('ten') || '').replace(/\s+/g, ' ').trim().slice(0, 60);
+const guest = guestName();
 if (guest) {
   $$('[data-guest-name]').forEach((el) => (el.textContent = guest));
   $$('[data-guest]').forEach((el) => { el.hidden = false; });

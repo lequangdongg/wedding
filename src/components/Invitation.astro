@@ -1,13 +1,21 @@
 ---
-import { families, sides, keep } from '../data/wedding';
+import { families, sides, keep, couple, mapsUrl, icsUrl, type SideKey } from '../data/wedding';
+// Thiệp mời online: mỗi bên một thiệp (hiện theo ?ben=), mời dự Tiệc cưới; lễ còn lại ghi kèm bên dưới
+const cards = (['nam', 'nu'] as SideKey[]).map((k) => {
+  const evs = sides[k].events;
+  const main = evs.find((e) => e.kind === 'Tiệc cưới') ?? evs[0];
+  const other = evs.find((e) => e !== main);
+  const [y, mo] = main.start.slice(0, 7).split('-');
+  return { k, main, other, month: mo, year: y, names: k === 'nu' ? [couple.bride.short, couple.groom.short] : [couple.groom.short, couple.bride.short] };
+});
+const icon = {
+  pin: 'M12 21s-7-6.1-7-11.2A7 7 0 0 1 19 9.8C19 14.9 12 21 12 21zm0-8.7a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z',
+  cal: 'M7 3v3M17 3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1z',
+};
 ---
 <section class="inv" id="loi-moi">
   <div class="wrap inv__in">
     <p class="eyebrow" data-fade>01 / 05 — Trân trọng kính mời</p>
-    <p class="inv__guest" data-guest hidden>
-      <span class="inv__guest-label">Kính gửi</span>
-      <span class="inv__guest-name" data-guest-name></span>
-    </p>
     <h2 class="h2" data-split>Đến chung vui <em class="it accent">cùng</em> gia đình chúng tôi</h2>
     <div class="inv__fams">
       {(['nam', 'nu'] as const).map((k, i) => (
@@ -21,7 +29,34 @@ import { families, sides, keep } from '../data/wedding';
     <p class="inv__news" data-fade>
       Trân trọng báo tin <strong class="only-nam">{sides.nam.ceremony}</strong><strong class="only-nu">{sides.nu.ceremony}</strong><br />của hai con chúng tôi
     </p>
-    <p class="inv__honor" data-fade>Sự hiện diện của Quý Khách là niềm vinh hạnh cho gia đình chúng tôi!</p>
+
+    <!-- THIỆP MỜI ONLINE: tên khách lấy từ ?ten=... (mặc định "Quý Khách") -->
+    {cards.map((c) => (
+      <article class:list={['ic', `only-${c.k}`]} aria-label="Thiệp mời" data-fade>
+        <div class="ic__paper">
+          <span class="ic__corner ic__corner--tl" aria-hidden="true"></span><span class="ic__corner ic__corner--tr" aria-hidden="true"></span>
+          <span class="ic__corner ic__corner--bl" aria-hidden="true"></span><span class="ic__corner ic__corner--br" aria-hidden="true"></span>
+          <p class="ic__kicker">Thiệp mời</p>
+          <p class="ic__to">Trân trọng kính mời</p>
+          <p class="ic__name"><span data-guest-name>Quý Khách</span></p>
+          <p class="ic__lead">tới dự <strong>{c.main.kind}</strong> chung vui cùng gia đình chúng tôi<br />mừng ngày thành hôn của</p>
+          <p class="ic__couple"><span>{c.names[0]}</span><em>&amp;</em><span>{c.names[1]}</span></p>
+          <div class="ic__when">
+            <span class="ic__side">Vào lúc<b>{c.main.time.replace(' giờ ', 'h')}</b></span>
+            <span class="ic__mid">{c.main.weekday}<b class="num">{c.main.day}</b></span>
+            <span class="ic__side">Tháng {c.month}<b>{c.year}</b></span>
+          </div>
+          <p class="ic__lunar">({c.main.lunar})</p>
+          <p class="ic__where">Tại <strong>{c.main.venue}</strong>{c.main.hall && <> · {c.main.hall}</>}<br /><span>{c.main.addr}</span></p>
+          {c.other && <p class="ic__also">{c.other.kind}: {c.other.time} · {c.other.weekday} {c.other.day}/{c.month} · {c.other.venue}</p>}
+          <p class="ic__honor">Sự hiện diện của Quý Khách là niềm vinh hạnh cho gia đình chúng tôi!</p>
+          <div class="ic__acts">
+            <a class="ic__btn" href={mapsUrl(c.main.mapQuery)} target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.pin} /></svg>Chỉ đường</a>
+            <a class="ic__btn" href={icsUrl(c.main)} download><svg viewBox="0 0 24 24" aria-hidden="true"><path d={icon.cal} /></svg>Thêm vào lịch</a>
+          </div>
+        </div>
+      </article>
+    ))}
   </div>
 </section>
 
@@ -29,10 +64,6 @@ import { families, sides, keep } from '../data/wedding';
   .inv { padding: var(--section-y) 0 calc(var(--section-y) * .6); text-align: center; }
   .inv__in { max-width: 920px; display: flex; flex-direction: column; align-items: center; gap: 24px; }
   .inv .h2 { font-size: clamp(2.75rem, 2rem + 3.4vw, 5.75rem); line-height: 1.02; }
-  .inv__guest { display: flex; flex-direction: column; align-items: center; gap: 6px; margin: 4px 0 8px; }
-  .inv__guest[hidden] { display: none; }
-  .inv__guest-label { font-size: 11px; letter-spacing: .24em; text-transform: uppercase; color: var(--c-graphite); }
-  .inv__guest-name { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-style: italic; font-size: clamp(2rem, 1.6rem + 2vw, 3.25rem); line-height: 1.2; color: var(--c-bordeaux); padding: 0 .4em .15em; border-bottom: 2px dotted var(--c-mist-deep); }
   .inv__fams { width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 8px; }
   :global(html[data-side='nu']) .fam--nu { order: -1; }
   .fam { border-top: 1px solid var(--c-ink); padding-top: 14px; display: flex; flex-direction: column; gap: 6px; }
@@ -41,11 +72,56 @@ import { families, sides, keep } from '../data/wedding';
   .fam__addr { font-size: 13px; line-height: 1.55; }
   .inv__news { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-size: 17px; letter-spacing: .16em; text-transform: uppercase; line-height: 1.7; margin-top: 8px; }
   .inv__news strong { display: inline-block; font-weight: 600; font-size: 1.75em; letter-spacing: .1em; color: var(--c-bordeaux); margin: .2em 0; }
-  .inv__honor { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-style: italic; font-size: clamp(1.375rem, 1.1rem + 1vw, 2rem); line-height: 1.45; color: var(--c-ink); max-width: 28ch; }
+
+  /* ---------- Thiệp mời online ---------- */
+  .ic { width: 100%; max-width: 560px; margin-top: 16px; }
+  .ic__paper { position: relative; padding: 40px 22px 30px; background: #FCFAF5; color: var(--c-ink); border-radius: 3px;
+    box-shadow: 0 40px 70px -40px rgb(59 10 16 / .45), 0 2px 0 rgb(23 24 26 / .04);
+    background-image: radial-gradient(120% 60% at 50% 0%, rgb(234 217 185 / .35), transparent 60%); }
+  /* viền đôi như thiệp in */
+  .ic__paper::before, .ic__paper::after { content: ''; position: absolute; pointer-events: none; border: 1px solid rgb(122 20 32 / .55); }
+  .ic__paper::before { inset: 10px; }
+  .ic__paper::after { inset: 14px; border-color: rgb(122 20 32 / .22); }
+  .ic__corner { position: absolute; width: 22px; height: 22px; border: 2px solid var(--c-bordeaux); }
+  .ic__corner--tl { top: 6px; left: 6px; border-right: 0; border-bottom: 0; }
+  .ic__corner--tr { top: 6px; right: 6px; border-left: 0; border-bottom: 0; }
+  .ic__corner--bl { bottom: 6px; left: 6px; border-right: 0; border-top: 0; }
+  .ic__corner--br { bottom: 6px; right: 6px; border-left: 0; border-top: 0; }
+  .ic__paper > p, .ic__when, .ic__acts { position: relative; }
+  .ic__kicker { font-size: 11px; font-weight: 600; letter-spacing: .34em; text-transform: uppercase; color: var(--c-bordeaux); }
+  .ic__kicker::before, .ic__kicker::after { content: ''; display: inline-block; width: 28px; height: 1px; background: currentColor; vertical-align: middle; margin: 0 12px; opacity: .6; }
+  .ic__to { margin-top: 18px; font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-size: 15px; letter-spacing: .22em; text-transform: uppercase; }
+  .ic__name { margin: 8px auto 0; max-width: 100%; padding: 0 .3em .1em; border-bottom: 1.5px dotted rgb(122 20 32 / .5);
+    font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-style: italic; font-weight: 500; font-size: clamp(1.9rem, 1.5rem + 2.2vw, 2.9rem); line-height: 1.25; color: var(--c-bordeaux); overflow-wrap: anywhere; }
+  .ic__lead { margin-top: 16px; font-size: 14px; line-height: 1.7; color: var(--c-graphite); }
+  .ic__lead strong { font-weight: 600; color: var(--c-ink); text-transform: uppercase; letter-spacing: .08em; }
+  .ic__couple { margin-top: 10px; display: flex; flex-direction: column; align-items: center; font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 600;
+    font-size: clamp(1.9rem, 1.5rem + 2vw, 2.75rem); line-height: 1.05; text-transform: uppercase; letter-spacing: .02em; }
+  .ic__couple span { white-space: nowrap; }
+  .ic__couple em { font-family: var(--f-script); font-weight: 400; text-transform: none; color: var(--c-blush); font-size: 1.05em; line-height: .9; }
+  .ic__when { margin: 22px auto 0; display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; max-width: 340px; }
+  .ic__side { display: flex; flex-direction: column; gap: 2px; padding: 6px 0; border-block: 1px solid rgb(23 24 26 / .35); font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--c-graphite); }
+  .ic__side b { font-size: 15px; font-weight: 600; letter-spacing: .06em; color: var(--c-ink); }
+  .ic__mid { display: flex; flex-direction: column; padding: 0 18px; font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: var(--c-bordeaux); }
+  .ic__mid b { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 600; font-size: 64px; line-height: .95; letter-spacing: 0; }
+  .ic__lunar { margin-top: 10px; font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-style: italic; font-size: 16px; color: var(--c-graphite); }
+  .ic__where { margin-top: 16px; font-size: 14px; line-height: 1.6; }
+  .ic__where strong { font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-weight: 600; font-size: 1.3em; line-height: 1.3; }
+  .ic__where span { color: var(--c-graphite); font-size: 13px; }
+  .ic__also { margin-top: 12px; font-size: 12px; line-height: 1.5; color: var(--c-graphite); }
+  .ic__honor { margin: 18px auto 0; max-width: 30ch; font-family: var(--f-display); font-size-adjust: var(--fsa-display); font-style: italic; font-size: clamp(1.15rem, 1rem + .7vw, 1.45rem); line-height: 1.45; }
+  .ic__acts { margin-top: 22px; display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+  .ic__btn { display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1px solid var(--c-bordeaux); color: var(--c-bordeaux); font-size: 13px; font-weight: 500; text-decoration: none; transition: background var(--d-micro), color var(--d-micro); }
+  .ic__btn:first-child { background: var(--c-bordeaux); color: var(--c-porcelain); }
+  .ic__btn:hover { background: var(--c-oxblood); border-color: var(--c-oxblood); color: var(--c-porcelain); }
+  .ic__btn:focus-visible { outline: 2px solid var(--c-bordeaux); outline-offset: 3px; }
+  .ic__btn svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
   @media (min-width: 768px) {
     .inv__fams { gap: 64px; }
     .fam__names { font-size: 26px; }
     .fam__addr { font-size: 15px; }
     .inv__news { font-size: 20px; }
+    .ic__paper { padding: 56px 48px 44px; }
+    .ic__lead, .ic__where { font-size: 15px; }
   }
 </style>
