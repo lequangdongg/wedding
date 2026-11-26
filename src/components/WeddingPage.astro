@@ -13,10 +13,8 @@ import Filmstrip from './Filmstrip.astro';
 import Events from './Events.astro';
 import Countdown from './Countdown.astro';
 import Wishes from './Wishes.astro';
-import Gift from './Gift.astro';
 import Footer from './Footer.astro';
 import MusicToggle from './MusicToggle.astro';
-import Toast from './Toast.astro';
 import { sides, type SideKey } from '../data/wedding';
 
 interface Props { side: SideKey }
@@ -37,9 +35,7 @@ const s = sides[side];
     <Filmstrip />
     <Countdown />
     <Wishes />
-    <Gift />
   </main>
   <Footer />
-  <Toast />
   <MusicToggle />
 </Base>

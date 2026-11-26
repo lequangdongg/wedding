@@ -1,8 +1,0 @@
----
-/** Thông báo nhỏ (vd. "Đã sao chép số tài khoản"). Đặt ngoài <main> vì các mục bên dưới dùng content-visibility (position: fixed bên trong sẽ bị giới hạn). */
----
-<div class="toast" id="toast" role="status" aria-live="polite"></div>
-<style>
-  .toast { position: fixed; left: 50%; bottom: max(24px, env(safe-area-inset-bottom)); z-index: 90; translate: -50% 0; background: var(--c-ink); color: var(--c-porcelain); font-size: 13px; padding: 12px 20px; border-radius: 999px; opacity: 0; transform: translateY(12px); transition: opacity var(--d-ui), transform var(--d-ui) var(--ease-silk); pointer-events: none; }
-  .toast.is-on { opacity: 1; transform: none; }
-</style>

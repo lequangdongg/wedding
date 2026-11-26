@@ -18,15 +18,17 @@ interface Props {
   /** 'contain' (mặc định) = luôn thấy trọn ảnh, không cắt người; phần trống là chính ảnh làm mờ */
   fit?: 'contain' | 'cover';
   quality?: number;
+  /** false = hiện ngay khi tải xong (không mờ dần) */
+  fade?: boolean;
   class?: string;
   style?: string;
   [key: string]: unknown;
 }
-const { src, alt, widths = [400, 640, 960, 1400], sizes = '100vw', eager = false, pos = '50% 50%', quality = 70, fit = 'contain', class: cls = '', style = '', ...rest } = Astro.props;
+const { src, alt, widths = [400, 640, 960, 1400], sizes = '100vw', eager = false, pos = '50% 50%', quality = 70, fit = 'contain', fade = !eager, class: cls = '', style = '', ...rest } = Astro.props;
 const key = (src.src.split('/').pop() || '').split('?')[0].split('.')[0];
 const placeholder = (lqip as Record<string, string>)[key];
 ---
-<div class:list={['ph', cls, { 'ph--eager': eager }]} style={`--pos:${pos};--fit:${fit};${placeholder ? `--lqip:url(${placeholder});` : ''}${style}`} {...rest}>
+<div class:list={['ph', cls, { 'ph--eager': !fade }]} style={`--pos:${pos};--fit:${fit};${placeholder ? `--lqip:url(${placeholder});` : ''}${style}`} {...rest}>
   <Picture
     src={src}
     alt={alt}

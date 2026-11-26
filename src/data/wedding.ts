@@ -183,7 +183,6 @@ export const nav = [
   { id: 'khoanh-khac', label: 'Khoảnh khắc' },
   { id: 'su-kien', label: 'Sự kiện' },
   { id: 'loi-chuc', label: 'Lời chúc' },
-  { id: 'mung-cuoi', label: 'Mừng cưới' },
 ];
 
 /**
