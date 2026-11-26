@@ -74,13 +74,13 @@ import { BASE } from '../data/wedding';
         const base = (document.querySelector('[data-base]') as HTMLElement).dataset.base || '';
         // chỉ có 1 trang (/); bên mời truyền bằng ?ben=nha-gai (mặc định nhà trai)
         const u = new URL(`${base}/`, baseEl.value || location.origin);
-        if (s === 'nha-gai') u.searchParams.set('ben', s);
-        if (name.trim()) u.searchParams.set('ten', name.trim());
-        return u.toString();
+        // encodeURIComponent: khoảng trắng = %20, "+" giữ là dấu cộng (vd. "Em Trang Châu+")
+        const q = [name.trim() && `ten=${encodeURIComponent(name.trim())}`, s === 'nha-gai' && `ben=${s}`].filter(Boolean).join('&');
+        return u.origin + u.pathname + (q ? `?${q}` : '');
       };
       const slug = (t: string) => t.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/đ/gi, 'd').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '').toLowerCase() || 'khach';
       const render = async (url: string, name: string) => {
-        linkEl.textContent = decodeURI(url).replace(/\+/g, ' '); open.href = url;
+        linkEl.textContent = decodeURI(url); open.href = url;
         await QRCode.toCanvas(qr, url, { width: 240, margin: 2, color: { dark: '#3B0A10', light: '#FFFFFF' }, errorCorrectionLevel: 'M' });
         dl.href = await QRCode.toDataURL(url, { width: 1024, margin: 2, color: { dark: '#3B0A10', light: '#FFFFFF' } });
         dl.download = `qr-${slug(name)}.png`;

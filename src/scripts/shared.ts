@@ -16,7 +16,10 @@ export const pad = (n: number) => (n < 10 ? '0' + n : String(n));
 export const guestName = (search = location.search): string => {
   const m = /[?&]ten=(.*?)(?=&(?:ben|now|utm_[a-z]+|fbclid|gclid|zarsrc)=|$)/i.exec(search);
   if (!m) return '';
-  let raw = m[1].replace(/\+/g, ' ').replace(/=+$/, '');
-  try { raw = decodeURIComponent(raw); } catch { raw = raw.replace(/%26/gi, '&').replace(/%20/g, ' '); }
+  let raw = m[1].replace(/=+$/, '');
+  // "+" : link có %20/khoảng trắng -> "+" là dấu cộng thật (vd. "Em Trang Châu+" = kèm người thương);
+  // link kiểu cũ (khoảng trắng mã hoá thành "+") -> "+" giữa chữ là khoảng trắng, "+" ở cuối vẫn giữ là dấu cộng
+  if (!/%20|\s/.test(raw)) raw = raw.replace(/\+(?!\+*$)/g, ' ');
+  try { raw = decodeURIComponent(raw); } catch { raw = raw.replace(/%26/gi, '&').replace(/%20/g, ' ').replace(/%2B/gi, '+'); }
   return raw.replace(/[<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 80);
 };
