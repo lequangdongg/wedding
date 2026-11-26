@@ -55,7 +55,7 @@ const people = [
   /* chữ nhấn: 2 bản xếp chồng, bản dưới (đỏ đô, nghiêng) lật lên thay bản trên */
   .cp__p :global(.roll) { display: inline-block; position: relative; vertical-align: top; overflow: visible clip; padding-block: .14em; margin-block: -.14em; }
   .cp__p :global(.roll > span) { display: block; white-space: nowrap; }
-  .cp__p :global(.roll > span + span) { position: absolute; left: 0; top: .14em; color: var(--c-bordeaux); font-style: italic; }
+  .cp__p :global(.roll > span + span) { position: absolute; left: 0; top: .14em; color: var(--c-bordeaux); font-weight: 600; }
   .cp__sign { align-self: flex-end; font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.6rem); color: var(--c-bordeaux); }
   @media (min-width: 1024px) {
     .cp__grid { grid-template-columns: 1fr 1fr 1fr; gap: 48px; align-items: center; }
