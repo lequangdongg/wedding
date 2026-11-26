@@ -41,7 +41,7 @@ body {
 body.is-locked { overflow: hidden; }
 /* Các mục cuối trang (sau Love Book, không có pin) chỉ dựng khi gần tới -> mở trang nhẹ hơn nhiều.
    scroll.ts làm mới ScrollTrigger khi kích thước thật của chúng thay đổi. Không đặt position: fixed bên trong các mục này. */
-#khoanh-khac, #su-kien, .fs, .cd, #loi-chuc, #mung-cuoi, body > footer { content-visibility: auto; contain-intrinsic-size: auto 900px; }
+#khoanh-khac, #su-kien, .fs, .cd, #loi-chuc, body > footer { content-visibility: auto; contain-intrinsic-size: auto 900px; }
 #khoanh-khac { contain-intrinsic-size: auto 1000px; }
 img, video, svg { display: block; max-width: 100%; }
 img { height: auto; }

@@ -159,19 +159,6 @@ function heroIntro() {
   gsap.ticker.add(loop);
 })();
 
-/* ================= Sao chép số TK ================= */
-const toast = $('#toast');
-let toastT = 0;
-const toastMsg = (m: string) => {
-  if (!toast) return;
-  toast.textContent = m; toast.classList.add('is-on');
-  clearTimeout(toastT); toastT = window.setTimeout(() => toast.classList.remove('is-on'), 2200);
-};
-$$('[data-copy]').forEach((b) => b.addEventListener('click', async () => {
-  try { await navigator.clipboard.writeText(b.dataset.copy || ''); toastMsg('Đã sao chép số tài khoản'); }
-  catch { toastMsg('Không sao chép được, vui lòng chép thủ công'); }
-}));
-
 const menu = $('#menu');
 const openBtn = $('#menu-open');
 const closeBtn = $('#menu-close');
