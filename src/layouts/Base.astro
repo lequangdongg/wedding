@@ -42,8 +42,10 @@ const og = new URL(`${publicPath}${ogImage}`, Astro.site);
       (function () {
         var m = /[?&]ten=(.*?)(?=&(?:ben|now|utm_[a-z]+|fbclid|gclid|zarsrc)=|$)/i.exec(location.search);
         if (!m) return;
-        var g = m[1].replace(/\+/g, ' ').replace(/=+$/, '');
-        try { g = decodeURIComponent(g); } catch (e) { g = g.replace(/%26/gi, '&').replace(/%20/g, ' '); }
+        var g = m[1].replace(/=+$/, '');
+        // "+" là dấu cộng thật (vd. "Em Trang Châu+"); riêng link kiểu cũ không có %20 thì "+" giữa chữ = khoảng trắng
+        if (!/%20|\s/.test(g)) g = g.replace(/\+(?!\+*$)/g, ' ');
+        try { g = decodeURIComponent(g); } catch (e) { g = g.replace(/%26/gi, '&').replace(/%20/g, ' ').replace(/%2B/gi, '+'); }
         g = g.replace(/[<>]/g, '').replace(/\s+/g, ' ').trim().slice(0, 80);
         if (!g) return;
         document.querySelectorAll('[data-guest-name]').forEach(function (el) { el.textContent = g; });
@@ -52,10 +54,11 @@ const og = new URL(`${publicPath}${ogImage}`, Astro.site);
         document.documentElement.classList.add('has-guest');
         // chuẩn hoá lại link (mã hoá "&" trong tên) để khách chia sẻ/tải lại vẫn đúng
         try {
-          var q = new URLSearchParams(); q.set('ten', g);
+          // mã hoá bằng encodeURIComponent: khoảng trắng = %20, dấu cộng = %2B (không nhầm nhau)
+          var q = 'ten=' + encodeURIComponent(g);
           var sp = new URLSearchParams(location.search);
-          ['ben', 'now'].forEach(function (k) { if (sp.get(k)) q.set(k, sp.get(k)); });
-          history.replaceState(null, '', location.pathname + '?' + q.toString() + location.hash);
+          ['ben', 'now'].forEach(function (k) { if (sp.get(k)) q += '&' + k + '=' + encodeURIComponent(sp.get(k)); });
+          history.replaceState(null, '', location.pathname + '?' + q + location.hash);
         } catch (e) {}
       })();
     </script>
